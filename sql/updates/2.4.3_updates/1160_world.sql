@@ -15,7 +15,6 @@ CREATE TABLE `access_requirement` (
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Access Requirements';
 
-
 ALTER TABLE `instance_template`
  DROP COLUMN `levelMin`,
  DROP COLUMN `levelMax`,
