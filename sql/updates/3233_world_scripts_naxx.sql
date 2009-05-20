@@ -1,4 +1,11 @@
-DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN (-28169,28732,54097);
+UPDATE `creature_template` SET `ScriptName`='mob_webwrap' WHERE `entry`=16486;
+UPDATE `creature_template` SET `ScriptName`='boss_grobbulus' WHERE entry = 15931;
+UPDATE `creature_template` SET `ScriptName`='mob_gothik_minion' WHERE entry IN (16124,16125,16126,16127,16148,16149,16150);
+UPDATE `creature_template` SET `ScriptName`='boss_four_horsemen' WHERE `entry` IN (16063,16064,16065,30549);
+
+DELETE FROM `spell_linked_spell` WHERE `spell_trigger` IN
+(28732,54097,-29865,-55053,-28169,28059,39088,-28059,-39088,28062,39090,28084,
+39091,-28084,-39091,28085,39093);
 INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comment`) VALUES
 ( 28732,-28798,  1, 'Widow\'s Embrace - Frenzy'),
 ( 54097,-54100,  1, 'Widow\'s Embrace - Frenzy (H)'),
@@ -7,36 +14,35 @@ INSERT INTO `spell_linked_spell` (`spell_trigger`, `spell_effect`, `type`, `comm
 (-28169, 28206,  0, 'Mutating Injection - Mutagen Explosion'),
 (-28169, 28240,  0, 'Mutating Injection - Poison Cloud'),
 ( 28059,-28084,  1, 'Positive Charge - Negative Charge'),
-( 39088,-39091,  1, 'Positive Charge - Negative Charge'),
 (-28059,-29659,  0, 'Positive Charge'),
-(-39088,-29659,  0, 'Positive Charge'),
-( 28062,-29659,  0, 'Positive Charge'),
-( 39090,-29659,  0, 'Positive Charge'),
+# ( 28062,-29659,  0, 'Positive Charge'),
 ( 28084,-28059,  1, 'Negative Charge - Positive Charge'),
-( 39091,-39088,  1, 'Negative Charge - Positive Charge'),
 (-28084,-29660,  0, 'Negative Charge'),
-(-39091,-29660,  0, 'Negative Charge'),
-( 28085,-29660,  0, 'Negative Charge'),
-( 39093,-29660,  0, 'Negative Charge');
-
-
-UPDATE creature_template SET scriptname = 'boss_grobbulus' WHERE entry = 15931;
-update creature_template set scriptname='mob_gothik_minion' where entry in (16124,16125,16126,16127,16148,16149,16150);
+# ( 28085,-29660,  0, 'Negative Charge'),
+( 39088,-39091,  1, 'Positive Charge - Negative Charge'),
+(-39088,-29659,  0, 'Positive Charge'),
+# ( 39090,-29659,  0, 'Positive Charge'),
+( 39091,-39088,  1, 'Negative Charge - Positive Charge'),
+(-39091,-39092,  0, 'Negative Charge');
+# ( 39093,-39092,  0, 'Negative Charge');
 
 INSERT INTO creature_template (entry, spell1, flags_extra, scriptname) VALUES
 (16363, 28158, 128, ''), # Grobbulus Cloud
-(29379, 54362, 128, '')  # Grobbulus Cloud (H)
+(29379, 54362, 128, ''), # Grobbulus Cloud (H)
+(16697, 28158, 128, ''), # Void Zone
+(29379, 54362, 128, '')  # Void Zone (H)
 ON DUPLICATE KEY UPDATE
 spell1 = VALUES(spell1),
 flags_extra = VALUES(flags_extra),
 scriptname = VALUES(scriptname);
 
-INSERT INTO creature_template (entry, spell1, spell2, flags_extra, scriptname) VALUES
-(16474, 28547, 0, 128, 'trigger_periodic'), # Blizzard (Sapphiron)
-(30000, 55699, 0, 128, 'trigger_periodic')  # Blizzard (Sapphiron) (H)
+INSERT INTO creature_template (entry, baseattacktime, spell1, flags_extra, scriptname) VALUES
+(16474, 1000, 28547, 128, 'trigger_periodic'), # Blizzard (Sapphiron)
+(30000, 1000, 55699, 128, 'trigger_periodic'), # Blizzard (Sapphiron) (H)
+(16697, 1000, 28865, 128, 'trigger_periodic') # Void Zone (Lady Blaumeux)
 ON DUPLICATE KEY UPDATE
+baseattacktime = VALUES(baseattacktime),
 spell1 = VALUES(spell1),
-spell2 = VALUES(spell2),
 flags_extra = VALUES(flags_extra),
 scriptname = VALUES(scriptname);
 
@@ -64,6 +70,10 @@ INSERT INTO creature_template (entry, spell1, spell2, spell3, spell4, spell5, sp
 (29256, 15284, 28991, 56098, 34970, 0, 0, 0, 28864), # Crypt Guard (H)
 (16506, 54095, 0, 0, 0, 0, 0, 0, 28732), # Naxxramas Worshipper
 (29274, 54096, 0, 0, 0, 0, 0, 0, 54097), # Naxxramas Worshipper (H)
+(17055, 54121, 0, 0, 0, 0, 0, 0, 0), # Maexxna Spiderling
+(29279, 28776, 0, 0, 0, 0, 0, 0, 0), # Maexxna Spiderling (H)
+(16486, 28622, 0, 0, 0, 0, 0, 0, 0), # Web Wrap
+(30183, 28622, 0, 0, 0, 0, 0, 0, 0), # Web Wrap (H)
 (16984, 15496, 0, 0, 0, 0, 0, 0, 0), # Plagued Warrior
 (29632, 15496, 0, 0, 0, 0, 0, 0, 0), # Plagued Warrior (H)
 (16983, 32736, 30138, 0, 0, 0, 0, 0, 0), # Plagued Champion
