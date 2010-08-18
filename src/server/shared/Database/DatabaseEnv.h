@@ -28,8 +28,10 @@
 #include "Database/Field.h"
 #include "Database/QueryResult.h"
 
-#include "Database/Database.h"
-typedef Database DatabaseType;
+#include "Database/DatabaseWorkerPool.h"
+#include "Database/MySQLThreading.h"
+
+typedef DatabaseWorkerPool DatabaseType;
 #define _LIKE_           "LIKE"
 #define _TABLE_SIM_      "`"
 #define _CONCAT3_(A,B,C) "CONCAT( " A " , " B " , " C " )"
@@ -38,6 +40,8 @@ typedef Database DatabaseType;
 extern DatabaseType WorldDatabase;
 extern DatabaseType CharacterDatabase;
 extern DatabaseType LoginDatabase;
+
+#define MAX_QUERY_LEN 32*1024
 
 #endif
 
