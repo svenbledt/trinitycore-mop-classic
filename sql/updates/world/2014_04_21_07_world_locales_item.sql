@@ -1,3 +1,5 @@
+SET NAMES 'utf8';
+
 TRUNCATE `locales_item`;
 
 INSERT INTO `locales_item` (`entry`, `name_loc1`, `name_loc2`, `name_loc3`, `name_loc4`, `name_loc5`, `name_loc6`, `name_loc7`, `name_loc8`, `description_loc1`, `description_loc2`, `description_loc3`, `description_loc4`, `description_loc5`, `description_loc6`, `description_loc7`, `description_loc8`) VALUES
@@ -38287,3 +38289,5 @@ INSERT INTO `locales_item` (`entry`, `name_loc1`, `name_loc2`, `name_loc3`, `nam
 (54857, '', 'Petite lance de Bourbimus', 'Murkimus'' kleiner Speer', '', '', 'Pequeña lanza de Murkimus', '', 'Маленькое копье Мурчалия', '', 'Vous apprend à invoquer cette mascotte.', 'Lehrt Euch, wie man dieses Haustier beschwört.', '', '', 'Te enseña a invocar este compañero.', '', 'Учит призывать этого спутника.'),
 (54860, '', 'Fusée de tourisme X-53', 'X-53 Reiserakete', '', '', 'Cohete de paseo X-53', '', 'Прогулочная ракета X-53', '', 'Vous apprend à invoquer cette monture. Elle change selon l''endroit où vous vous trouvez et votre compétence de monte.', 'Lehrt Euch, wie man dieses Reittier beschwört. Dieses Reittier passt sich Eurer Reitfertigkeit und Eurem Aufenthaltsort an.', '', '', 'Te enseña a invocar esta montura. Cambia según tu habilidad en equitación y la zona en la que estés.', '', 'Обучает управлению этим средством передвижения. Свойства этого транспортного средства могут меняться в зависимости от вашего навыка верховой езды и местонахождения.'),
 (56806, '', 'Mini Thor', 'Mini-Thor', '', '', 'Mini thor', '', 'Игрушечный Тор', '', 'Vous apprend à invoquer le mini Thor.', 'Lehrt Euch, wie man einen winzigen Thor beschwört.', '', '', 'Te enseña a invocar un mini thor.', '', 'Учит призывать игрушечного Тора.');
+
+SET NAMES 'latin1';

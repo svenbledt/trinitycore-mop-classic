@@ -1,3 +1,5 @@
+SET NAMES 'utf8';
+
 UPDATE `locales_creature` SET `name_loc1`='굶주린 시체', `name_loc4`='食腐者', `name_loc5`='食腐者', `name_loc7`='Comecarnes' WHERE `entry`=3;
 UPDATE `locales_creature` SET `name_loc1`='코볼트 졸개', `name_loc4`='狗头人歹徒', `name_loc5`='狗頭人惡黨', `name_loc7`='Alimaña kóbold' WHERE `entry`=6;
 UPDATE `locales_creature` SET `name_loc1`='퀘스트기버 베니', `name_loc4`='Benny Questgiver', `name_loc5`='本尼任務給予者', `name_loc7`='Asignador Benny', `subname_loc1`='시험용', `subname_loc4`='NPC', `subname_loc5`='測試', `subname_loc7`='PNJ' WHERE `entry`=19;
@@ -27245,3 +27247,5 @@ UPDATE `locales_creature` SET `name_loc1`='루비 비룡', `name_loc4`='红玉�
 UPDATE `locales_creature` SET `name_loc1`='루비 용', `name_loc4`='红玉巨龙', `name_loc5`='晶紅龍', `name_loc7`='Dragón rubí' WHERE `entry`=40870;
 UPDATE `locales_creature` SET `name_loc1`='[DND] 제어기', `name_loc4`='[DND] Controller', `name_loc5`='[DND]控制器', `name_loc7`='[DND] Controller' WHERE `entry`=41839;
 UPDATE `locales_creature` SET `name_loc1`='꼬마 토르', `name_loc4`='迷你雷神', `name_loc5`='迷你雷神', `name_loc7`='Mini thor', `subname_loc1`='파괴자', `subname_loc4`='无坚不摧', `subname_loc5`='毀滅者', `subname_loc7`='El Destructor' WHERE `entry`=42078;
+
+SET NAMES 'latin1';
