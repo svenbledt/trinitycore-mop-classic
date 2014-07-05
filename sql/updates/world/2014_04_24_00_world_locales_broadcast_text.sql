@@ -1,3 +1,5 @@
+SET NAMES 'utf8';
+
 UPDATE `locales_broadcast_text` SET `MaleText_loc1`='제발, 제발 좀 도와주시오! 난 여기 갇혀 있소!', `MaleText_loc4`='救命啊！我动不了了！', `MaleText_loc5`='救命啊!我動不了了!', `MaleText_loc7`='¡Socorro! ¡Socorro! ¡Soy víctima de represión!' WHERE `ID`=1;
 UPDATE `locales_broadcast_text` SET `MaleText_loc1`='중대.. 제자리에 서! ... 정렬!', `MaleText_loc4`='全队……立正！……集合！', `MaleText_loc5`='全體...立正!...集合!', `MaleText_loc7`='Compañía... ¡ALTO! ¡Formen FILAS!' WHERE `ID`=3;
 UPDATE `locales_broadcast_text` SET `MaleText_loc1`='앞으로... 가!', `MaleText_loc4`='前进……前进！', `MaleText_loc5`='起步...走!!', `MaleText_loc7`='Adelante... ¡¡MARCHEN!!' WHERE `ID`=4;
@@ -78650,3 +78652,5 @@ UPDATE `locales_broadcast_text` SET `MaleText_loc1`='볼진은 정말 보통이 
 UPDATE `locales_broadcast_text` SET `MaleText_loc1`='|TInterface\\Icons\\inv_misc_bomb_05:20|t |cFFFF0000|Hspell:145996|h[폭파 준비 완료]|h|r! |cFFFF0000|Hspell:146364|h[폭탄 투척]|h|r으로 폭탄을 던지십시오!', `MaleText_loc4`='|TInterface\\Icons\\inv_misc_bomb_05:20|t你身后被|cFFFF0000|Hspell:145996|h[设置炸弹]|h|r了！快使用|cFFFF0000|Hspell:146364|h[投掷炸弹]|h|r扔掉它们！', `MaleText_loc5`='|TInterface\\Icons\\inv_misc_bomb_05:20|t你獲得|cFFFF0000|Hspell:145996|h[引爆]|h|r!使用|cFFFF0000|Hspell:146364|h[投擲炸彈]|h|r來投擲炸彈!', `MaleText_loc7`='|TInterfaceIconsinv_misc_bomb_05:20|tTienes |cFFFF0000|Hspell:145996|h[Listo para explotar]|h|r! Utiliza |cFFFF0000|Hspell:146364|h[Lanzar bomba]|h|r para lanzarlas!' WHERE `ID`=77369;
 UPDATE `locales_broadcast_text` SET `MaleText_loc1`='헬스크림의 최후로군.$b$b<경계하는 눈길로 당신을 바라보는 볼진>$b$b$r|1이여;여;, 앞으로는 어쩔 셈인가?', `MaleText_loc4`='地狱咆哮已经完蛋了。$b$b<沃金警惕地看着你。>$b$b接下来呢，$r？', `MaleText_loc5`='這就是地獄吼最終的下場。$b$b<沃金小心翼翼地看著你。>$b$b下一步是什麼，$r?', `MaleText_loc7`='Eh''te es el final de Grito Infernal.$b$b<Vol''jin te mira con cautela.>$b$b¿Y ahora qué, $r?' WHERE `ID`=77371;
 UPDATE `locales_broadcast_text` SET `MaleText_loc1`='|TInterface\\Icons\\achievement_arena_2v2_5:20|t$n|1이;가; 전투를 시작하려고 합니다. 전투 시작에 필요한 추가 인원: $8589w', `MaleText_loc4`='|TInterface\\Icons\\achievement_arena_2v2_5:20|t$n已同意开始战斗。另外还需要$8589w名玩家才可开始。', `MaleText_loc5`='|TInterface\\Icons\\achievement_arena_2v2_5:20|t$n同意進行戰鬥。另外還需要$8589w名玩家才可開始。', `MaleText_loc7`='|TInterfaceIconsachievement_arena_2v2_5:20|t$n ha aceptado el encuentro. Jugadores adicionales necesarios para comenzar: $8589w.' WHERE `ID`=77865;
+
+SET NAMES 'latin1';

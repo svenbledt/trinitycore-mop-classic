@@ -1,3 +1,5 @@
+SET NAMES 'utf8';
+
 DROP TABLE IF EXISTS `locales_broadcast_text`;
 CREATE TABLE IF NOT EXISTS `locales_broadcast_text` (
   `ID` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT '0',
@@ -73832,3 +73834,5 @@ INSERT INTO `locales_broadcast_text` (`ID`, `MaleText_loc1`, `MaleText_loc2`, `M
 (77369, '', '|TInterface\\Icons\\inv_misc_bomb_05:20|tVous êtes |cFFFF0000|Hspell:145996|h[Prêt à exploser]|h|r ! Utilisez |cFFFF0000|Hspell:146364|h[Larguer la bombe]|h|r pour les larguer !', '|TInterface\\Icons\\inv_misc_bomb_05:20|t Ihr wurdet |cFFFF0000|Hspell:145996|h[scharfgemacht]|h|r! Benutzt |cFFFF0000|Hspell:146364|h[Bombe werfen]|h|r, um sie loszuwerden!', '', '', '|TInterface\\Icons\\inv_misc_bomb_05:20|tTienes |cFFFF0000|Hspell:145996|h[Listo para explotar]|h|r! Utiliza |cFFFF0000|Hspell:146364|h[Lanzar bomba]|h|r para lanzarlas!', '', '|TInterface\\Icons\\inv_misc_bomb_05:20|tВы использовали способность|cFFFF0000|Hspell:145996|h[Готовность к взрыву]|h|r! Используйте |cFFFF0000|Hspell:146364|h[Бросок бомбы]|h|r, чтобы метнуть заряд в цель.', '', '', '', '', '', '', '', ''),
 (77371, '', 'Pour Hurlenfer, c’est la fin.$b$b<Vol’jin vous regarde avec méfiance.>$b$bQue voulez-vous d’autre, $r ?', 'Das ist das Ende von Höllschrei.$b$b<Vol''jin beäugt Euch misstrauisch.>$b$bWas jetzt, $R?', '', '', 'Eh''te es el final de Grito Infernal.$b$b<Vol''jin te mira con cautela.>$b$b¿Y ahora qué, $r?', '', 'С Адским Криком покончено.$b$b<Вол''джин тревожно смотрит на вас.>$b$bЧто будет дальше, $r?', '', '', '', '', '', '', '', ''),
 (77865, '', '|TInterface\\Icons\\achievement_arena_2v2_5:20|t$n a accepté de commencer le combat. Joueurs supplémentaires requis pour commencer : $8589w.', '|TInterface\\Icons\\achievement_arena_2v2_5:20|t$n hat zugestimmt, die Begegnung zu starten. Zusätzliche Spieler benötigt, um zu beginnen: $8589w.', '', '', '|TInterface\\Icons\\achievement_arena_2v2_5:20|t$n ha aceptado el encuentro. Jugadores adicionales necesarios para comenzar: $8589w.', '', '|TInterface\\Icons\\achievement_arena_2v2_5:20|t$n $gсогласился:согласилась; начать бой. Число недостающих игроков:  $8589w.', '', '', '', '', '', '', '', '');
+
+SET NAMES 'latin1';

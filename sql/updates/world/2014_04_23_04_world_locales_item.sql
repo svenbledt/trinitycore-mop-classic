@@ -1,3 +1,5 @@
+SET NAMES 'utf8';
+
 UPDATE `locales_item` SET `name_loc1`='마틴 퓨리', `name_loc4`='马丁之怒', `name_loc5`='馬汀烈怒', `name_loc7`='Martin Furia' WHERE `entry`=17;
 UPDATE `locales_item` SET `name_loc1`='낡은 쇼트소드', `name_loc4`='破损的短剑', `name_loc5`='破損的短劍', `name_loc7`='Espada corta desgastada' WHERE `entry`=25;
 UPDATE `locales_item` SET `name_loc1`='구부러진 지팡이', `name_loc4`='弯曲的法杖', `name_loc5`='彎曲法杖', `name_loc7`='Bastón doblado' WHERE `entry`=35;
@@ -38109,3 +38111,5 @@ UPDATE `locales_item` SET `name_loc1`='꼬마 해체자', `name_loc4`='小拆', 
 UPDATE `locales_item` SET `name_loc1`='머키무스의 작은 창', `name_loc4`='莫叽姆斯的小矛', `name_loc5`='魚人穆斯的小矛', `name_loc7`='Pequeña lanza de Murkimus', `description_loc1`='애완동물 친구를 소환하는 법을 배웁니다.', `description_loc4`='教你学会召唤这种小伙伴。', `description_loc5`='教你學會如何召喚這個夥伴。', `description_loc7`='Te enseña a invocar este compañero.' WHERE `entry`=54857;
 UPDATE `locales_item` SET `name_loc1`='X-53 관광 로켓', `name_loc4`='X-53型观光火箭', `name_loc5`='X-53型觀光火箭', `name_loc7`='Cohete de paseo X-53', `description_loc1`='탈것 소환하는 법을 배웁니다. 타기 숙련도와 위치에 따라 달라지는 탈것입니다.', `description_loc4`='教你学会召唤这种坐骑。这种坐骑的速度会根据你的骑术等级和所在区域改变。', `description_loc5`='教你學會如何召喚這個坐騎。此坐騎將隨著你的騎術技能和地點而改變。', `description_loc7`='Te enseña a invocar esta montura. Cambia según tu habilidad en equitación y la zona en la que estés.' WHERE `entry`=54860;
 UPDATE `locales_item` SET `name_loc1`='꼬마 토르', `name_loc4`='迷你雷神', `name_loc5`='迷你雷神', `name_loc7`='Mini thor', `description_loc1`='꼬마 토르 소환하는 법을 배웁니다.', `description_loc4`='教会你如何召唤迷你雷神。', `description_loc5`='教你學會如何召喚迷你雷神。', `description_loc7`='Te enseña a invocar un mini thor.' WHERE `entry`=56806;
+
+SET NAMES 'latin1';
