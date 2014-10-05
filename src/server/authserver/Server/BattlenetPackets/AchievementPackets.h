@@ -33,7 +33,7 @@ namespace Battlenet
             SMSG_DATA                       = 0x2,  // Not implemented
             SMSG_CRITERIA_FLUSH_RESPONSE    = 0x3,  // Not implemented
             SMSG_ACHIEVEMENT_HANDLE_UPDATE  = 0x4,  // Not implemented
-            SMSG_CHANGE_TROPHY_CASE_RESULE  = 0x6   // Not implemented
+            SMSG_CHANGE_TROPHY_CASE_RESULT  = 0x6   // Not implemented
         };
     }
 }
