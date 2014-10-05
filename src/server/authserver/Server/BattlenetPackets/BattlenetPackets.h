@@ -24,4 +24,6 @@
 #include "FriendsPackets.h"
 #include "PresencePackets.h"
 
+#include "SupportPackets.h"
+
 #endif // BattlenetPackets_h__
