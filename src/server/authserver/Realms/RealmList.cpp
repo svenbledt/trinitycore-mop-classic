@@ -19,7 +19,6 @@
 #include <boost/asio/ip/tcp.hpp>
 #include "Common.h"
 #include "RealmList.h"
-#include "BattlenetManager.h"
 #include "Database/DatabaseEnv.h"
 #include "Util.h"
 
@@ -192,17 +191,4 @@ void RealmList::UpdateRealms(bool init)
         }
         while (result->NextRow());
     }
-}
-
-Realm const* RealmList::GetRealm(Battlenet::RealmId const& id) const
-{
-    auto itr = std::find_if(m_realms.begin(), m_realms.end(), [id](RealmMap::value_type const& pair)
-    {
-        return pair.second.Region == id.Region && pair.second.Battlegroup == id.Battlegroup && pair.second.m_ID == id.Index;
-    });
-
-    if (itr != m_realms.end())
-        return &itr->second;
-
-    return NULL;
 }

@@ -60,11 +60,6 @@ struct Realm
     ip::tcp::endpoint GetAddressForClient(ip::address const& clientAddr) const;
 };
 
-namespace Battlenet
-{
-    struct RealmId;
-}
-
 /// Storage object for the list of realms on the server
 class RealmList
 {
@@ -88,7 +83,6 @@ public:
     RealmMap::const_iterator begin() const { return m_realms.begin(); }
     RealmMap::const_iterator end() const { return m_realms.end(); }
     uint32 size() const { return m_realms.size(); }
-    Realm const* GetRealm(Battlenet::RealmId const& id) const;
 
 private:
     RealmList();
