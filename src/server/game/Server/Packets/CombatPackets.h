@@ -19,6 +19,7 @@
 #define CombatPackets_h__
 
 #include "Packet.h"
+#include "ObjectGuid.h"
 
 namespace WorldPackets
 {
@@ -39,7 +40,7 @@ namespace WorldPackets
         public:
             AttackStop(WorldPacket&& packet) : ClientPacket(CMSG_ATTACKSTOP, std::move(packet)) { }
 
-            void Read() override {};
+            void Read() override { }
         };
     }
 }
