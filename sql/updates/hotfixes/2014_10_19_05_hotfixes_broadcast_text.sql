@@ -12894,21 +12894,23 @@ INSERT INTO `broadcast_text` (`ID`, `Language`, `MaleText`, `FemaleText`, `Emote
 (13998, 0, '[Furbolg] Behold the prophecy!', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 13998
 (13999, 0, 'Do you smell that?  Fresh meat has somehow breached our citadel.  Be wary of any intruders.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 13999
 (14000, 0, 'Intruders!  Hold them off until I can release the warhounds!', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14000
-Symbols of Divinity? Check. Candles? Check. Arcane powder, uh... arcane powder? Oh, no! This is the last time I of
-r to pick up reagents for anyone. Is there a vendor around here?', 'Symbols of Divinity? Check. Candles? Check. Arcane powder, uh... arcane powder? Oh, no! This is the last time I offer to pick up reagents for anyone. Is there a vendor around here?', 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 20981
-(20982, 0, 'Is there a mage around here? I''m supposed to be bringing the food and water...', 'Is there a mage around here? I''m supposed to be bringing the food and water...', 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 20982
-(20983, 0, 'The next person who asks me for a potion is getting a knuckle sandwich. I quit alchemy!', 'The next person who asks me for a potion is getting a knuckle sandwich. I quit alchemy!', 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 20983
-(20984, 0, 'Boy, I could really use one of those gryphons right about now...', 'Boy, I could really use one of those gryphons right about now...', 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 20984
-(20985, 0, 'I can instruct you in jewelcrafting.  Interested?', 'I can instruct you in jewelcrafting.  Interested?', 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 20985
-(20986, 0, 'Why dis wall no stay up? Me keep banging but no good!', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 20986
-(20987, 0, 'Thank you for the summon, little one. My group left for the dungeon without me!', 'Thank you for the summon, little one. My group left for the dungeon without me!', 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 20987
-(20988, 0, 'Why dis wall no go down? Wut doing?', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 20988
-(20989, 0, 'Hey stupid! Why you banging wall? Wall go up not down! Stupid orc! Up! Up!', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 20989
-(20990, 0, 0, 'That was neat!', 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 20990
-(20991, 0, 'Awaken, my children and assist your master!', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 20991
-(20992, 0, 'Wut you want? Smell funny for fel orc...', 0, 6, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 20992
-(20993, 0, 'You no make dis your home. Maybe you want eat someting?', 0, 274, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 20993
- 14017
+(14001, 0, 'You''re too late, now feel the wrath of my warhounds!', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14001
+(14002, 0, '<The footman stand resolute, muscles tense.>', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14002
+(14003, 0, 'Stop it with this Light nonsense.  The swamp is where we need to go!  We belong there!', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14003
+(14004, 0, 'Bah!  Suit yourselves.  We''re leaving!', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14004
+(14005, 0, 'I... I want to hear about the Light.  I think... I remember...', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14005
+(14006, 0, 'Welcome, my brethren!  You''ve been freed from demons.  Embrace the teachings of Velen!  Embrace the light!', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14006
+(14007, 0, 'As we attempt to gain the help of the peoples of this world against the Burning Legion, we must also learn to live peaceably amongst them.$B$BPlease keep this in mind as your journey takes you throughout Azeroth.  May the Light guide you.', 0, 1, 1, 0, 0, 500, 0, 0, 0, 1, 19034), -- 14007
+(14008, 0, 'Control Human Footman', 'Control Human Footman', 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14008
+(14009, 0, '[Furbolg] Spirits grant us vision!', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14009
+(14010, 0, 'I am ready to be flown down to the Exodar.', 'I am ready to be flown down to the Exodar.', 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14010
+(14011, 0, 'What brings you all the way up here, little $r?', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14011
+(14012, 0, 'Are you ready, $n?', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14012
+(14013, 0, 0, 'Greetings, $c.  I get so few visitors up here.  To what do I owe the pleasure?', 1, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14013
+(14014, 0, 0, 'Susurrus is expecting you, $n.', 1, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14014
+(14015, 0, 'You are brave to swim down to my realm, land-walker.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14015
+(14016, 0, 0, 'I have been expecting you.', 2, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14016
+(14017, 7, 'I wish to learn more about blacksmithing.', 'I wish to learn more about blacksmithing.', 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14017
 (14018, 0, 'Be careful out in the desert, $c.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14018
 (14019, 0, 'The sound of footsteps shuffling echo throughout the cave.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14019
 (14020, 0, 'What''s that $T scrub : girlie;?  You want your mommy?  Well too bad.  Maybe you should pay a visit to the Thrallmar officer''s club to get her back?', 0, 6, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 14020
@@ -38915,16 +38917,17 @@ INSERT INTO `broadcast_text` (`ID`, `Language`, `MaleText`, `FemaleText`, `Emote
 (39776, 0, 'They had their chance to come with me, and instead they mocked my beliefs. They are nothing to me.', 0, 1, 274, 0, 0, 0, 0, 0, 0, 1, 19034), -- 39776
 (39777, 0, 'Your wife is concerned for you. She wants you to return to Orgrimmar.', 'Your wife is concerned for you. She wants you to return to Orgrimmar.', 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 39777
 (39778, 0, 'Doesn''t she realize I wanted her to come with me? I''m young; I don''t want to die. We should have many good years ahead of us and this is the only way. Tell her these things. Make her understand.', 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 19034), -- 39778
-t an office in the southern Mage Quarter along the inner ring.$B$BIf he''s not out exploring, he''ll likely be there.', 'You''ll want to find Adam Hossack. He''s got an office in the southern Mage Quarter along the inner ring.$B$BIf he''s not out exploring, he''ll likely be there.', 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 47579
-(47580, 0, 'There''s always something new to investigate.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 47580
-(47581, 0, 0, 'Be quick about it.', 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 47581
-(47582, 0, 'Nothing can stop the wrath of the Banshee Queen.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 47582
-(47583, 0, 'The Bloodfang will prevail.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 47583
-(47584, 0, 'Time to expand my ice cream empire.$B$BTigule and Foror are going down!', 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 47584
-(47585, 0, 'Welcome, mortals. (Frail little children). Few have laid eyes on this inner sanctum. (They reach out to touch the fire!)', 0, 0, 0, 0, 0, 0, 0, 22065, 0, 1, 19034), -- 47585
-(47586, 0, 0, 'Do you see me now, Cho''gall? I''m coming for you! I''m going to rip off your head while the other watches!', 0, 0, 0, 0, 0, 0, 0, 36, 1, 19034), -- 47586
-(47587, 0, 'It is here the chosen realize their destiny. (One with eternity). And it is here that you will realize yours.(End of the flesh. End of the flesh)!', 0, 0, 0, 0, 0, 0, 0, 22066, 0, 1, 19034), -- 47587
-d you see before you has been judged. (Fire, water, earth, air!) All shall perish before the elements! (Burn and drown and crush and suffocate!)', 0, 0, 0, 0, 0, 0, 0, 22123, 1, 1, 19034), -- 39789
+(39779, 0, 'Okay, let''s do this! You fight the ogres, and I will... not fight them. Head for the exit!', 0, 5, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 39779
+(39780, 0, 'I''ve been given another chance to serve?  I will not fail again!', 'I''ve been given another chance to serve?  I will not fail again!', 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 39780
+(39781, 0, 'Alexstrasza has chosen capable allies.... A pity that I must END YOU!', 0, 0, 0, 0, 0, 0, 0, 17512, 0, 1, 19034), -- 39781
+(39782, 0, 'You thought you stood a chance?', 0, 0, 0, 0, 0, 0, 0, 17513, 0, 1, 19034), -- 39782
+(39783, 0, 'It''s for the best.', 0, 0, 0, 0, 0, 0, 0, 17514, 0, 1, 19034), -- 39783
+(39784, 0, 'HALION! I....', 0, 0, 0, 0, 0, 0, 0, 17515, 0, 1, 19034), -- 39784
+(39785, 0, 'Turn them to ash, minions!', 0, 0, 0, 0, 0, 0, 0, 17516, 0, 1, 19034), -- 39785
+(39786, 0, 'We made it! I''ll find my way back on my own. Do me a favor and go tell Royce Duskwhisper where he can stick his stupid Eye of Twilight.', 0, 5, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 39786
+(39787, 0, 'I see you are growing in numbers, my brethren. Tell me of your progress in implementing our master''s plan.', 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 19034), -- 39787
+(39788, 0, 'Then all is in order. The master has given us a mission of the utmost importance and he will not suffer failure.', 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 19034), -- 39788
+(39789, 0, 'Behold! The world you see before you has been judged. (Fire, water, earth, air!) All shall perish before the elements! (Burn and drown and crush and suffocate!)', 0, 0, 0, 0, 0, 0, 0, 22123, 1, 1, 19034), -- 39789
 (39790, 0, 'Join us, and embrace the inevitable end. (The Master''s power calls!) You will be reborn, stronger than flesh! (Strength beyond form! Power in the infinite!)', 0, 0, 0, 0, 0, 0, 0, 22124, 1, 1, 19034), -- 39790
 (39791, 0, 'Swear your allegiance to me (The master wants! He sees and wants and hungers!) and you will be remade in my image. (Wait! INFIDEL! A heathen among us!) An intruder! YOU! Show yourself...', 0, 0, 0, 0, 0, 0, 0, 22125, 22, 1, 19034), -- 39791
 (39792, 0, 'Work on the devices is proceeding as you have directed. We will soon be ready to carry out the next phase of your orders.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 39792
@@ -62049,10 +62052,11 @@ INSERT INTO `broadcast_text` (`ID`, `Language`, `MaleText`, `FemaleText`, `Emote
 (62926, 0, 0, 'Isn''t Zouchin Province beautiful? I''ve lived here my whole life.', 1, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 62926
 (62927, 0, 0, 'My father thinks it''s too dangerous beyond Zouchin''s walls for a lady. He only lets me leave when we need supplies from One Keg.', 1, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 62927
 (62928, 0, 0, 'The way I see it is, I''m not very good at being a lady, so maybe I''d make a better adventurer like you.', 1, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 62928
-n this desert, and named it after my father Durotan, Chieftain of the Frostwolf Clan.', 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 70967
-(70968, 0, 'The land was harsh. Time and again it was Vol''jin and his people who ensured the Horde''s survival, saving us from starvation, or taking up arms when we were attacked.', 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 70968
-(70969, 0, 'Trolls and orcs have fought together. Died together. We are family. And family looks after its own.', 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 70969
-n Zouchin can be dangerous!', 1, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 62933
+(62929, 0, 0, 'Those ruins creep me out. They''re so old...', 1, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 62929
+(62930, 0, 0, 'Look at those boats! Where are they coming from?!', 1, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 62930
+(62931, 0, 0, 'Oh no! Look at those huts! Why are they attacking defenseless villagers?', 1, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 62931
+(62932, 0, 0, 'My village is under attack! I hope my family is alright.', 1, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 62932
+(62933, 0, 0, 'It looks like my father was wrong. Even Zouchin can be dangerous!', 1, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 62933
 (62934, 0, 0, 'I have to check on my family. Please help us!', 1, 0, 0, 0, 0, 0, 0, 0, 1, 19034), -- 62934
 (62935, 0, 'Archers! Shoot down the airborne mantid!', 0, 0, 0, 0, 0, 0, 0, 28553, 0, 1, 19034), -- 62935
 (62936, 0, 'Ready your arrows and attack the flyers!', 0, 0, 0, 0, 0, 0, 0, 28554, 0, 1, 19034), -- 62936
@@ -84875,9 +84879,7 @@ was before the Cataclysm.', 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 19034), -- 86085
 (86189, 0, 'I''m in da running to be da next blood champion. You dead!', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19034), -- 86189
 (86190, 0, 'I''m gonna be da next blood champion. You die!', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19034), -- 86190
 (86191, 0, 'Your head will be my good luck charm to be the next blood champion.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19034), -- 86191
-
-(86192, 0, 'You just another kill towards me becoming da blood champion.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19034), -- 8619
-
+(86192, 0, 'You just another kill towards me becoming da blood champion.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19034), -- 86192
 (86193, 0, 'I... lose?', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19034), -- 86193
 (86194, 0, 0, 'We have activated the |c00FFFF00|Hspell:178539|h[Mage Portal]|h|r!', 0, 0, 0, 0, 0, 0, 8213, 0, 0, 19034), -- 86194
 (86195, 0, 'It no end like dis...', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19034), -- 86195
@@ -90955,4 +90957,4 @@ Level 3', 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 19034), -- 92123
 (92181, 0, 'The riverbeasts are not so used to land combat, we will need to let this one retire for tonight.', 'The riverbeasts are not so used to land combat, we will need to let this one retire for tonight.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 19034), -- 92181
 (92182, 0, 'The elekk is nearly asleep after today''s training, we will let it rest for the night.', 'The elekk is nearly asleep after today''s training, we will let it rest for the night.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 19034), -- 92182
 (92183, 0, 'The clefthoof will need a good brushing and some water, check back tomorrow for more training.', 'The clefthoof will need a good brushing and some water, check back tomorrow for more training.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 19034), -- 92183
-(92184, 0, 'Your boar looks weary but healthy, leave it with us for tonight and we will take care of it.', 'Your boar looks weary but healthy, leave it with us for tonight and we will take care of it.', 0, 0, 0, 0, 0, 
+(92184, 0, 'Your boar looks weary but healthy, leave it with us for tonight and we will take care of it.', 'Your boar looks weary but healthy, leave it with us for tonight and we will take care of it.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 19034); -- 92184
