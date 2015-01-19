@@ -6505,14 +6505,17 @@ INSERT INTO `broadcast_text` (`ID`, `Language`, `MaleText`, `FemaleText`, `Emote
 (7603, 0, 'Once a great city of the night elves, the Highborne once ruled there, practicing great and powerful arcane magics. They are cursed now, haunting the lands, and their ruined city has been victimized by the Spitelash naga. I understand that the naga search the ruins for powerful Highborne artifacts.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 7603
 (7604, 0, 'A powerful human mage is rumored to live to the north; he keeps watch over the land for some unknown reason. I have not traveled there myself, but it is said that visitors are welcome and can even earn favor with him if they are willing to do errands for him.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 7604
 (7605, 0, 'I''ve seen terrible things happen to the furbolg over the last few years--they were victims on many fronts. But it''s unclear to me what''s become of this tribe. Are they corrupted by the same plague that''s touched Felwood? Or perhaps they are simply angry at what''s happened to their once peaceful people and now seek to defend themselves. Either way, most of them appear hostile to those who come into the area.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 7605
-(7606, 0, 'The blue dragons themselves aren''t here, but followers of Malygos are. I do not know why, but I can tell you this: wherever the blue dragons are, expect to find arcane magic. I wouldn''t be surprised if the dragonspawn are here protecting something... perhaps something the Highborne left behind.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 7606
-(7607, 0, '', 'I should find some hired help; I don''t like sitting here all day selling fish supplies. I''d much rather go fishing, and then sell supplies.', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 7607
-(7608, 0, 'Let''s take a look at your fishing supplies.', 'Let''s take a look at your fishing supplies.', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 7608
-(7610, 0, '', 'Throm-Ka, $c. My mood is poor this day, so please, unless you can help me, I would prefer to be alone.', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 7610
-(7611, 0, '', 'Good work, $n!  Complete your trial by speaking with me.  Time continues to slip away until you do so!', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 7611
-(7612, 0, 'Reckless mortals! None may challenge the Sons of the Living flame!', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 7612
-(7613, 0, 'I can not train you, $c.', 'I can not train you, $c.', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 7613
-(7614, 0, 'I am Ulysses Rackmore, captain of the Gallant.  And this is the log of the last few days of my doomed ship.$B$BWe were sailing to Feathermoon Stronghold with a shipment of supplies when naga stormed the sides of the Gallant.  We drove them back but we knew they''d return.  Fearing the loss of my most precious belongings, I steered the Gallant to an island off the coast of Desolace, one with old, night elf ruins.  And there I left my treasure chest.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 7614
+, 0, 0, 0, 0, 0, 1, 18019), -- 13381
+(13382, 1, '', 'Hey!  Could you come over and get me out of this cage?', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 13382
+(13383, 1, '', 'HELP!!!', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 13383
+(13384, 1, '', 'Get me out of here and I guarantee there''ll be a reward in it for you!', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 13384
+(13385, 1, '', 'Quick, kill all of these trolls and then let me out of this thing!', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 13385
+(13386, 1, '', 'If you let me out I promise that you won''t regret it!', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 13386
+(13387, 1, '', 'If you don''t mind hurrying it up?  I think they''re getting ready to sacrifice me!', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 13387
+(13388, 1, 'Another pilgrim has arrived! Bring water quickly, or we may lose her!', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 13388
+(13389, 0, '', 'Do you hear something?', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 13389
+(13390, 0, 'I''ve managed to work myself into quite a spot here. Far Seer Regulkut tried to warn me, but my carelessness has finally caught up with me.$B$BI came down here to study the ruins of Zeth''Gor, but ran afoul of the Legion on my way. Now, all I have to show for it is a nasty gash on my leg.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 13390
+in of the Gallant.  And this is the log of the last few days of my doomed ship.$B$BWe were sailing to Feathermoon Stronghold with a shipment of supplies when naga stormed the sides of the Gallant.  We drove them back but we knew they''d return.  Fearing the loss of my most precious belongings, I steered the Gallant to an island off the coast of Desolace, one with old, night elf ruins.  And there I left my treasure chest.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 7614
 (7615, 0, 'Continue reading...', 'Continue reading...', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 7615
 (7616, 0, 'My chest is one of ingenious design, and requires two keys to unlock, one gold and one silver.  The first key, the silver key, I gave to my first mate, and I kept the gold.$B$BBut we were doomed to lose them.  My key was lost during the next naga attack, and my first mate''s was lost a day later when drysnap makrura assailed us and pulled him into the deep.$B$BI am sure the naga and makrura have the keys.  I am glad the two are enemies and will not share them.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 7616
 (7617, 0, 'After the makrura attack, we could see that the Gallant would not survive another.  So I and the few surviving sailors abandoned my ship.$B$BWe are now ashore and will soon strike out for the town of Nijel''s Point, but much danger lies between us and sanctuary, and I fear Desolace will consume us.$B$BI write this now in hopes that someone will know our plight, and some day avenge us against the watery fiends who were our ruin.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 7617
@@ -31782,9 +31785,13 @@ INSERT INTO `broadcast_text` (`ID`, `Language`, `MaleText`, `FemaleText`, `Emote
 (32617, 0, 'Years... wasted...', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 32617
 (32618, 0, 'YOU HAVE FAILED ME, VARIMATHRAS!', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 32618
 (32619, 0, 'Here it comes.  Stand ready.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 32619
-(32620, 0, 'Something''s wrong... I sense a dark presence.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 32620
-(32621, 0, 'The Lich King is here.  May the Light guide our blades.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 32621
-(32622, 0, 'The prisoner sobs desperately, waiting for the end to come.', 'The prisoner sobs desperately, waiting for the end to come.', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 32622
+ done!
+', 0, 0, 0, 0, 0, 0, 0, 0, 0, 18019), -- 39992
+(39993, 0, 'You''re losing grip.  Be careful!
+', 'You''re losing grip.  Be careful!
+', 0, 0, 0, 0, 0, 0, 0, 0, 0, 18019), -- 39993
+(39994, 0, '|TInterface\Icons\ability_warrior_charge.blp:20|tGeneral Umbriss sets his eyes on |cFFFF0000$n|r and begins to cast |cFFFF0000|Hspell:74670|h[Blitz]|h|r!', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 39994
+), -- 32622
 (32623, 0, 'Only a fool would mock the appearance of my battle-garb.$B$BThis raiment of well-worn steel is from an ancient place of learning!', '', 1, 5, 0, 1, 5, 0, 0, 0, 1, 18019), -- 32623
 (32624, 0, 'I will not die so quickly this time!', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 32624
 (32625, 0, '', 'Champions! My children, blessed with my power, shall aid you in your fight!', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 32625
@@ -57021,7 +57028,9 @@ INSERT INTO `broadcast_text` (`ID`, `Language`, `MaleText`, `FemaleText`, `Emote
 (57883, 0, '', 'Someone LIVES back here?', 0, 0, 0, 0, 0, 0, 30487, 6, 1, 18019), -- 57883
 (57884, 0, '', 'This is all pretty cool, and scary, and all that stuff, but shouldn''t we be getting back to Mudmug''s place now?', 0, 0, 0, 0, 0, 0, 30489, 1, 1, 18019), -- 57884
 (57885, 0, '', 'So... umm... $p? I''m still here, you know.', 0, 0, 0, 0, 0, 0, 30490, 1, 1, 18019), -- 57885
-(57886, 0, '', 'Following you all over the place. Have been for a while now.', 0, 0, 0, 0, 0, 0, 30492, 1, 1, 18019), -- 57886
+, 18019), -- 66096
+(66097, 0, 'I am seeing red!', 'I am seeing red!', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 66097
+19), -- 57886
 (57887, 0, '', 'Yikes, $p, don''t manhandle the thing. Have you never picked an herb before?', 0, 0, 0, 0, 0, 0, 30512, 5, 1, 18019), -- 57887
 (57888, 0, '', 'Don''t forget to talk to that jinyu, down there by the river.', 0, 0, 0, 0, 0, 0, 30455, 1, 1, 18019), -- 57888
 (57889, 0, '', 'I guess what I''m saying is... thanks.', 0, 0, 0, 0, 0, 0, 30479, 20, 1, 18019), -- 57889
@@ -75413,4 +75422,4 @@ Time to test what he''s made of...', 274, 1, 0, 274, 1, 0, 0, 0, 0, 18019), -- 7
 (77366, 0, 'Vol''jin''s one tough nut. Stabbed in the neck, still he comes back to collect what''s due. I like this guy!$b$bMy people need security and profit. Under Hellscream, we got a whole lot of neither.', '', 273, 0, 0, 273, 0, 0, 0, 0, 0, 18019), -- 77366
 (77369, 0, '|TInterface\Icons\inv_misc_bomb_05:20|tYou have |cFFFF0000|Hspell:145996|h[Set to Blow]|h|r! Use |cFFFF0000|Hspell:146364|h[Throw Bomb]|h|r to throw them!', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 77369
 (77371, 0, 'Dat''s de end of Hellscream.$b$b<Vol''jin eyes you warily.>$b$bWhat next, $r?', '', 274, 0, 0, 274, 0, 0, 0, 0, 0, 18019), -- 77371
-(77865, 0, '|TInterface\Icons\achievement_arena_2v2_5:20|t$n has agreed to begin the encounter. Additional players required to begin: $8589w.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019); -- 77865
+(77865, 0, '|TInterface\Icons\achievement_arena_2v2_5:20|t$n has agreed to begin the encounter. Additional players required to begin: $8589w.', '', 0, 0, 0, 0, 0, 0, 0, 

@@ -7987,7 +7987,7 @@ UPDATE `quest_template` SET `RewardMoneyMaxLevel`=59100, `WDBVerified`=15595 WHE
 UPDATE `quest_template` SET `RewardMoneyMaxLevel`=50700, `Flags`=16392, `WDBVerified`=15595 WHERE `Id`=4521; -- Wild Guardians
 UPDATE `quest_template` SET `Flags`=16392, `WDBVerified`=15595 WHERE `Id`=4541; -- <NYI> <TXT>
 UPDATE `quest_template` SET `RewardMoneyMaxLevel`=3000, `Flags`=16384, `Details`='Brave traveler, the centaurs have increased their attacks in this area. Freewind Post must know about this renewed harassment immediately! Seek Cliffwatcher Longhorn at Freewind Post to the southeast and give him this urgent message.$b$bBe warned, avoid the Grimtotem Clan nearby... they have been acting strange toward us lately.
-
+
 ', `WDBVerified`=15595 WHERE `Id`=4542; -- Message to Freewind Post
 UPDATE `quest_template` SET `Flags`=16392, `WDBVerified`=15595 WHERE `Id`=4561; -- Testing for Impurities - Un'Goro Crater
 UPDATE `quest_template` SET `RewardMoneyMaxLevel`=3600, `Flags`=16384, `WDBVerified`=15595 WHERE `Id`=4581; -- Kayneth Stillwind
@@ -13501,7 +13501,7 @@ UPDATE `quest_template` SET `RewardMoneyMaxLevel`=93300, `WDBVerified`=15595 WHE
 UPDATE `quest_template` SET `WDBVerified`=15595 WHERE `Id`=12113; -- Nice to Meat You
 UPDATE `quest_template` SET `WDBVerified`=15595 WHERE `Id`=12114; -- Therapy
 UPDATE `quest_template` SET `RewardMoneyMaxLevel`=12300, `Details`='There is one who recently joined our cause that might be able to decipher this tome. An unbound death knight known as Koltira Deathweaver has temporarily taken residence here at Agmar''s Hammer. As he was once a death knight of Arthas and member of the Scourge, he might be able to translate the language of the dead.$B$BTake the flesh-bound tome to Koltira and ask him to translate the pages.
-', `WDBVerified`=15595 WHERE `Id`=12115; -- Koltira and the Language of Death
+, `WDBVerified`=15595 WHERE `Id`=12115; -- Koltira and the Language of Death
 UPDATE `quest_template` SET `WDBVerified`=15595 WHERE `Id`=12116; -- It Takes Guts....
 UPDATE `quest_template` SET `RewardMoneyMaxLevel`=12300, `WDBVerified`=15595 WHERE `Id`=12117; -- Travel to Moa'ki Harbor
 UPDATE `quest_template` SET `RewardMoneyMaxLevel`=12300, `WDBVerified`=15595 WHERE `Id`=12118; -- Travel to Moa'ki Harbor
@@ -15629,3 +15629,4 @@ UPDATE `quest_template` SET `RewardOrRequiredMoney`=82000, `RewardMoneyMaxLevel`
 UPDATE `quest_template` SET `RewardOrRequiredMoney`=246000, `RewardMoneyMaxLevel`=314100, `RewardItemId1`=0, `RewardItemCount1`=0, `RewardCurrencyId1`=395, `RewardCurrencyCount1`=58, `WDBVerified`=15595 WHERE `Id`=26034; -- The Twilight Destroyer
 
 UPDATE `quest_template` SET `SourceItemCount`=1 WHERE `SourceItemId` != 0;
+

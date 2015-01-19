@@ -25410,13 +25410,13 @@ INSERT INTO `broadcast_text` (`ID`, `Language`, `MaleText`, `FemaleText`, `Emote
 (26274, 0, 'Huh?', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 26274
 (26275, 0, '', 'Apparently you flubbed this batch of blight. What do you have to say for yourself?', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 26275
 (26276, 0, '<The Tuskarr eyes you suspiciously.>$b$bDo not stay long. You do not understand our people, and I don''t want trouble.', '<The Tuskarr eyes you suspiciously.>$b$bDo not stay long. You do not understand our people, and I don''t want trouble.', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 26276
-(26277, 0, 'But... I followed your instructions precisely! Sorry?', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 26277
-(26278, 0, '', '%s sighs.', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 26278
-(26279, 0, '', 'Sorry? SORRY?! Here''s sorry for you!', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 26279
-(26280, 0, '', 'Oops. I guess it IS working! That''s odd.', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 26280
-(26281, 0, 'Eep!', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 26281
-(26282, 0, 'The sky is not safe, friend. Be alert!', '', 1, 0, 0, 1, 0, 0, 0, 0, 1, 18019), -- 26282
-(26283, 0, 'No Effect!', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 26283
+, 0, 0, 0, 0, 1, 18019), -- 33810
+(33811, 0, 'Hi! My name''s Uthil. We''re going to be such good friends once you''re dead!', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 33811
+(33812, 0, 'Grow, little one.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 33812
+(33813, 0, 'There you are.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 33813
+(33814, 0, 'Help shield us from these cutting winds, little sapling.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 33814
+(33815, 0, 'Good luck to you in there. I''ll try to find you farther inside once the concourse is clear.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 33815
+, 0, 0, 0, 0, 1, 18019), -- 26283
 (26284, 1, 'One more beast saved from certain death!', 'One more beast saved from certain death!', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 26284
 (26285, 1, 'The Scourge are no match for me, Torp!', 'The Scourge are no match for me, Torp!', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 26285
 (26286, 1, 'Delivered as promised, Torp!', 'Delivered as promised, Torp!', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 26286
@@ -59509,7 +59509,8 @@ INSERT INTO `broadcast_text` (`ID`, `Language`, `MaleText`, `FemaleText`, `Emote
 (60459, 0, 'I always figure we should be taught not to wait for inspiration to start a thing. Action always generates inspiration. Inspiration rarely generates action.$B$BSuch is the way of the Huojin.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 60459
 (60460, 0, 'And there we have it, just add water! Wish I would have thought of that one a little sooner.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 60460
 (60461, 0, 'Much of the cover of this book has been destroyed. What is still visible appears to be in Trollish...', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 60461
-(60462, 0, 'This page must have been dropped by one of the looters. Lorewalker Cho will know what it says.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 60462
+, 1, 0, 0, 0, 0, 1, 18019), -- 68501
+dropped by one of the looters. Lorewalker Cho will know what it says.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 60462
 (60463, 0, 'The altar is still warm from a recent ritual...', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 60463
 (60464, 0, 'No! Wikkets stole my Chomp Chomp!', '', 407, 0, 0, 407, 0, 0, 0, 0, 1, 18019), -- 60464
 (60465, 0, '[PH] This is a placeholder visual, don''t bug me.', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 18019), -- 60465
@@ -75413,4 +75414,4 @@ Time to test what he''s made of...', 274, 1, 0, 274, 1, 0, 0, 0, 0, 18019), -- 7
 (77366, 0, 'Vol''jin''s one tough nut. Stabbed in the neck, still he comes back to collect what''s due. I like this guy!$b$bMy people need security and profit. Under Hellscream, we got a whole lot of neither.', '', 273, 0, 0, 273, 0, 0, 0, 0, 0, 18019), -- 77366
 (77369, 0, '|TInterface\Icons\inv_misc_bomb_05:20|tYou have |cFFFF0000|Hspell:145996|h[Set to Blow]|h|r! Use |cFFFF0000|Hspell:146364|h[Throw Bomb]|h|r to throw them!', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019), -- 77369
 (77371, 0, 'Dat''s de end of Hellscream.$b$b<Vol''jin eyes you warily.>$b$bWhat next, $r?', '', 274, 0, 0, 274, 0, 0, 0, 0, 0, 18019), -- 77371
-(77865, 0, '|TInterface\Icons\achievement_arena_2v2_5:20|t$n has agreed to begin the encounter. Additional players required to begin: $8589w.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019); -- 77865
+(77865, 0, '|TInterface\Icons\achievement_arena_2v2_5:20|t$n has agreed to begin the encounter. Additional players required to begin: $8589w.', '', 0, 0, 0, 0, 0, 0, 0, 0, 1, 18019); -- 
