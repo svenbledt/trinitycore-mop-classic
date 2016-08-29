@@ -1,4 +1,4 @@
-﻿DELETE FROM `broadcast_text` WHERE `ID` = 33133;
+DELETE FROM `broadcast_text` WHERE `ID` = 33133;
 DELETE FROM `broadcast_text` WHERE `ID` = 33134;
 
 DELETE FROM `broadcast_text_locale` WHERE `ID` IN (33133, 33134);
