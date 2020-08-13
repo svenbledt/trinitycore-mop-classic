@@ -234,7 +234,7 @@ INSERT INTO `item_name_description_locale` (`ID`, `locale`, `Description_lang`, 
 (13567, 'ruRU', '15 ед. порчи', 35435);
 
 DELETE FROM `area_table_locale` WHERE `locale` = 'ruRU' AND `VerifiedBuild`>0;
-INSERT INTO `area_table_locale` (`ID`, `locale`, `ZoneName_lang`, `AreaName_lang`, `VerifiedBuild`) VALUES
+INSERT INTO `area_table_locale` (`ID`, `locale`, `AreaName_lang`, `VerifiedBuild`) VALUES
 (12825, 'ruRU', 'Город Мехагон', 35435),
 (10290, 'ruRU', 'Мехагон', 35435);
 
@@ -374,7 +374,7 @@ INSERT INTO `player_condition_locale` (`ID`, `locale`, `FailureDescription_lang`
 (79520, 'ruRU', 'Изучите любую сущность 3-го уровня из жутких видений другим персонажем, чтобы открыть эту сущность.', 35435);
 
 DELETE FROM `map_locale` WHERE `locale` = 'ruRU' AND `VerifiedBuild`>0;
-INSERT INTO `map_locale` (`ID`, `locale`, `Directory_lang`, `MapName_lang`, `MapDescription0_lang`, `MapDescription1_lang`, `PvpShortDescription_lang`, `PvpLongDescription_lang`, `VerifiedBuild`) VALUES
+INSERT INTO `map_locale` (`ID`, `locale`, `MapName_lang`, `MapDescription0_lang`, `MapDescription1_lang`, `PvpShortDescription_lang`, `PvpLongDescription_lang`, `VerifiedBuild`) VALUES
 (2268, 'ruRU', 'Город Мехагон', '', '', '', '', 35435);
 
 DELETE FROM `wmo_area_table_locale` WHERE `locale` = 'ruRU' AND `VerifiedBuild`>0;
