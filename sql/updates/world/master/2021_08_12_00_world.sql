@@ -167910,4 +167910,4 @@ UPDATE `creature_questitem` SET `VerifiedBuild`=39653 WHERE (`CreatureEntry`=38 
 UPDATE `creature_questitem` SET `VerifiedBuild`=39653 WHERE (`CreatureEntry`=3 AND `Idx`=1);
 UPDATE `creature_questitem` SET `VerifiedBuild`=39653 WHERE (`CreatureEntry`=3 AND `Idx`=0);
 UPDATE `creature_questitem` SET `VerifiedBuild`=39653 WHERE (`CreatureEntry`=98 AND `Idx`=0);
-UPDATE `creature_questitem` SET `VerifiedBuild`=39653 WHERE (`CreatureEntry`=453 AND `Idx`=0)
+UPDATE `creature_questitem` SET `VerifiedBuild`=39653 WHERE (`CreatureEntry`=453 AND `Idx`=0);
