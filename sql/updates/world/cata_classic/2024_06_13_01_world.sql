@@ -1,10 +1,10 @@
-DELETE FROM TABLE `quest_template`;
-DELETE FROM TABLE `quest_poi`;
-DELETE FROM TABLE `quest_poi_points`;
-DELETE FROM TABLE `quest_reward_display_spell`;
-DELETE FROM TABLE `quest_poi_points`;
-DELETE FROM TABLE `quest_objectives`;
-DELETE FROM TABLE `quest_objectives_completion_effect`;
+DELETE FROM `quest_template`;
+DELETE FROM `quest_poi`;
+DELETE FROM `quest_poi_points`;
+DELETE FROM `quest_reward_display_spell`;
+DELETE FROM `quest_poi_points`;
+DELETE FROM `quest_objectives`;
+DELETE FROM `quest_objectives_completion_effect`;
 
 INSERT INTO `quest_poi` (`QuestID`, `BlobIndex`, `Idx1`, `ObjectiveIndex`, `QuestObjectiveID`, `QuestObjectID`, `MapID`, `UiMapID`, `Priority`, `Flags`, `WorldEffectID`, `PlayerConditionID`, `NavigationPlayerConditionID`, `SpawnTrackingID`, `AlwaysAllowMergingBlobs`, `VerifiedBuild`) VALUES
 (82989, 0, 0, -1, 0, 0, 1, 1454, 0, 2, 0, 0, 0, 0, 0, 55056), -- Warchief's Command Board
