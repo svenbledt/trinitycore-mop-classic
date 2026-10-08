@@ -94,7 +94,15 @@ Port of TrinityCore's `cata_classic` branch (Cataclysm Classic 4.4.x) to the **M
 
 ## Build & test
 
-Taken from upstream CI (`.github/workflows/*.yml`, `.circleci/config.yml`). Requires CMake ≥ 3.24, Boost (CI uses 1.84), OpenSSL, the MySQL client library and readline/zlib/bzip2. Everything else is vendored in `dep/`. Local toolchain availability hasn't been verified yet.
+**Docker (preferred; nothing to install but Docker Desktop).** Run from `contrib/mop-dev/`; details in its `README.md`.
+
+```sh
+docker compose --profile build run --rm builder      # cmake + ninja + ctest + install (upstream CI image)
+docker compose --profile extract run --rm extractor  # DB2 + GameTables from the local client into the data volume
+docker compose up -d db bnetserver worldserver       # MySQL 8.4 + servers on 1119/8081/8085/8086
+```
+
+**Native.** Taken from upstream CI (`.github/workflows/*.yml`, `.circleci/config.yml`). Requires CMake ≥ 3.24, Boost (CI uses 1.84), OpenSSL, the MySQL client library and readline/zlib/bzip2. Everything else is vendored in `dep/`. Local toolchain availability hasn't been verified yet.
 
 ```sh
 # Configure (same flags as CI; BUILD_TESTING is off by default)

@@ -1,0 +1,8 @@
+LoginDatabaseInfo = "db;3306;root;root;auth"
+LoginREST.ExternalAddress = 127.0.0.1
+LoginREST.LocalAddress = 127.0.0.1
+SourceDirectory = "/src"
+Updates.EnableDatabases = 1
+Updates.AutoSetup = 1
+CertificatesFile = "/opt/tc/bin/bnetserver.cert.pem"
+PrivateKeyFile = "/opt/tc/bin/bnetserver.key.pem"
