@@ -91,3 +91,12 @@ The path is `HandleAuthSessionCallback` → `InitializeSession` → `HandleCharE
 | `SMSG_ENUM_CHARACTERS_RESULT` | the WarbandGroups order differs, but TC sends it empty (deferred to Phase 2) | WPP V5_5 |
 
 These are unchanged: AuthSession, AuthResponse main body, ConnectToFailed, AccountDataTimes, SetTimeZoneInformation, HotfixRequest.
+
+## Client launcher / server keys (5.5.4)
+
+- **Launchers:** `ModernWoWTools/Launcher` 0.1.3 rejects Classic major 5. Its successor `Burralis/Game-Launcher` (MIT, cloned to `F:\WorkDir\burralis-launcher`) lists Classic up to 5.5.3, has no dev mode and no static seed, and patches by data patterns only.
+- **Burralis patterns in 70032:** `Portal` and `Version2UrlNew` are found. `ConnectToModulus`, `CryptoRsaModulus` and `CryptoEdPublicKey` are **not** found, so the launcher aborts at the "ConnectTo RsaModulus" patch.
+- **EnterEncryptedMode verification:** `sub_1413E1150` calls `sub_142EB1EC0(sig, ..., pubKey)`. `pubKey` is looked up by `int32` (the new `RegionGroup` field) in `NetClient::CertStore` (`sub_1413DC010`); entries are `{int id; 32-byte key; byte devFlag}`. A non-dev entry with a non-GM retail client raises "Using non-perf or non-GM retail client in dev region is not allowed".
+- **CertStore source:** `WowAuthCrypto::Certificate` list loaded from a CASC file, FileDataID **7725530** (`sub_142EB2270`, "Failed to load server certificates TACT file").
+- **Context and seed** for the signature are still plain: context `0x143042610`, seed `0x143042730`.
+- **Open:** the certificate format and its signing root, whether it's plain in memory for a data patch, and how the ConnectTo RSA key is stored now.
