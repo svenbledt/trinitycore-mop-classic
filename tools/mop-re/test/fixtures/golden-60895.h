@@ -81,3 +81,54 @@ struct ChrClassesLoadInfo
 
     static constexpr DB2LoadInfo Instance{ Fields, 26, &ChrClassesMeta::Instance, HOTFIX_SEL_CHR_CLASSES };
 };
+struct AchievementLoadInfo
+{
+    static constexpr DB2FieldMeta Fields[15] =
+    {
+        { false, FT_STRING, "Description" },
+        { false, FT_STRING, "Title" },
+        { false, FT_STRING, "Reward" },
+        { false, FT_INT, "ID" },
+        { true, FT_SHORT, "InstanceID" },
+        { true, FT_BYTE, "Faction" },
+        { true, FT_SHORT, "Supercedes" },
+        { true, FT_SHORT, "Category" },
+        { true, FT_BYTE, "MinimumCriteria" },
+        { true, FT_BYTE, "Points" },
+        { true, FT_INT, "Flags" },
+        { false, FT_SHORT, "UiOrder" },
+        { true, FT_INT, "IconFileID" },
+        { false, FT_INT, "CriteriaTree" },
+        { true, FT_SHORT, "SharesCriteria" },
+    };
+
+    static constexpr DB2LoadInfo Instance{ Fields, 15, &AchievementMeta::Instance, HOTFIX_SEL_ACHIEVEMENT };
+};
+
+struct AreaTriggerLoadInfo
+{
+    static constexpr DB2FieldMeta Fields[18] =
+    {
+        { false, FT_STRING, "Message" },
+        { false, FT_FLOAT, "PosX" },
+        { false, FT_FLOAT, "PosY" },
+        { false, FT_FLOAT, "PosZ" },
+        { false, FT_INT, "ID" },
+        { false, FT_SHORT, "ContinentID" },
+        { true, FT_INT, "PhaseUseFlags" },
+        { true, FT_SHORT, "PhaseID" },
+        { true, FT_SHORT, "PhaseGroupID" },
+        { false, FT_FLOAT, "Radius" },
+        { false, FT_FLOAT, "BoxLength" },
+        { false, FT_FLOAT, "BoxWidth" },
+        { false, FT_FLOAT, "BoxHeight" },
+        { false, FT_FLOAT, "BoxYaw" },
+        { true, FT_BYTE, "ShapeType" },
+        { true, FT_SHORT, "ShapeID" },
+        { true, FT_INT, "AreaTriggerActionSetID" },
+        { true, FT_BYTE, "Flags" },
+    };
+
+    static constexpr DB2LoadInfo Instance{ Fields, 18, &AreaTriggerMeta::Instance, HOTFIX_SEL_AREA_TRIGGER };
+};
+

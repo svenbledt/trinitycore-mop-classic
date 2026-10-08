@@ -23795,7 +23795,7 @@ void Player::LearnSkillRewardedSpells(uint32 skillId, uint32 skillValue, Races r
         }
 
         // Check race if set
-        if (!ability->RaceMask.IsEmpty() && !ability->RaceMask.HasRace(race))
+        if (Trinity::RaceMask<int64> raceMask = MakeRaceMask(ability->RaceMask); !raceMask.IsEmpty() && !raceMask.HasRace(race))
             continue;
 
         // Check class if set
@@ -24228,7 +24228,7 @@ bool Player::IsSpellFitByClassAndRace(uint32 spell_id) const
     for (SkillLineAbilityMap::const_iterator _spell_idx = bounds.first; _spell_idx != bounds.second; ++_spell_idx)
     {
         // skip wrong race skills
-        if (!_spell_idx->second->RaceMask.IsEmpty() && !_spell_idx->second->RaceMask.HasRace(race))
+        if (Trinity::RaceMask<int64> raceMask = MakeRaceMask(_spell_idx->second->RaceMask); !raceMask.IsEmpty() && !raceMask.HasRace(race))
             continue;
 
         // skip wrong class skills

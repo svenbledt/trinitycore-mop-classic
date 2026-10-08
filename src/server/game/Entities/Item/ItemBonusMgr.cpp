@@ -90,9 +90,8 @@ ItemContext GetContextForPlayer(MapDifficultyEntry const* mapDifficulty, Player 
             if (itemContextPickerEntry->PVal <= 0)
                 continue;
 
-            bool meetsPlayerCondition = false;
-            if (player)
-                meetsPlayerCondition = ConditionMgr::IsPlayerMeetingCondition(player, itemContextPickerEntry->PlayerConditionID);
+            // TODO(verify): 5.5.x ItemContextPickerEntry has no PlayerConditionID (LabelID instead); treated as no condition
+            bool meetsPlayerCondition = player != nullptr;
 
             if (itemContextPickerEntry->Flags & 0x1)
                 meetsPlayerCondition = !meetsPlayerCondition;
