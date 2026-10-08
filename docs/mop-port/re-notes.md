@@ -66,3 +66,13 @@ Matching tool: `tools/mop-re/src/match.ts` with `overrides/70032.json` (group ma
 - **Powers** (source: client `PowerType.db2`, `PowerTypeEnum` + `NameGlobalStringTag`): `28 = SHADOW_ORBS` (ChrClassesXPowerTypes ID 63, Priest), `29 = COMBAT_TEXT_RUNE_DEATH`. `MAX_POWERS` goes from 28 to 30, and `UnitMods` gets two power slots.
 - **SpellEffect.db2 maxima:** `Effect` 347 (TC knew 330), `EffectAura` 642 (TC knew 624), `ImplicitTarget` 149, `EffectIndex` 31. New ids are numbered placeholders with no-op handlers, `TODO(verify)`.
 - **SpellScaling.txt** has 16 data columns (11 classes + 6 `Unknown`). TC keeps Item/Consumable positionally; the 4 extra columns are unnamed `TODO(verify)`.
+
+## Battle.net services
+
+The method: search the dump for each service's `OriginalHash` as a little-endian uint32 (code immediates) and for the full service name strings.
+
+- The client registers `bgs.protocol.authentication.v2.client.AuthenticationService`/`Listener`, `account.v2.client.AccountService` and `game_utilities.v2.client.GameUtilitiesService`. `connection.v1.ConnectionService` stays v1.
+- cata_classic v1 hashes for Authentication `0x0DECFC01`, Account `0x62DA0891` and GameUtilities `0x3FC1274D` get **0 hits**. TC master's v2 hashes, Authentication `0xC02F8216` (9), Account `0x22DC2464` (20) and GameUtilities `0x5DBB51C2` (12), are present.
+- **Port:** cherry-picked TC master `ad3f7233ac54` (protos) plus `presence_types` from `53068a94e8`, and the bnetserver/worldserver service subset of master `c8ec3740265a` ("Updated to 12.0.7"). Its `WorldSession::SendConnectToInstance` ConnectTo layout change was left out because it's a world packet and belongs to Phase 2.
+- The realm-list JSON fields added by `c8ec3740265a` are all present as client strings: `cfgContentSetID`, `useBleepChance`, `realmPermissions`, `tokenLifespanNanoSecs`, `BleepProxy`, `title_id`.
+- **Open:** the external challenge payload type `web_auth_url` isn't present as a plain string, so it's unverified statically and gets confirmed in the e2e login.
