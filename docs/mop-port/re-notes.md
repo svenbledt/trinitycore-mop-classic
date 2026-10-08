@@ -100,3 +100,12 @@ These are unchanged: AuthSession, AuthResponse main body, ConnectToFailed, Accou
 - **CertStore source:** `WowAuthCrypto::Certificate` list loaded from a CASC file, FileDataID **7725530** (`sub_142EB2270`, "Failed to load server certificates TACT file").
 - **Context and seed** for the signature are still plain: context `0x143042610`, seed `0x143042730`.
 - **Open:** the certificate format and its signing root, whether it's plain in memory for a data patch, and how the ConnectTo RSA key is stored now.
+
+### CertStore details (resolved)
+
+- FileDataID 7725530 is a PEM bundle of 12 self-signed Ed25519 X.509 certs (`*.gameservers.worldofwarcraft.blizzard.com`). Extract it with `tools/mop-re/casc/casc_dump.cpp` into the gitignored `out/` (never commit it).
+- Extended Key Usage OIDs (`sub_142EB0F30`): `serverAuth`; `1.3.6.1.4.1.27296.303.1.1.2` (sets both flags, dev flag = 1) or `…1.1.3` (dev flag 0, only on the `dev` cert); `…303.1.2.<N>` gives key id N.
+- Key ids: 1 us, 2 kr, 3 eu, 4 tw, 5 cn, 6 events, 7 ptr, 8 beta, 9 dev, 10 qa, 11 bl, 12 qacn. No chain or signature check was seen in the store build (`sub_1413DC010`).
+- The store is a lazy singleton at `NetClient+1864`, built on first world connect (`sub_1413DD200`).
+- **Server:** `EnterEncryptedMode::RegionGroup = 1`. **Launcher:** the Burralis fork's `CertStoreInjector` finds the entry array by shape (`{int32 id; key[32]; u8 dev}`, ids 1..N at a 40-byte stride) and overwrites the keys with TC's public key `02596f0d…`.
+- **Auth key capture:** `sub_142EB1AE0` (digest) receives the 16-byte build key as arg 6. On entry to `WowClassic.exe+0x2EB1AE0`, `[rsp+0x30]` points at it.
