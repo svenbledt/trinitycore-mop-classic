@@ -55,6 +55,15 @@ test("override names outside any mapped group still win", () => {
   expect(r.absent).toEqual([]);
 });
 
+test("duplicate WPP values: first entry wins, later duplicates are absent", () => {
+  const r = matchOpcodes(
+    [W("SMSG_REAL", 0x3a0005), W("SMSG_NYI", 0x3a0005)],
+    Array.from({ length: 8 }, (_, i) => C("SMSG", 0x460000 | i)),
+    { groupMap: { SMSG: { "0x3a": "0x46" } } });
+  expect(r.matched.map(m => m.name)).toEqual(["SMSG_REAL"]);
+  expect(r.absent.map(a => a.name)).toEqual(["SMSG_NYI"]);
+});
+
 test("report summarises counts", () => {
   const r = matchOpcodes([W("CMSG_A", 0x380000)], [C("CMSG", 0x440000)], { groupMap: { CMSG: { "0x38": "0x44" } } });
   expect(renderReport(r)).toContain("matched: 1 (low: 0)");

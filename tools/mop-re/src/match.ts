@@ -51,7 +51,12 @@ export function matchOpcodes(wpp: OpcodeEntry[], client: ClientOpcode[], ov: Ove
   const used = new Set<string>();
   for (const dir of ["CMSG", "SMSG"] as Direction[]) {
     const gm = ov.groupMap?.[dir] ?? {};
-    const wd = wpp.filter(e => e.dir === dir);
+    const seenValue = new Set<number>();
+    const wd: OpcodeEntry[] = [];
+    for (const e of wpp.filter(e => e.dir === dir)) {
+      if (seenValue.has(e.value)) res.absent.push(e); // WPP lists a few values twice; first entry wins
+      else { seenValue.add(e.value); wd.push(e); }
+    }
     const cd = client.filter(e => e.dir === dir);
     const inMapped = new Set<string>();
     for (const [wgS, cgS] of Object.entries(gm)) {
