@@ -6,8 +6,8 @@ Last updated: 2026-10-08
 |---|---|
 | Base | TrinityCore `cata_classic` @ `0614c9fd941` (4.4.2.60895) |
 | Target | MoP Classic 5.5.4.70032 (dump at `d:\WoW\World of Warcraft\_classic_\WowClassic_dump.exe`) |
-| Current phase | **0 — Recon: done** (`00-recon.md`) |
-| Next | Phase 1 — login and realm list (needs spec → plan, superpowers workflow) |
+| Current phase | **1 — Login and realm list: code done, end-to-end client check pending** (branch `mop/phase1`) |
+| Next | Run the client via Arctium `--staticseed` against the Docker stack, then start Phase 2 |
 
 ## Done
 - Imported upstream `cata_classic` with full history as local `main`. The `upstream` remote has push disabled; there's no `origin` yet, and the repo will be private.
@@ -18,5 +18,12 @@ Last updated: 2026-10-08
 2. **Client RE:** recover whatever the server needs (including `build_auth_key`) from the 70032 dump, using IDA Pro via MCP, Ghidra, or anything that fits.
 3. **Hosting:** a private repo on the user's GitHub, later moving to an org. Ask before creating it or pushing.
 
+## Phase 1 (2026-10-08)
+- Docker dev stack (`contrib/mop-dev`): build plus 38/38 ctest, extractor, vmaps; bnetserver and worldserver both start ("World initialized").
+- Generated opcode table and DB2 layouts for 70032 (`tools/mop-re`).
+- Auth: build_info, build_auth_key (Arctium static seed) and realmlist; Battle.net v2 services ported from TC master.
+- Login and glue packets updated (see `re-notes.md` "Login packet layouts").
+- Content gaps: Monk create info removed until Phase 4; new spell effects and auras are placeholders.
+- **Pending:** the end-to-end client login (needs Arctium); the unknown-build rejection check; SMSG_PONG ambiguity.
+
 ## Not started
-- Local build verification. The toolchain on this machine hasn't been checked.
