@@ -1,0 +1,4 @@
+{
+  "wpp": { "sha": "9c0e672642b5aa6175bf7de1e76fad57d6dde477", "opcodes": "WowPacketParser/Enums/Version/V5_5_3_64802/Opcodes.cs" },
+  "wowdbdefs": { "sha": "e3df3707b103342dd487b1f5ea0f9b1b63da4bbe" }
+}
