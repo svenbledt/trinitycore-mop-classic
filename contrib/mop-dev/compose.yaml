@@ -37,6 +37,14 @@ services:
       - install:/opt/tc
     command: ["bash", "/src/contrib/mop-dev/scripts/build.sh"]
 
+  tdb:
+    image: alpine:3.20
+    profiles: ["setup"]
+    volumes:
+      - ../..:/src:ro
+      - tdb:/tdb
+    command: ["sh", "/src/contrib/mop-dev/scripts/fetch-tdb.sh"]
+
   extractor:
     <<: *runner
     profiles: ["extract"]
@@ -62,6 +70,6 @@ services:
     ports: ["8085:8085", "8086:8086"]
     stdin_open: true
     tty: true
-    command: ["bash", "-c", "bash /src/contrib/mop-dev/scripts/make-conf.sh worldserver && bash /src/contrib/mop-dev/scripts/fetch-tdb.sh && exec ./worldserver -c /opt/tc/etc/worldserver.conf"]
+    command: ["bash", "-c", "bash /src/contrib/mop-dev/scripts/make-conf.sh worldserver && { ls /tdb/TDB_full_*.sql >/dev/null 2>&1 || { echo 'TDB missing: run docker compose --profile setup run --rm tdb'; exit 1; }; } && ln -sf /tdb/*.sql /opt/tc/bin/ && exec ./worldserver -c /opt/tc/etc/worldserver.conf"]
 
 volumes: { build: {}, ccache: {}, install: {}, data: {}, tdb: {}, mysql: {} }
