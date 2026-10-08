@@ -6767,7 +6767,7 @@ struct MapMeta
         { FT_INT, 3, true },
     };
 
-    static constexpr DB2Meta Instance{ 1349477, -1, 23, 23, 0x32401DC5, Fields, -1 };
+    static constexpr DB2Meta Instance{ 1349477, -1, 23, 23, 0xB47C6F05, Fields, -1 };
 };
 
 struct MapCelestialBodyMeta

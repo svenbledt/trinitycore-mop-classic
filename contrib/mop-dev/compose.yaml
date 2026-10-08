@@ -46,14 +46,30 @@ services:
     command: ["sh", "/src/contrib/mop-dev/scripts/fetch-tdb.sh"]
 
   extractor:
-    <<: *runner
+    image: trinitycore/circle-ci:debian-13-builder # needs clang for the read-only shim
     profiles: ["extract"]
+    user: "0:0"
+    environment:
+      - EXTRACT_FLAGS # 10 = DB2 + GameTables (default), 1 = maps
     volumes:
+      - ../..:/src:ro
       - install:/opt/tc
       - data:/data
       - "D:/WoW/World of Warcraft:/wow:ro"
     working_dir: /data
-    command: ["/opt/tc/bin/mapextractor", "-i", "/wow", "-o", "/data", "-e", "10"]
+    command: ["bash", "-c", "clang -shared -fPIC -o /tmp/rofs.so /src/contrib/mop-dev/scripts/rofs-shim.c -ldl && LD_PRELOAD=/tmp/rofs.so exec /opt/tc/bin/mapextractor -i /wow -o /data -e $${EXTRACT_FLAGS:-10}"]
+
+  vmaps:
+    image: trinitycore/circle-ci:debian-13-builder
+    profiles: ["extract"]
+    user: "0:0"
+    volumes:
+      - ../..:/src:ro
+      - install:/opt/tc
+      - data:/data
+      - "D:/WoW/World of Warcraft:/wow:ro"
+    working_dir: /data
+    command: ["bash", "-c", "clang -shared -fPIC -o /tmp/rofs.so /src/contrib/mop-dev/scripts/rofs-shim.c -ldl && LD_PRELOAD=/tmp/rofs.so /opt/tc/bin/vmap4extractor -d /wow && mkdir -p vmaps && /opt/tc/bin/vmap4assembler Buildings vmaps"]
 
   bnetserver:
     <<: *runner

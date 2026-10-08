@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { parseDbd, selectBuild } from "../src/dbd";
-import { emitMeta, emitLoadInfo, parentIndexOf, parseLoadInfoBlock, emitHotfixStatements, emitHotfixSql, carryLoadFields } from "../src/gen_db2";
+import { emitMeta, emitLoadInfo, parentIndexOf, parseLoadInfoBlock, emitHotfixStatements, emitHotfixSql, carryLoadFields, rebuildExtractorBlock, emitLoadInfoFields } from "../src/gen_db2";
 
 const crlf = (s: string) => s.replace(/\r\n/g, "\n");
 const metaH = crlf(await Bun.file(import.meta.dir + "/fixtures/golden-60895.h").text()); // snapshot of upstream 4.4.2.60895 blocks
@@ -61,7 +61,7 @@ test("carry-over keeps TrinityCore names/signs for fields that existed, generic 
   const f = carryLoadFields(selectBuild(p, "5.5.4.70032")!, selectBuild(p, "4.4.2.60895")!, tc);
   expect(f).toEqual([
     { signed: false, ft: "FT_INT", name: "ID" },
-    { signed: false, ft: "FT_INT", name: "AlphaRenamed" },
+    { signed: true, ft: "FT_INT", name: "AlphaRenamed" }, // sign follows the new Meta (loader validates it), name is carried
     { signed: true, ft: "FT_BYTE", name: "Gamma" },
     { signed: false, ft: "FT_INT", name: "Beta" },
     { signed: false, ft: "FT_FLOAT", name: "PosX" },
@@ -100,6 +100,47 @@ test("a scalar that became an array gets array element names", () => {
   const tc = [{ signed: true, ft: "FT_LONG", name: "RaceMask" }, { signed: false, ft: "FT_INT", name: "ID" }];
   expect(carryLoadFields(selectBuild(p, "5.5.4.70032")!, selectBuild(p, "4.4.2.60895")!, tc).map(f => f.name))
     .toEqual(["ID", "RaceMask1", "RaceMask2"]);
+});
+
+test("MySQL reserved words are backtick-quoted in statements (columns and table)", () => {
+  const s = emitHotfixStatements("Lock", [
+    { signed: false, ft: "FT_INT", name: "ID" }, { signed: false, ft: "FT_FLOAT", name: "Float4" },
+    { signed: false, ft: "FT_INT", name: "System" }, { signed: false, ft: "FT_INT", name: "Int1" },
+  ], "HOTFIX_SEL_LOCK");
+  expect(s).toContain("SELECT ID, `Float4`, `System`, `Int1` FROM `lock` WHERE");
+  expect(s).toContain("SELECT MAX(ID) + 1 FROM `lock`");
+});
+
+test("extractor block is rebuilt from the server's Meta and LoadInfo blocks", () => {
+  const ext = [
+    "struct DemoLoadInfo", "{", "    static constexpr DB2MetaField MetaFields[1] =", "    {", "        { FT_BYTE, 1, true },", "    };", "",
+    "    static constexpr DB2Meta MetaInstance{ 7, -1, 1, 1, 0x00000001, MetaFields, -1 };", "",
+    "    static constexpr DB2FieldMeta Fields[2] =", "    {", "        { false, FT_INT, \"ID\" },", "        { true, FT_BYTE, \"Flags\" },", "    };", "",
+    "    static constexpr DB2FileLoadInfo Instance{ Fields, 2, &MetaInstance };", "};",
+  ].join("\n");
+  const meta = ["struct DemoMeta", "{", "    static constexpr DB2MetaField Fields[2] =", "    {", "        { FT_INT, 1, true },", "        { FT_BYTE, 1, true },", "    };", "",
+    "    static constexpr DB2Meta Instance{ 7, -1, 2, 2, 0x00000002, Fields, -1 };", "};"].join("\n");
+  const load = ["struct DemoLoadInfo", "{", "    static constexpr DB2FieldMeta Fields[3] =", "    {", "        { false, FT_INT, \"ID\" },", "        { true, FT_INT, \"Flags\" },",
+    "        { true, FT_BYTE, \"LVF\" },", "    };", "", "    static constexpr DB2LoadInfo Instance{ Fields, 3, &DemoMeta::Instance, HOTFIX_SEL_DEMO };", "};"].join("\n");
+  const out = rebuildExtractorBlock(ext, meta, load);
+  expect(out).toContain("static constexpr DB2MetaField MetaFields[2] =");
+  expect(out).toContain("static constexpr DB2Meta MetaInstance{ 7, -1, 2, 2, 0x00000002, MetaFields, -1 };");
+  expect(out).toContain("        { true, FT_INT, \"Flags\" },\n        { true, FT_BYTE, \"LVF\" },");
+  expect(out).toContain("static constexpr DB2FileLoadInfo Instance{ Fields, 3, &MetaInstance };");
+});
+
+test("LoadInfo keeps its own struct name when it differs from the Meta name", () => {
+  const out = emitLoadInfoFields("CfgCategories", [{ signed: false, ft: "FT_INT", name: "ID" }], "HOTFIX_SEL_CFG_CATEGORIES", "Cfg_Categories");
+  expect(out).toStartWith("struct CfgCategoriesLoadInfo\n");
+  expect(out).toContain("&Cfg_CategoriesMeta::Instance, HOTFIX_SEL_CFG_CATEGORIES }");
+});
+
+test("a non-inline relation is always an unsigned FT_INT in LoadInfo (DB2Stores assert)", () => {
+  const p = parseDbd([
+    "COLUMNS", "int ID", "int PowerType", "int<ChrClasses::ID> ClassID", "",
+    "LAYOUT 00000002", "BUILD 5.5.4.70032", "$noninline,id$ID<32>", "PowerType<8>", "$noninline,relation$ClassID<8>", "",
+  ].join("\n"));
+  expect(carryLoadFields(selectBuild(p, "5.5.4.70032")!, null, []).at(-1)).toEqual({ signed: false, ft: "FT_INT", name: "ClassID" });
 });
 
 test("Achievement hotfix statements are byte-identical to upstream", () => {

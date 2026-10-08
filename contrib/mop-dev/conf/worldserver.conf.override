@@ -6,3 +6,7 @@ DataDir = "/data"
 SourceDirectory = "/src"
 Updates.EnableDatabases = 15
 Updates.AutoSetup = 1
+vmap.enableLOS = 0
+vmap.enableHeight = 0
+vmap.enableIndoorCheck = 0
+mmap.enablePathFinding = 0

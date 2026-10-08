@@ -52,4 +52,17 @@ Opcode = `(group << 16) | index`, sent as a 32-bit value on the wire (as in Trin
 | SMSG_GET_ACCOUNT_CHARACTER_LIST_RESULT | 0x460213 | u32 token, u32 count, bit, entries (guid, guid, u32, u8×4, u64…); `0x460214` = LIVE_REGION variant |
 | SMSG_AVAILABLE_HOTFIXES | 0x4A0001 | u32 VirtualRealmAddress, u32 count, (u32, u32) loop. Group `0x4A` = WPP `0x3E` at the same index |
 
+## Auth seed key
+
+- **Seeds:** `AuthCheckSeed`, `SessionKeySeed`, `ContinuedSessionSeed` and `EncryptionKeySeed` are unchanged from TrinityCore. They're at `0x1430426B0`, `0x1430426F0`, `0x1430426D0` and `0x143042710`.
+- **Digest:** `sub_142EB1AE0` computes `HMAC-SHA512(SHA512(sessionKey[64] || buildKey[16]), LocalChallenge || ServerChallenge || AuthCheckSeed)`, the same as `WorldSocket::HandleAuthSessionCallback`. It's called from the auth-challenge handler `sub_1413E0C30`.
+- **Provider:** `buildKey` comes from the function pointer `qword_145E84368`, registered in `sub_1401F0050` (`0x1401F0990`) as `sub_1401F1530`, next to the type fourCC `'WoW'` (`dword_145E84358`). The provider's body (`0x1401F0AB0`) is encrypted at rest (mostly `0xCC`) and decrypted only at runtime, so the genuine per-build key can't be recovered statically.
+- **Server key:** the server uses the Arctium launcher's static seed `179D3DC3235629D07113A9B3867F97A7` (source: ModernWoWTools/Launcher `src/Launcher.cs`, "Resulting static auth seed is: …"; the HermesProxy default is the same). The client must be started through Arctium with `--staticseed`.
+
 Matching tool: `tools/mop-re/src/match.ts` with `overrides/70032.json` (group map plus the anchors above). It aligns each mapped group with monotone offsets; anchors are hard constraints. SMSG groups are dense, so non-anchored SMSG names are low confidence (TODO(verify)). Open: SMSG_PONG is `0x4D0009` or `0x4D000A`.
+
+## Client enum extensions found by loading 5.5.4.70032 data
+
+- **Powers** (source: client `PowerType.db2`, `PowerTypeEnum` + `NameGlobalStringTag`): `28 = SHADOW_ORBS` (ChrClassesXPowerTypes ID 63, Priest), `29 = COMBAT_TEXT_RUNE_DEATH`. `MAX_POWERS` goes from 28 to 30, and `UnitMods` gets two power slots.
+- **SpellEffect.db2 maxima:** `Effect` 347 (TC knew 330), `EffectAura` 642 (TC knew 624), `ImplicitTarget` 149, `EffectIndex` 31. New ids are numbered placeholders with no-op handlers, `TODO(verify)`.
+- **SpellScaling.txt** has 16 data columns (11 classes + 6 `Unknown`). TC keeps Item/Consumable positionally; the 4 extra columns are unnamed `TODO(verify)`.

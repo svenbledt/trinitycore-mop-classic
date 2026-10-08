@@ -86,16 +86,16 @@ struct LiquidMaterialLoadInfo
 {
     static constexpr DB2MetaField MetaFields[2] =
     {
-        { FT_BYTE, 1, true },
+        { FT_INT, 1, true },
         { FT_BYTE, 1, true },
     };
 
-    static constexpr DB2Meta MetaInstance{ 1132538, -1, 2, 2, 0x01033D2A, MetaFields, -1 };
+    static constexpr DB2Meta MetaInstance{ 1132538, -1, 2, 2, 0x98E5D7AA, MetaFields, -1 };
 
     static constexpr DB2FieldMeta Fields[3] =
     {
         { false, FT_INT, "ID" },
-        { true, FT_BYTE, "Flags" },
+        { true, FT_INT, "Flags" },
         { true, FT_BYTE, "LVF" },
     };
 
@@ -134,7 +134,7 @@ struct LiquidTypeLoadInfo
     {
         { FT_STRING_NOT_LOCALIZED, 1, true },
         { FT_STRING_NOT_LOCALIZED, 6, true },
-        { FT_SHORT, 1, false },
+        { FT_INT, 1, true },
         { FT_BYTE, 1, false },
         { FT_INT, 1, false },
         { FT_INT, 1, false },
@@ -149,15 +149,15 @@ struct LiquidTypeLoadInfo
         { FT_BYTE, 1, false },
         { FT_INT, 1, true },
         { FT_BYTE, 6, false },
-        { FT_INT, 2, true },
-        { FT_FLOAT, 18, true },
+        { FT_INT, 3, true },
+        { FT_FLOAT, 38, true },
         { FT_INT, 4, false },
         { FT_FLOAT, 4, true },
     };
 
-    static constexpr DB2Meta MetaInstance{ 1371380, -1, 21, 21, 0x95DB15B6, MetaFields, -1 };
+    static constexpr DB2Meta MetaInstance{ 1371380, -1, 21, 21, 0xD1ECEEC9, MetaFields, -1 };
 
-    static constexpr DB2FieldMeta Fields[56] =
+    static constexpr DB2FieldMeta Fields[77] =
     {
         { false, FT_INT, "ID" },
         { false, FT_STRING_NOT_LOCALIZED, "Name" },
@@ -167,7 +167,7 @@ struct LiquidTypeLoadInfo
         { false, FT_STRING_NOT_LOCALIZED, "Texture4" },
         { false, FT_STRING_NOT_LOCALIZED, "Texture5" },
         { false, FT_STRING_NOT_LOCALIZED, "Texture6" },
-        { false, FT_SHORT, "Flags" },
+        { true, FT_INT, "Flags" },
         { false, FT_BYTE, "SoundBank" },
         { false, FT_INT, "SoundID" },
         { false, FT_INT, "SpellID" },
@@ -189,6 +189,7 @@ struct LiquidTypeLoadInfo
         { false, FT_BYTE, "FrameCountTexture6" },
         { true, FT_INT, "Color1" },
         { true, FT_INT, "Color2" },
+        { true, FT_INT, "Color3" },
         { false, FT_FLOAT, "Float1" },
         { false, FT_FLOAT, "Float2" },
         { false, FT_FLOAT, "Float3" },
@@ -207,6 +208,26 @@ struct LiquidTypeLoadInfo
         { false, FT_FLOAT, "Float16" },
         { false, FT_FLOAT, "Float17" },
         { false, FT_FLOAT, "Float18" },
+        { false, FT_FLOAT, "Float19" },
+        { false, FT_FLOAT, "Float20" },
+        { false, FT_FLOAT, "Float21" },
+        { false, FT_FLOAT, "Float22" },
+        { false, FT_FLOAT, "Float23" },
+        { false, FT_FLOAT, "Float24" },
+        { false, FT_FLOAT, "Float25" },
+        { false, FT_FLOAT, "Float26" },
+        { false, FT_FLOAT, "Float27" },
+        { false, FT_FLOAT, "Float28" },
+        { false, FT_FLOAT, "Float29" },
+        { false, FT_FLOAT, "Float30" },
+        { false, FT_FLOAT, "Float31" },
+        { false, FT_FLOAT, "Float32" },
+        { false, FT_FLOAT, "Float33" },
+        { false, FT_FLOAT, "Float34" },
+        { false, FT_FLOAT, "Float35" },
+        { false, FT_FLOAT, "Float36" },
+        { false, FT_FLOAT, "Float37" },
+        { false, FT_FLOAT, "Float38" },
         { false, FT_INT, "Int1" },
         { false, FT_INT, "Int2" },
         { false, FT_INT, "Int3" },
@@ -217,7 +238,7 @@ struct LiquidTypeLoadInfo
         { false, FT_FLOAT, "Coefficient4" },
     };
 
-    static constexpr DB2FileLoadInfo Instance{ Fields, 56, &MetaInstance };
+    static constexpr DB2FileLoadInfo Instance{ Fields, 77, &MetaInstance };
 };
 
 struct MapLoadInfo
@@ -249,7 +270,7 @@ struct MapLoadInfo
         { FT_INT, 3, true },
     };
 
-    static constexpr DB2Meta MetaInstance{ 1349477, -1, 23, 23, 0x32401DC5, MetaFields, -1 };
+    static constexpr DB2Meta MetaInstance{ 1349477, -1, 23, 23, 0xB47C6F05, MetaFields, -1 };
 
     static constexpr DB2FieldMeta Fields[26] =
     {
@@ -275,7 +296,7 @@ struct MapLoadInfo
         { false, FT_BYTE, "MaxPlayers" },
         { true, FT_SHORT, "WindSettingsID" },
         { true, FT_INT, "ZmpFileDataID" },
-        { true, FT_INT, "Unknown1154" },
+        { true, FT_INT, "PreloadFileDataID" },
         { true, FT_INT, "Flags1" },
         { true, FT_INT, "Flags2" },
         { true, FT_INT, "Flags3" },

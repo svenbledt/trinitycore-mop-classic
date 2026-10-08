@@ -694,6 +694,24 @@ NonDefaultConstructible<pAuraEffectHandler> AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNoImmediateEffect,                         //622 SPELL_AURA_MOD_SPELL_COOLDOWN_BY_HASTE implemented in SpellHistory::StartCooldown
     &AuraEffect::HandleNULL,                                      //623 SPELL_AURA_MOD_GATHERING_ITEMS_GAINED_PERCENT
     &AuraEffect::HandleNoImmediateEffect,                         //624 SPELL_AURA_MOD_DAMAGE_FROM_MANA implemented in Unit::Unit::SpellDamagePctDone
+    &AuraEffect::HandleNULL,                                      //625
+    &AuraEffect::HandleNULL,                                      //626
+    &AuraEffect::HandleNULL,                                      //627
+    &AuraEffect::HandleNULL,                                      //628
+    &AuraEffect::HandleNULL,                                      //629
+    &AuraEffect::HandleNULL,                                      //630
+    &AuraEffect::HandleNULL,                                      //631
+    &AuraEffect::HandleNULL,                                      //632
+    &AuraEffect::HandleNULL,                                      //633
+    &AuraEffect::HandleNULL,                                      //634
+    &AuraEffect::HandleNULL,                                      //635
+    &AuraEffect::HandleNULL,                                      //636
+    &AuraEffect::HandleNULL,                                      //637
+    &AuraEffect::HandleNULL,                                      //638
+    &AuraEffect::HandleNULL,                                      //639
+    &AuraEffect::HandleNULL,                                      //640
+    &AuraEffect::HandleNULL,                                      //641
+    &AuraEffect::HandleNULL,                                      //642
 };
 
 AuraEffect::AuraEffect(Aura* base, SpellEffectInfo const& spellEfffectInfo, SpellEffectValue const* baseAmount, Unit* caster) :
