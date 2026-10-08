@@ -82,8 +82,12 @@ WorldPacket const* AvailableHotfixes::Write()
 
     _worldPacket << int32(VirtualRealmAddress);
     _worldPacket << uint32(Hotfixes.size());
+    // 5.5.x layout: WowPacketParser V5_5_0_61735 HotfixHandler.cs:24 (UniqueID before PushID)
     for (DB2Manager::HotfixId const& hotfixId : Hotfixes)
-        _worldPacket << hotfixId;
+    {
+        _worldPacket << uint32(hotfixId.UniqueID);
+        _worldPacket << int32(hotfixId.PushID);
+    }
 
     return &_worldPacket;
 }

@@ -36,6 +36,7 @@ ByteBuffer& operator<<(ByteBuffer& data, EuropaTicketConfig const& europaTicketS
     data << Bits<1>(europaTicketSystemStatus.SuggestionsEnabled);
 
     data << europaTicketSystemStatus.ThrottleState;
+    data << europaTicketSystemStatus.ExpensiveThrottleState;
 
     return data;
 }
@@ -217,9 +218,9 @@ WorldPacket const* FeatureSystemStatus::Write()
     return &_worldPacket;
 }
 
+// 5.5.x layout: client reader IDA 0x1405A8450 (70032); WowPacketParser V5_5_0_61735 MiscellaneousHandler.cs:438
 WorldPacket const* FeatureSystemStatusGlueScreen::Write()
 {
-    _worldPacket << Bits<1>(BpayStoreEnabled);
     _worldPacket << Bits<1>(BpayStoreAvailable);
     _worldPacket << Bits<1>(BpayStoreDisabledByParentalControls);
     _worldPacket << Bits<1>(CharUndeleteEnabled);
@@ -260,6 +261,8 @@ WorldPacket const* FeatureSystemStatusGlueScreen::Write()
     _worldPacket << Bits<1>(BNSendWhisperUseV2Services);
     _worldPacket << Bits<1>(BNSendGameDataUseV2Services);
     _worldPacket << Bits<1>(CharacterSelectListModeRealmless);
+    for (bool unk : Unk554Bits)
+        _worldPacket << Bits<1>(unk);
 
     _worldPacket.FlushBits();
 
@@ -271,15 +274,18 @@ WorldPacket const* FeatureSystemStatusGlueScreen::Write()
     _worldPacket << int64(TokenBalanceAmount);
     _worldPacket << int32(MaxCharactersPerRealm);
     _worldPacket << uint32(LiveRegionCharacterCopySourceRegions.size());
-    _worldPacket << uint32(BpayStoreProductDeliveryDelay);
     _worldPacket << int32(ActiveBoostType);
     _worldPacket << int32(TrialBoostType);
     _worldPacket << int32(MinimumExpansionLevel);
     _worldPacket << int32(MaximumExpansionLevel);
     _worldPacket << int32(ContentSetID);
     _worldPacket << uint32(GameRuleValues.size());
+    _worldPacket << uint32(0); // TODO(verify): 5.5.4 vector of (uint32, uint32, uint32)
+    _worldPacket << uint32(0); // TODO(verify): 5.5.4 vector of uint32
     _worldPacket << int32(ActiveTimerunningSeasonID);
     _worldPacket << int32(RemainingTimerunningSeasonSeconds);
+    for (int32 unk : Unk554Ints)
+        _worldPacket << int32(unk);
     _worldPacket << int16(MaxPlayerGuidLookupsPerRequest);
     _worldPacket << int16(NameLookupTelemetryInterval);
     _worldPacket << NotFoundCacheTimeSeconds;
@@ -296,8 +302,13 @@ WorldPacket const* FeatureSystemStatusGlueScreen::Write()
     if (!LiveRegionCharacterCopySourceRegions.empty())
         _worldPacket.append(LiveRegionCharacterCopySourceRegions.data(), LiveRegionCharacterCopySourceRegions.size());
 
+    // 5.5.4 client reads Rule as uint8 here (IDA 0x1405A8450)
     for (GameRuleValuePair const& gameRuleValue : GameRuleValues)
-        _worldPacket << gameRuleValue;
+    {
+        _worldPacket << uint8(gameRuleValue.Rule);
+        _worldPacket << int32(gameRuleValue.Value);
+        _worldPacket << float(gameRuleValue.ValueF);
+    }
 
     for (DebugTimeEventInfo const& debugTimeEventInfo : DebugTimeEvents)
         _worldPacket << debugTimeEventInfo;

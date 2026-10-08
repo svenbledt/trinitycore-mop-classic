@@ -76,3 +76,18 @@ The method: search the dump for each service's `OriginalHash` as a little-endian
 - **Port:** cherry-picked TC master `ad3f7233ac54` (protos) plus `presence_types` from `53068a94e8`, and the bnetserver/worldserver service subset of master `c8ec3740265a` ("Updated to 12.0.7"). Its `WorldSession::SendConnectToInstance` ConnectTo layout change was left out because it's a world packet and belongs to Phase 2.
 - The realm-list JSON fields added by `c8ec3740265a` are all present as client strings: `cfgContentSetID`, `useBleepChance`, `realmPermissions`, `tokenLifespanNanoSecs`, `BleepProxy`, `title_id`.
 - **Open:** the external challenge payload type `web_auth_url` isn't present as a plain string, so it's unverified statically and gets confirmed in the e2e login.
+
+## Login packet layouts
+
+The path is `HandleAuthSessionCallback` → `InitializeSession` → `HandleCharEnumOpcode`. Changes for 5.5.4.70032:
+
+| Packet (TC class) | Change | Source |
+|---|---|---|
+| `SMSG_ENTER_ENCRYPTED_MODE` (`Auth::EnterEncryptedMode`) | `int32 RegionGroup` added before the signature | IDA `0x140616FF0` case `0x4D0004`, TC master |
+| `SMSG_AUTH_RESPONSE` (`AuthWaitInfo`) | `AllowedFactionGroupForCharacterCreate` changed uint32 → uint8 | WPP V5_5 AuthenticationHandler.cs:181 |
+| `SMSG_AVAILABLE_HOTFIXES` | each entry is now UniqueID then PushID (the shared `HotfixId` operator is unchanged) | WPP V5_5 HotfixHandler.cs:24 |
+| `SMSG_UNDELETE_COOLDOWN_STATUS_RESPONSE` | now MaxCooldown, CurrentCooldown, then the bit | WPP V5_5 CharacterHandler.cs:672 |
+| `SMSG_FEATURE_SYSTEM_STATUS_GLUE_SCREEN` | `BpayStoreEnabled` bit and `BpayStoreProductDeliveryDelay` removed; +3 bits after the RealmHiddenAlert length; +2 vector counts after GameRuleValues (entries `(u32,u32,u32)` and `(u32)`); +2 int32 after RemainingTimerunningSeasonSeconds; GameRule `Rule` sent as uint8; Europa config now has a second (expensive) throttle state | IDA `0x1405A8450`, TC master (throttle) |
+| `SMSG_ENUM_CHARACTERS_RESULT` | the WarbandGroups order differs, but TC sends it empty (deferred to Phase 2) | WPP V5_5 |
+
+These are unchanged: AuthSession, AuthResponse main body, ConnectToFailed, AccountDataTimes, SetTimeZoneInformation, HotfixRequest.
