@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node tools/comment_budget_hook.mjs",
+            "timeout": 15,
+            "statusMessage": "Checking comment budget"
+          }
+        ]
+      }
+    ]
+  }
+}

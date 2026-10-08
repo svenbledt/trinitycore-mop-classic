@@ -46,6 +46,8 @@ Port of TrinityCore's `cata_classic` branch (Cataclysm Classic 4.4.x) to the **M
   - Follow TrinityCore's existing patterns for build-version gating, packet classes, opcode tables and DB2 stores.
   - Keep MoP-specific changes localized.
   - Don't refactor upstream code unless it's required.
+- **Inline comments: 2 lines max.** State only the non-obvious "why"; longer reasoning goes in `docs/mop-port/` with a one-line pointer. A PostToolUse hook (`tools/comment_budget_hook.mjs`) enforces this on every file you edit, upstream TrinityCore comments included (only vendored `dep/` is exempt).
+  - **Never ignore a comment-budget block.** Fix every run it reports before moving on, even ones your edit didn't write: an earlier edit, session or person put it there, and it's still ours to fix.
 - **Small steps.** Each commit is buildable and testable. The build must pass on Linux, and on Windows if configured, and existing tests must run.
 - **Ask before hard-to-reverse decisions**, such as:
   - dropping Cata Classic client support vs. keeping multi-build support
