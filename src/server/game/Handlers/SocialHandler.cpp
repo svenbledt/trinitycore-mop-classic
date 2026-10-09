@@ -177,6 +177,7 @@ void WorldSession::HandleSetContactNotesOpcode(WorldPackets::Social::SetContactN
 
 void WorldSession::HandleSocialContractRequest(WorldPackets::Social::SocialContractRequest& /*socialContractRequest*/)
 {
-    // TODO(verify): SMSG_SOCIAL_CONTRACT_REQUEST_RESPONSE opcode 0x46032B low-confidence; 5.5.4 client crashes
-    // (ERROR #132) mis-dispatching it. Cosmetic; not sent until the opcode is verified. See docs/mop-port/re-notes.md.
+    WorldPackets::Social::SocialContractRequestResponse response;
+    response.ShowSocialContract = false;
+    SendPacket(response.Write());
 }

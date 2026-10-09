@@ -1540,7 +1540,7 @@ enum OpcodeServer : uint32
     SMSG_NOTIFY_MISSILE_TRAJECTORY_COLLISION           = 0x460158, // TODO(verify): low-confidence match
     SMSG_NOTIFY_MONEY                                  = 0x46003C, // TODO(verify): low-confidence match
     SMSG_NOTIFY_RECEIVED_MAIL                          = 0x4600E6, // TODO(verify): low-confidence match
-    SMSG_NPC_INTERACTION_OPEN_RESULT                   = 0x460320, // TODO(verify): low-confidence match
+    SMSG_NPC_INTERACTION_OPEN_RESULT                   = 0x460315,
     SMSG_OFFER_PETITION_ERROR                          = 0x460164, // TODO(verify): low-confidence match
     SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA          = 0x460194, // TODO(verify): low-confidence match
     SMSG_ON_MONSTER_MOVE                               = UNKNOWN_OPCODE,
@@ -1820,7 +1820,7 @@ enum OpcodeServer : uint32
     SMSG_SHOW_QUEST_COMPLETION_TEXT                    = UNKNOWN_OPCODE,
     SMSG_SHOW_TAXI_NODES                               = 0x46017B, // TODO(verify): low-confidence match
     SMSG_SHOW_TRADE_SKILL_RESPONSE                     = 0x460223, // TODO(verify): low-confidence match
-    SMSG_SOCIAL_CONTRACT_REQUEST_RESPONSE              = 0x46032B, // TODO(verify): low-confidence match
+    SMSG_SOCIAL_CONTRACT_REQUEST_RESPONSE              = 0x460320,
     SMSG_SOCKET_GEMS_FAILURE                           = 0x4601D6, // TODO(verify): low-confidence match
     SMSG_SOCKET_GEMS_SUCCESS                           = 0x4601D5, // TODO(verify): low-confidence match
     SMSG_SOR_START_EXPERIENCE_INCOMPLETE               = 0x460081, // TODO(verify): low-confidence match

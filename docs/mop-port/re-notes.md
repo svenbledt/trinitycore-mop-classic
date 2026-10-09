@@ -125,3 +125,10 @@ These are unchanged: AuthSession, AuthResponse main body, ConnectToFailed, Accou
 - Group shifted `0x3A → 0x46` in 5.5.4 (verified: known-good 70032 SMSG match WPP 5.5.3 index with group 0x46 — AUTH_RESPONSE 0x3A0001→0x460001, ENUM 0x3A0018→0x460018). Several mid/high indices drift +0xB (UNDELETE 0x3A026F→0x46027A, ACCOUNT_DATA_TIMES 0x3A01AE→0x4601B9, SERVER_TIME 0x3A01B8→0x4601C3), all confirmed working.
 - Our match guessed `0x46032B` (0x320+0xB) but it's WRONG — the 5.5.4 client crashes on it (packed-GUID over-read), so the drift near 0x320 is not +0xB. Real 70032 index unknown; needs the client's group-0x46 handler-table (not a literal switch, so not text-searchable) or a ymir sniff. Client anchors found: event `SOCIAL_CONTRACT_STATUS_UPDATE` fired by `sub_140766130`; request sender `sub_1413DF020` (send path 0x1413DECD0); Lua glue `C_SocialContractGlue` `sub_1408ED590`.
 - Status: packet suppressed server-side (cosmetic), so this is non-blocking. Resume harvest in Phase 2 with a sniff or by reversing the group-0x46 dispatch/registration.
+
+### RESOLVED (2026-10-09): social-contract opcode + an NPC_INTERACTION mis-map
+
+Client confirms via per-packet opcode getters (`mov [rdx], <opcode>h`) cross-checked with WPP 5.5.3 indices (group shifted 0x3A→0x46, this index region is stable, no drift):
+- **SMSG_SOCIAL_CONTRACT_REQUEST_RESPONSE = `0x460320`** (getter `sub_1405D4F50`; WPP 5.5.3 `0x3A0320`). Our old `0x46032B` was a different (GUID) packet → client crash. Re-enabled the server send; verified no crash, reaches character screen.
+- **SMSG_NPC_INTERACTION_OPEN_RESULT = `0x460315`** (getter `sub_1405D45C0`; WPP 5.5.3 `0x3A0315`) — was mis-mapped to `0x460320`, fixed to clear the collision.
+Method for future low-confidence SMSG in group 0x46: scope `search_text "<idx>"` to the getter block `0x1405D0000-0x1405E0000` (each class has a `mov [rdx], 46xxxxh` getter), map to WPP 5.5.3 names by index.
