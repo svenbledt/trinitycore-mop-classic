@@ -6,12 +6,12 @@
 
 ## Goal
 
-A player can **create** a character in the MoP Classic 5.5.4 client, see it appear in the character list, and **delete** it — verified end-to-end against the live client. Canonical test character: **Human Warrior**.
+A player can **create** a character in the MoP Classic 5.5.4 client, see it appear in the character list, and **delete** it — verified end-to-end against the live client. Canonical test characters: **Human Warrior** (Alliance) and **Orc Warrior** (Horde) — same class, different race/faction/start data.
 
 ## Scope
 
 ### Builds
-- Correct 5.5.4 **opcodes** for the create/delete path: `CMSG_CREATE_CHARACTER`, `CMSG_CHAR_DELETE`, `SMSG_CREATE_CHAR`, `SMSG_DELETE_CHAR` (verify the existing values; fix via the Phase 1 method — client dispatch/getters + WPP 5.5.3 cross-check — if wrong).
+- Correct 5.5.4 **opcodes** for the create/delete path: `CMSG_CREATE_CHARACTER`, `CMSG_CHAR_DELETE`, `SMSG_CREATE_CHAR`, `SMSG_DELETE_CHAR`. **Harvest every one from the client** (per-packet getter functions in the dump + WPP 5.5.3 cross-check) — do NOT accept the current repo values without client confirmation, even the ones that look right.
 - Correct 5.5.4 **packet layouts** for those packets: `CreateCharacter::Read`, `CharDelete::Read`, `CreateChar::Write`, `DeleteChar::Write` (bit widths, field order, flags such as `HardcoreSelfFound`/`UseNPE`, the `ChrCustomizationChoice` array).
 - `SMSG_ENUM_CHARACTERS_RESULT` **per-character record** correctness — Phase 1 only validated it with zero characters; here it must render one real character (name, race/class/sex, level, position, items/display, customizations). This is the main new risk.
 - **Create flow glue** as needed for 5.5.4: name validation, customization validation against the regenerated ChrCustomization DB2 stores, the DB insert, and the correct `CharacterCreateResult`/`CharDeleteResult` response codes.
@@ -19,7 +19,7 @@ A player can **create** a character in the MoP Classic 5.5.4 client, see it appe
 ### Does NOT build (explicitly)
 - Entering the world, the enter-world handshake, or any update-field / player-object-update work — that is **2b**.
 - Monk (no sourced create data yet; Phase 4). Any race/class lacking `player_classlevelstats` stays excluded as in Phase 1.
-- Full customization coverage/validation for every race/class/appearance — only what Human Warrior creation needs plus not actively breaking others.
+- Full customization coverage/validation for every race/class/appearance — only what Human Warrior and Orc Warrior creation need plus not actively breaking others.
 - Character customization *editing* (recustomize/barbershop), character boost, templates, trial/NPE flows, name-change/race-change.
 
 ## Decisions that are expensive to change later
@@ -33,12 +33,12 @@ Reuse the Phase 1 loop, per packet: confirm opcode + layout against WPP 5.5.3 an
 ## Testing
 - Unit (Catch2 `tests/game/Opcodes.cpp`): assert the four create/delete opcodes' verified values; the duplicate-value guard already covers collisions.
 - Unit where practical: packet Read/Write round-trips for the create/delete packets.
-- End-to-end (manual, live client): create Human Warrior → appears in the list after relog/enum → delete it → list empty. Worldserver logs show `CMSG_CREATE_CHARACTER` → success result, `CMSG_CHAR_DELETE` → success.
+- End-to-end (manual, live client): for **both** Human Warrior and Orc Warrior — create → appears in the list after relog/enum → delete → list empty. Worldserver logs show `CMSG_CREATE_CHARACTER` → success result, `CMSG_CHAR_DELETE` → success.
 
-## Open questions for review
-1. Human Warrior as the canonical test character — confirmed. Any second race/class to validate (e.g. a Horde race) within 2a, or keep strictly one?
-2. If the 5.5.4 `CMSG_CREATE_CHARACTER` layout adds fields we can't source from the client dump quickly, is it acceptable to read-and-ignore them with `// TODO(verify)` to unblock the flow?
-3. Name-reservation / starter-edition / realm character-cap checks — enforce as upstream does, or relax on the dev stack for 2a?
+## Resolved decisions (from review)
+1. **Two test characters:** Human Warrior (Alliance) + Orc Warrior (Horde). Both must create/list/delete end-to-end.
+2. **Harvest every create/delete opcode from the client** — no shortcuts, no accepting repo values on faith.
+3. **Do NOT relax the stack:** enforce name-reservation, starter-edition, and realm character-cap checks exactly as upstream `cata_classic` does. (Unknown *non-opcode packet fields* with no client source may still be read-and-ignored with `// TODO(verify)`, since that's the only way to parse an unknown layout — but validation logic is not relaxed.)
 
 ## Review focus (inputs the tests above don't exercise)
 - Creating a character whose name collides or is invalid (reserved, profanity, wrong length) → correct result code, no crash.
