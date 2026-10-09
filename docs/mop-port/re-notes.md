@@ -163,3 +163,9 @@ Diffed the repo's `EnumCharactersResult` writers against WPP V5_5_0_61735 `Handl
 - Top-level `EnumCharactersResult::Write`: moved the **WarbandGroups loop last** (after RaceUnlockData); WPP V5_5_0 orders it after RegionwideCharacters/RaceUnlock. Harmless while empty (Phase 1), wrong once populated.
 - VisualItems (fixed array of 19), the VisualItemInfo field order, PersonalTabard (5x int32), and the create/delete read paths already matched WPP; unchanged.
 - Verified by `tests/game/CharacterPackets.cpp` "Enum character record..." round-trip (RED on the uint8 ListPosition, GREEN after). Live-client render of a real character is the Task 5 e2e gate. 5.5.4-specific deltas vs WPP 5.5.3 to re-confirm there: none observed, but the record was not re-derived field-by-field from the 5.5.4 binary (WPP V5_5_0 is the cited layout authority per CLAUDE.md; check against the client at e2e).
+
+## Phase 2a (2026-10-09): character delete path verified
+
+- `CMSG_CHAR_DELETE` (`CharDelete::Read` = `>> Guid`) matches WPP V5_5_0 `HandleClientCharDelete` (one packed GUID) and the client sender `sub_140586660` (writes one GUID). No change.
+- `SMSG_DELETE_CHAR` (`DeleteChar::Write`) result code is uint32 for 5.5.4 — fixed and unit-tested in Task 2 (shared finding with SMSG_CREATE_CHAR).
+- `WorldSession::HandleCharDeleteOpcode` (`CharacterHandler.cpp:863`) already rejects a GUID the account does not own (`accountId != initAccountId` -> `OnPlayerFailedDelete`, return) and guards guild-leader / arena-captain / loaded-character cases. Upstream validation intact; the stack is not relaxed.
