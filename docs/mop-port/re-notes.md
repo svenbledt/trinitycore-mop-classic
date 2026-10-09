@@ -132,3 +132,7 @@ Client confirms via per-packet opcode getters (`mov [rdx], <opcode>h`) cross-che
 - **SMSG_SOCIAL_CONTRACT_REQUEST_RESPONSE = `0x460320`** (getter `sub_1405D4F50`; WPP 5.5.3 `0x3A0320`). Our old `0x46032B` was a different (GUID) packet → client crash. Re-enabled the server send; verified no crash, reaches character screen.
 - **SMSG_NPC_INTERACTION_OPEN_RESULT = `0x460315`** (getter `sub_1405D45C0`; WPP 5.5.3 `0x3A0315`) — was mis-mapped to `0x460320`, fixed to clear the collision.
 Method for future low-confidence SMSG in group 0x46: scope `search_text "<idx>"` to the getter block `0x1405D0000-0x1405E0000` (each class has a `mov [rdx], 46xxxxh` getter), map to WPP 5.5.3 names by index.
+
+### Phase 1 review follow-ups (2026-10-09)
+- Added `tools/mop-re/test/opcodes_unique.test.ts`: fails if two opcode names share a value (the 0x460320 collision class). `gen_opcodes.ts` already rejects dupes at generation; this guards the committed header against hand-edits.
+- `EnumUtils<Powers>::Count()` returns 29 while FromIndex/ToIndex span 31 — pre-existing TC pattern (Count == MAX_POWERS-1), not a regression; confirmed nothing sizes an array by it. Deferred.
