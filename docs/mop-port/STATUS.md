@@ -1,13 +1,20 @@
 # MoP Classic port — status
 
-Last updated: 2026-10-08
+Last updated: 2026-10-09
 
 | | |
 |---|---|
 | Base | TrinityCore `cata_classic` @ `0614c9fd941` (4.4.2.60895) |
 | Target | MoP Classic 5.5.4.70032 (dump at `d:\WoW\World of Warcraft\_classic_\WowClassic_dump.exe`) |
-| Current phase | **1 — DONE and merged to main** (client reaches character screen end-to-end) |
-| Next | Phase 2 — world connection (char create/delete, enter-world, update fields) |
+| Current phase | **2a — code-complete on `mop/phase2a`, pending live e2e** (char create/delete) |
+| Next | Live e2e (Human + Orc Warrior) → final review → merge; then Phase 2b (enter-world + update fields) |
+
+## Phase 2a (2026-10-09) — character creation & deletion
+Branch `mop/phase2a`. Code + unit tests done (43/43 ctest, bun, codestyle green); the live-client create→list→delete loop is the remaining gate (`docs/mop-port/phase2a-e2e.md`).
+- Opcodes harvested/verified: CMSG_CREATE_CHARACTER 0x440070, CMSG_CHAR_DELETE 0x4400CD, SMSG_CREATE_CHAR 0x4601AF, SMSG_DELETE_CHAR 0x4601B0; 0x4400CC = CMSG_SERVER_TIME_OFFSET_REQUEST (not delete).
+- Packet layouts: create/delete read paths already matched WPP V5_5_0; SMSG create/delete result code widened uint8→uint32; enum per-character record fixed (ListPosition u16, +Flags4, +Unused1110_1, +2 bits, +EraChoiceState, WarbandGroups loop last).
+- Handlers (`HandleCharCreateOpcode`/`HandleCharDeleteOpcode`) are unmodified upstream: full validation + account-ownership checks intact.
+- Details in `re-notes.md` (Phase 2a sections).
 
 ## Done
 - Imported upstream `cata_classic` with full history as local `main`. The `upstream` remote has push disabled; there's no `origin` yet, and the repo will be private.
