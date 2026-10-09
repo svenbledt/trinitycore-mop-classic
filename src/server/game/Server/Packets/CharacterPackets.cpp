@@ -81,19 +81,7 @@ EnumCharacters::EnumCharacters(WorldPacket&& packet) : ClientPacket(std::move(pa
 
 EnumCharactersResult::CharacterInfoBasic::CharacterInfoBasic(Field const* fields)
 {
-    //         0                1                2                3                 4                  5
-    // "SELECT characters.guid, characters.name, characters.race, characters.class, characters.gender, characters.level, "
-    //  6                7               8                      9                      10
-    // "characters.zone, characters.map, characters.position_x, characters.position_y, characters.position_z, "
-    //  11                    12                      13                   14                   15                     16                   17
-    // "guild_member.guildid, characters.playerFlags, characters.at_login, character_pet.entry, character_pet.modelid, character_pet.level, characters.equipmentCache, "
-    //  18                     19               20                      21                            22
-    // "character_banned.guid, characters.slot, characters.logout_time, characters.activeTalentGroup, characters.lastLoginBuild, "
-    //  23                                    24                                    25                                    26                                    27
-    // "characters.personalTabardEmblemStyle, characters.personalTabardEmblemColor, characters.personalTabardBorderStyle, characters.personalTabardBorderColor, characters.personalTabardBackgroundColor "
-    //  28
-    // "character_declinedname.genitive"
-
+    // fields[N] column legend: see docs/mop-port/enum-characters-columns.md
     Guid              = ObjectGuid::Create<HighGuid::Player>(fields[0].GetUInt64());
     VirtualRealmAddress = GetVirtualRealmAddress();
     GuildClubMemberID = ::Battlenet::Services::Clubs::CreateClubMemberId(Guid);
@@ -448,7 +436,8 @@ void CreateCharacter::Read()
 
 WorldPacket const* CreateChar::Write()
 {
-    _worldPacket << uint8(Code);
+    // 5.5.4 client reads the result code as a uint32 (dump: SMSG_CREATE_CHAR reader), then a packed GUID.
+    _worldPacket << uint32(Code);
     _worldPacket << Guid;
     return &_worldPacket;
 }
@@ -460,7 +449,8 @@ void CharDelete::Read()
 
 WorldPacket const* DeleteChar::Write()
 {
-    _worldPacket << uint8(Code);
+    // 5.5.4 client reads the result code as a uint32 (dump: SMSG_DELETE_CHAR reader).
+    _worldPacket << uint32(Code);
     return &_worldPacket;
 }
 

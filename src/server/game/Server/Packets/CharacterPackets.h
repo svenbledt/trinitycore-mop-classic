@@ -314,7 +314,7 @@ namespace WorldPackets
         class CreateChar final : public ServerPacket
         {
         public:
-            CreateChar() : ServerPacket(SMSG_CREATE_CHAR, 1) { }
+            CreateChar() : ServerPacket(SMSG_CREATE_CHAR, 4 + 18) { }
 
             WorldPacket const* Write() override;
 
@@ -335,7 +335,7 @@ namespace WorldPackets
         class DeleteChar final : public ServerPacket
         {
         public:
-            DeleteChar(): ServerPacket(SMSG_DELETE_CHAR, 1) { }
+            DeleteChar(): ServerPacket(SMSG_DELETE_CHAR, 4) { }
 
             WorldPacket const* Write() override;
 
