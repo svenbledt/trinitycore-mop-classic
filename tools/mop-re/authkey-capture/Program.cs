@@ -38,6 +38,10 @@ static class Program
         if (args.Length == 4 && args[0] == "peek")
             return Peek(Convert.ToInt64(args[1], 16), int.Parse(args[2]), args[3]);
 
+        // Read-only mode (no debugger): stacks <out dir>; ring-buffers thread stack snapshots until <out dir>/stop exists
+        if (args.Length == 2 && args[0] == "stacks")
+            return Stacks(args[1]);
+
         var rva = args.Length > 0 ? Convert.ToInt64(args[0], 16) : 0x2EB1AE0;
         var name = args.Length > 1 ? args[1] : "WowClassic";
         var proc = Process.GetProcessesByName(name).FirstOrDefault();
@@ -159,6 +163,72 @@ static class Program
         var cc = buf.Take(read).Count(b => b == 0xCC);
         Console.WriteLine($"pid {proc.Id} base 0x{proc.MainModule.BaseAddress:X}: read {read}/{length} (ok={ok}), 0xCC bytes {cc}");
         return ok ? 0 : 1;
+    }
+
+    [DllImport("ntdll.dll")] static extern int NtQueryInformationThread(nint thread, int infoClass, byte[] info, int length, out int returned);
+
+    static int Stacks(string outDir)
+    {
+        var proc = Process.GetProcessesByName("WowClassic").FirstOrDefault(p => p.WorkingSet64 > 100 * 1024 * 1024);
+        if (proc == null)
+        {
+            Console.WriteLine("WowClassic.exe is not running.");
+            return 1;
+        }
+
+        System.IO.Directory.CreateDirectory(outDir);
+        var stopFile = System.IO.Path.Combine(outDir, "stop");
+        var ring = new Queue<byte[]>();
+        Console.WriteLine($"pid {proc.Id}: snapshotting thread stacks until '{stopFile}' exists");
+
+        while (!System.IO.File.Exists(stopFile) && !proc.HasExited)
+        {
+            ring.Enqueue(SnapshotStacks(proc));
+            while (ring.Count > 150)
+                ring.Dequeue();
+            System.Threading.Thread.Sleep(100);
+        }
+
+        var n = 0;
+        foreach (var snap in ring)
+            System.IO.File.WriteAllBytes(System.IO.Path.Combine(outDir, $"snap{n++:D3}.bin"), snap);
+        Console.WriteLine($"wrote {n} snapshots");
+        return 0;
+    }
+
+    // Concatenated committed stack ranges [StackLimit, StackBase) of every thread, read via the TEB.
+    static byte[] SnapshotStacks(Process proc)
+    {
+        var output = new System.IO.MemoryStream();
+        proc.Refresh();
+        foreach (ProcessThread t in proc.Threads)
+        {
+            var h = OpenThread(0x0040 /*THREAD_QUERY_INFORMATION*/, false, t.Id);
+            if (h == 0)
+                continue;
+
+            var tbi = new byte[48];
+            var status = NtQueryInformationThread(h, 0 /*ThreadBasicInformation*/, tbi, tbi.Length, out _);
+            CloseHandle(h);
+            if (status != 0)
+                continue;
+
+            var teb = (nint)BitConverter.ToInt64(tbi, 8);
+            var tib = new byte[24];
+            if (!ReadProcessMemory(proc.Handle, teb, tib, tib.Length, out _))
+                continue;
+
+            var stackBase = BitConverter.ToInt64(tib, 8);
+            var stackLimit = BitConverter.ToInt64(tib, 16);
+            var size = stackBase - stackLimit;
+            if (size <= 0 || size > 16 * 1024 * 1024)
+                continue;
+
+            var stack = new byte[size];
+            if (ReadProcessMemory(proc.Handle, (nint)stackLimit, stack, (int)size, out var read))
+                output.Write(stack, 0, read);
+        }
+        return output.ToArray();
     }
 
     static void SetBreakpoint(nint thread, nint address, bool enable)

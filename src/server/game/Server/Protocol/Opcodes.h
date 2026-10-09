@@ -906,7 +906,7 @@ enum OpcodeServer : uint32
     SMSG_AUCTION_WON_NOTIFICATION                      = 0x46019F, // TODO(verify): low-confidence match
     SMSG_AURA_POINTS_DEPLETED                          = 0x500010, // TODO(verify): low-confidence match
     SMSG_AURA_UPDATE                                   = 0x50000F, // TODO(verify): low-confidence match
-    SMSG_AUTH_CHALLENGE                                = 0x4D0003,
+    SMSG_AUTH_CHALLENGE                                = 0x4D0000,
     SMSG_AUTH_FAILED                                   = 0x460000, // TODO(verify): low-confidence match
     SMSG_AUTH_RESPONSE                                 = 0x460001,
     SMSG_AVAILABLE_HOTFIXES                            = 0x4A0001,

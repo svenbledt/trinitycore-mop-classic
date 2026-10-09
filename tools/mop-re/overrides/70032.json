@@ -4,7 +4,7 @@
     "SMSG": { "0x3a": "0x46", "0x3e": "0x4a", "0x3f": "0x4b", "0x40": "0x4c", "0x41": "0x4d", "0x51": "0x50" }
   },
   "names": {
-    "SMSG_AUTH_CHALLENGE": 5046275,
+    "SMSG_AUTH_CHALLENGE": 5046272,
     "SMSG_ENTER_ENCRYPTED_MODE": 5046276,
     "SMSG_CONNECT_TO": 5046280,
     "SMSG_MULTIPLE_PACKETS": 5046285,

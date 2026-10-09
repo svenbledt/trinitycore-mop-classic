@@ -6,8 +6,8 @@ Last updated: 2026-10-08
 |---|---|
 | Base | TrinityCore `cata_classic` @ `0614c9fd941` (4.4.2.60895) |
 | Target | MoP Classic 5.5.4.70032 (dump at `d:\WoW\World of Warcraft\_classic_\WowClassic_dump.exe`) |
-| Current phase | **1 — Login and realm list: code done, end-to-end client check pending** (branch `mop/phase1`) |
-| Next | Run the client via Arctium `--staticseed` against the Docker stack, then start Phase 2 |
+| Current phase | **1 — Login and realm list: DONE (client reaches character screen end-to-end)** (branch `mop/phase1`) |
+| Next | Phase 2 — world connection (verify remaining opcodes, enter world) |
 
 ## Done
 - Imported upstream `cata_classic` with full history as local `main`. The `upstream` remote has push disabled; there's no `origin` yet, and the repo will be private.
