@@ -201,7 +201,7 @@ ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterInfoBasi
 {
     data << charInfo.Guid;
     data << uint32(charInfo.VirtualRealmAddress);
-    data << uint8(charInfo.ListPosition);
+    data << uint16(charInfo.ListPosition);
     data << uint8(charInfo.RaceID);
     data << uint8(charInfo.SexID);
     data << uint8(charInfo.ClassID);
@@ -216,6 +216,7 @@ ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterInfoBasi
     data << uint32(charInfo.Flags);
     data << uint32(charInfo.Flags2);
     data << uint32(charInfo.Flags3);
+    data << uint32(charInfo.Flags4);
     data << uint8(charInfo.unkWod61x);
 
     data << uint32(charInfo.PetCreatureDisplayID);
@@ -235,12 +236,15 @@ ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterInfoBasi
 
     data << int32(charInfo.TimerunningSeasonID);
     data << uint32(charInfo.OverrideSelectScreenFileDataID);
+    data << uint32(0); // Unused1110_1 (WPP V5_5_0 ReadBasicCharacterListEntry)
 
     for (ChrCustomizationChoice const& customization : charInfo.Customizations)
         data << customization;
 
     data << BitsSize<6>(charInfo.Name);
     data << Bits<1>(charInfo.FirstLogin);
+    data << Bits<1>(charInfo.Unused1110_2);
+    data << Bits<1>(charInfo.Unused1110_3);
 
     data.FlushBits();
 
@@ -254,6 +258,7 @@ ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterRestrict
     ASSERT(restrictionsAndMails.MailSenders.size() == restrictionsAndMails.MailSenderTypes.size());
 
     data << Bits<1>(restrictionsAndMails.BoostInProgress);
+    data << Bits<2>(restrictionsAndMails.EraChoiceState);
     data << Bits<1>(restrictionsAndMails.RpeResetAvailable);
     data << Bits<1>(restrictionsAndMails.RpeResetQuestClearAvailable);
     data.FlushBits();
@@ -387,9 +392,6 @@ WorldPacket const* EnumCharactersResult::Write()
     for (RaceLimitDisableInfo const& raceLimitDisableInfo : RaceLimitDisables)
         _worldPacket << raceLimitDisableInfo;
 
-    for (WarbandGroup const& warbandGroup : WarbandGroups)
-        _worldPacket << warbandGroup;
-
     for (CharacterInfo const& charInfo : Characters)
         _worldPacket << charInfo;
 
@@ -398,6 +400,10 @@ WorldPacket const* EnumCharactersResult::Write()
 
     for (RaceUnlock const& raceUnlock : RaceUnlockData)
         _worldPacket << raceUnlock;
+
+    // WarbandGroups come last in 5.5.x (WPP V5_5_0 HandleEnumCharactersResult).
+    for (WarbandGroup const& warbandGroup : WarbandGroups)
+        _worldPacket << warbandGroup;
 
     return &_worldPacket;
 }

@@ -149,3 +149,17 @@ Harvested from the client dump (IDA db 23ceab28, imagebase 0x140000000) by readi
 - **`0x4400CC` resolved: = CMSG_SERVER_TIME_OFFSET_REQUEST** (empty body `sub_1401EF480`; WPP SERVER_TIME_OFFSET_REQUEST `0xCB→0xCC`, +1). This is the no-arg packet the client sends at the char screen — not char-delete; already mapped correctly in the repo.
 - **Task 2/4 carry-forward:** client reads the SMSG create/delete `Code` as **uint32** (`sub_142E4CB60`, 4-byte). Repo `CreateChar`/`DeleteChar::Write` emit `uint8 Code` — widen in Phase 2a Task 2/4.
 - **Tooling note (deferred):** `src/match.ts` assumes a single monotone index offset per group, but 5.5.4 drift is piecewise non-monotone, so hand-verified high-index opcodes (SOCIAL_CONTRACT, NPC_INTERACTION, now CREATE/DELETE) can't be fed into `names` without collapsing the group alignment. They're kept as top-level provenance keys (ignored by the matcher) and carried directly in the committed `Opcodes.h`. A non-collapsing override overlay in `match.ts` would restore a clean `match.ts`+`gen_opcodes` reproduction.
+
+## Phase 2a (2026-10-09): SMSG_ENUM_CHARACTERS_RESULT per-character record
+
+Diffed the repo's `EnumCharactersResult` writers against WPP V5_5_0_61735 `HandleEnumCharactersResult` / `ReadBasicCharacterListEntry` / `ReadCharacterRestrictionAndMailData` (the record Phase 1's empty-list test never exercised). Fixes applied to `CharacterPackets.cpp`:
+
+- Per-character record (`CharacterInfoBasic`):
+  - `ListPosition` widened uint8 -> **uint16**.
+  - Inserted **Flags4 (uint32)** between Flags3 and the CantLoginReason byte (`unkWod61x`).
+  - Inserted **Unused1110_1 (uint32)** after OverrideSelectScreenFileDataID, before the customizations array.
+  - Added **two unused bits** after the FirstLogin bit (Unused1110_2/3) in the trailing bit block.
+- `CharacterRestrictionAndMailData`: inserted the **EraChoiceState (2 bits)** between BoostInProgress and RpeResetAvailable.
+- Top-level `EnumCharactersResult::Write`: moved the **WarbandGroups loop last** (after RaceUnlockData); WPP V5_5_0 orders it after RegionwideCharacters/RaceUnlock. Harmless while empty (Phase 1), wrong once populated.
+- VisualItems (fixed array of 19), the VisualItemInfo field order, PersonalTabard (5x int32), and the create/delete read paths already matched WPP; unchanged.
+- Verified by `tests/game/CharacterPackets.cpp` "Enum character record..." round-trip (RED on the uint8 ListPosition, GREEN after). Live-client render of a real character is the Task 5 e2e gate. 5.5.4-specific deltas vs WPP 5.5.3 to re-confirm there: none observed, but the record was not re-derived field-by-field from the 5.5.4 binary (WPP V5_5_0 is the cited layout authority per CLAUDE.md; check against the client at e2e).

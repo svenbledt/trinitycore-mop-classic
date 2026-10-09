@@ -20,6 +20,12 @@
 #include "CharacterPackets.h"
 #include "WorldPacket.h"
 
+// Defined in CharacterPackets.cpp (internal serializer); declared here to test the record layout.
+namespace WorldPackets::Character
+{
+    ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterInfoBasic const& charInfo);
+}
+
 // The 5.5.4.70032 client reads the SMSG_CREATE_CHAR/DELETE_CHAR result code as a uint32
 // (4-byte read, verified in the client dump), not the uint8 of earlier builds.
 TEST_CASE("SMSG_CREATE_CHAR writes a uint32 result code then the packed GUID", "[Packets]")
@@ -48,4 +54,87 @@ TEST_CASE("SMSG_DELETE_CHAR writes a uint32 result code", "[Packets]")
     copy >> code;
     REQUIRE(code == 70);
     REQUIRE(copy.rpos() == copy.size());
+}
+
+// Decodes a serialized CharacterInfoBasic following WowPacketParser V5_5_0_61735
+// ReadBasicCharacterListEntry and checks the fields Phase 1's empty list never hit.
+TEST_CASE("Enum character record matches the 5.5.4 per-character layout", "[Packets]")
+{
+    using WorldPackets::Character::EnumCharactersResult;
+    EnumCharactersResult::CharacterInfoBasic basic;
+    basic.Guid = ObjectGuid::Create<HighGuid::Player>(0xABCD);
+    basic.VirtualRealmAddress = 0x11223344;
+    basic.ListPosition = 0x42;
+    basic.RaceID = 1;
+    basic.SexID = 0;
+    basic.ClassID = 1;
+    basic.SpecID = 0x0102;
+    basic.ExperienceLevel = 1;
+    basic.MapID = 0;
+    basic.ZoneID = 12;
+    basic.PreloadPos = TaggedPosition<Position::XYZ>(1.0f, 2.0f, 3.0f);
+    basic.Flags = 0xA;
+    basic.Flags2 = 0xB;
+    basic.Flags3 = 0xC;
+    basic.Flags4 = 0xD;
+    basic.unkWod61x = 7;
+    basic.Name = "Testchar";
+    basic.FirstLogin = true;
+
+    ByteBuffer buf;
+    buf << basic;
+
+    ObjectGuid guid;
+    buf >> guid;
+    REQUIRE(guid == basic.Guid);
+    REQUIRE(buf.read<uint32>() == 0x11223344);
+    REQUIRE(buf.read<uint16>() == 0x42); // ListPosition is a uint16 in 5.5.4
+    REQUIRE(buf.read<uint8>() == 1);     // RaceID
+    REQUIRE(buf.read<uint8>() == 0);     // SexID
+    REQUIRE(buf.read<uint8>() == 1);     // ClassID
+    REQUIRE(buf.read<int16>() == 0x0102);
+    REQUIRE(buf.read<uint32>() == 0);    // customization count
+    REQUIRE(buf.read<uint8>() == 1);     // ExperienceLevel
+    REQUIRE(buf.read<int32>() == 0);     // MapID
+    REQUIRE(buf.read<int32>() == 12);    // ZoneID
+    REQUIRE(buf.read<float>() == 1.0f);
+    REQUIRE(buf.read<float>() == 2.0f);
+    REQUIRE(buf.read<float>() == 3.0f);
+    REQUIRE(buf.read<uint64>() == 0);    // GuildClubMemberID
+    ObjectGuid guildGuid;
+    buf >> guildGuid;
+    REQUIRE(guildGuid.IsEmpty());
+    REQUIRE(buf.read<uint32>() == 0xA);  // Flags
+    REQUIRE(buf.read<uint32>() == 0xB);  // Flags2
+    REQUIRE(buf.read<uint32>() == 0xC);  // Flags3
+    REQUIRE(buf.read<uint32>() == 0xD);  // Flags4
+    REQUIRE(buf.read<uint8>() == 7);     // CantLoginReason (unkWod61x)
+    REQUIRE(buf.read<uint32>() == 0);    // PetCreatureDisplayID
+    REQUIRE(buf.read<uint32>() == 0);    // PetExperienceLevel
+    REQUIRE(buf.read<uint32>() == 0);    // PetCreatureFamilyID
+
+    for (int i = 0; i < 19; ++i)         // VisualItems
+    {
+        buf.read<uint32>(); buf.read<uint8>(); buf.read<uint32>(); buf.read<uint8>();
+        buf.read<int32>(); buf.read<int32>(); buf.read<int32>();
+    }
+
+    REQUIRE(buf.read<int32>() == 0);     // SaveVersion (Unknown703)
+    buf.read<int64>();                   // LastPlayedTime
+    REQUIRE(buf.read<int32>() == 0);     // LastLoginVersion
+    for (int i = 0; i < 5; ++i)
+        REQUIRE(buf.read<int32>() == -1); // PersonalTabard defaults
+    REQUIRE(buf.read<int32>() == 0);     // ProfessionIds[0]
+    REQUIRE(buf.read<int32>() == 0);     // ProfessionIds[1]
+    REQUIRE(buf.read<int32>() == 0);     // TimerunningSeasonID
+    REQUIRE(buf.read<uint32>() == 0);    // OverrideSelectScreenFileDataID
+    REQUIRE(buf.read<uint32>() == 0);    // Unused1110_1
+
+    buf.ResetBitPos();
+    REQUIRE(buf.ReadBits(6) == 8);       // name length
+    REQUIRE(buf.ReadBit() == true);      // FirstLogin
+    buf.ReadBit();                       // Unused1110_2
+    buf.ReadBit();                       // Unused1110_3
+    REQUIRE(buf.ReadString(8) == "Testchar");
+    REQUIRE(buf.rpos() == buf.size());
 }

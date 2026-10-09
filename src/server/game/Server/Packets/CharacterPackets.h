@@ -143,6 +143,7 @@ namespace WorldPackets
                  *
                  * @param   fields         Field set of CharacterDatabaseStatements::CHAR_SEL_ENUM
                  */
+                CharacterInfoBasic() = default;
                 CharacterInfoBasic(Field const* fields);
 
                 ObjectGuid Guid;
@@ -162,8 +163,11 @@ namespace WorldPackets
                 uint32 Flags             = 0; ///< Character flag @see enum CharacterFlags
                 uint32 Flags2            = 0; ///< Character customization flags @see enum CharacterCustomizeFlags
                 uint32 Flags3            = 0; ///< Character flags 3 @todo research
+                uint32 Flags4            = 0; ///< 5.5.x added a 4th flags dword before CantLoginReason
                 bool FirstLogin      = false;
-                uint8 unkWod61x          = 0;
+                uint8 unkWod61x          = 0; ///< CantLoginReason byte
+                bool Unused1110_2    = false;
+                bool Unused1110_3    = false;
                 Timestamp<> LastPlayedTime;
                 uint16 SpecID            = 0;
                 uint32 Unknown703        = 0;
@@ -195,6 +199,7 @@ namespace WorldPackets
             struct CharacterRestrictionAndMailData
             {
                 bool BoostInProgress = false; ///< @todo
+                uint8 EraChoiceState = 0; ///< 2-bit field (WPP V5_5_0 ReadCharacterRestrictionAndMailData)
                 uint32 Flags4 = 0;
                 std::vector<std::string> MailSenders;
                 std::vector<uint32> MailSenderTypes;
