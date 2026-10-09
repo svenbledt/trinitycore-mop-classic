@@ -646,13 +646,7 @@ struct AccountInfo
 
     explicit AccountInfo(Field const* fields)
     {
-        //           0              1           2          3                4            5           6               7         8            9    10                 11     12                13
-        // SELECT a.id, a.session_key, ba.last_ip, ba.locked, ba.lock_country, a.expansion, a.mutetime, a.client_build, a.locale, a.recruiter, a.os, a.timezone_offset, ba.id, aa.SecurityLevel,
-        //                                                              14                                                            15    16
-        // bab.unbandate > UNIX_TIMESTAMP() OR bab.unbandate = bab.bandate, ab.unbandate > UNIX_TIMESTAMP() OR ab.unbandate = ab.bandate, r.id
-        // FROM account a LEFT JOIN battlenet_accounts ba ON a.battlenet_account = ba.id LEFT JOIN account_access aa ON a.id = aa.AccountID AND aa.RealmID IN (-1, ?)
-        // LEFT JOIN battlenet_account_bans bab ON ba.id = bab.id LEFT JOIN account_banned ab ON a.id = ab.id LEFT JOIN account r ON a.id = r.recruiter
-        // WHERE a.username = ? AND LENGTH(a.session_key) = 40 ORDER BY aa.RealmID DESC LIMIT 1
+        // Column order: LOGIN_SEL_ACCOUNT_INFO_BY_NAME (LoginDatabase.cpp)
         Game.Id = fields[0].GetUInt32();
         Game.KeyData = fields[1].GetBinary<64>();
         BattleNet.LastIP = fields[2].GetString();
@@ -1007,11 +1001,7 @@ void WorldSocket::HandleConnectToFailed(WorldPackets::Auth::ConnectToFailed& con
                     return;
             }
         }
-        //else
-        //{
-        //    transfer_aborted when/if we get map node redirection
-        //    SendPacketAndLogOpcode(*WorldPackets::Auth::ResumeComms().Write());
-        //}
+        // TODO: send SMSG_RESUME_COMMS here once map node redirection (transfer_aborted) exists
     }
 }
 

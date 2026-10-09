@@ -3692,7 +3692,7 @@ void ObjectMgr::LoadPlayerInfo()
 
             for (uint32 raceIndex = RACE_HUMAN; raceIndex < MAX_RACES; ++raceIndex)
             {
-                if (!characterLoadout->RaceMask.HasRace(raceIndex))
+                if (!MakeRaceMask(characterLoadout->RaceMask).HasRace(raceIndex))
                     continue;
 
                 if (auto const& playerInfo = Trinity::Containers::MapGetValuePtr(_playerInfo, { Races(raceIndex), Classes(characterLoadout->ChrClassID) }))

@@ -1,0 +1,12 @@
+LoginDatabaseInfo     = "db;3306;root;root;auth"
+WorldDatabaseInfo     = "db;3306;root;root;world"
+CharacterDatabaseInfo = "db;3306;root;root;characters"
+HotfixDatabaseInfo    = "db;3306;root;root;hotfixes"
+DataDir = "/data"
+SourceDirectory = "/src"
+Updates.EnableDatabases = 15
+Updates.AutoSetup = 1
+vmap.enableLOS = 0
+vmap.enableHeight = 0
+vmap.enableIndoorCheck = 0
+mmap.enablePathFinding = 0

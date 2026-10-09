@@ -2887,7 +2887,7 @@ bool ConditionMgr::IsPlayerMeetingCondition(Player const* player, PlayerConditio
             return false;
     }
 
-    if (!condition->RaceMask.IsEmpty() && !condition->RaceMask.HasRace(player->GetRace()))
+    if (Trinity::RaceMask<int64> raceMask = MakeRaceMask(condition->RaceMask); !raceMask.IsEmpty() && !raceMask.HasRace(player->GetRace()))
         return false;
 
     if (condition->ClassMask && !(player->GetClassMask() & condition->ClassMask))

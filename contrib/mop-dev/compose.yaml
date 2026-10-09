@@ -1,0 +1,91 @@
+# MoP Classic development environment. See README.md in this directory.
+name: tc-mop
+
+x-runner: &runner
+  image: trinitycore/circle-ci:debian-13-runner
+  user: "0:0"
+  volumes:
+    - ../..:/src:ro
+    - install:/opt/tc
+    - data:/data
+    - tdb:/tdb
+  working_dir: /opt/tc/bin
+
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysql:/var/lib/mysql
+      - ../../sql/create/create_mysql.sql:/docker-entrypoint-initdb.d/01-create.sql:ro
+    ports: ["127.0.0.1:3306:3306"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-proot"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  builder:
+    image: trinitycore/circle-ci:debian-13-builder
+    profiles: ["build"]
+    user: "0:0"
+    volumes:
+      - ../..:/src:ro
+      - build:/build
+      - ccache:/root/.ccache
+      - install:/opt/tc
+    command: ["bash", "/src/contrib/mop-dev/scripts/build.sh"]
+
+  tdb:
+    image: alpine:3.20
+    profiles: ["setup"]
+    volumes:
+      - ../..:/src:ro
+      - tdb:/tdb
+    command: ["sh", "/src/contrib/mop-dev/scripts/fetch-tdb.sh"]
+
+  extractor:
+    image: trinitycore/circle-ci:debian-13-builder # needs clang for the read-only shim
+    profiles: ["extract"]
+    user: "0:0"
+    environment:
+      - EXTRACT_FLAGS # 10 = DB2 + GameTables (default), 1 = maps
+    volumes:
+      - ../..:/src:ro
+      - install:/opt/tc
+      - data:/data
+      - "D:/WoW/World of Warcraft:/wow:ro"
+    working_dir: /data
+    command: ["bash", "-c", "clang -shared -fPIC -o /tmp/rofs.so /src/contrib/mop-dev/scripts/rofs-shim.c -ldl && LD_PRELOAD=/tmp/rofs.so exec /opt/tc/bin/mapextractor -i /wow -o /data -e $${EXTRACT_FLAGS:-10}"]
+
+  vmaps:
+    image: trinitycore/circle-ci:debian-13-builder
+    profiles: ["extract"]
+    user: "0:0"
+    volumes:
+      - ../..:/src:ro
+      - install:/opt/tc
+      - data:/data
+      - "D:/WoW/World of Warcraft:/wow:ro"
+    working_dir: /data
+    command: ["bash", "-c", "clang -shared -fPIC -o /tmp/rofs.so /src/contrib/mop-dev/scripts/rofs-shim.c -ldl && LD_PRELOAD=/tmp/rofs.so /opt/tc/bin/vmap4extractor -d /wow && mkdir -p vmaps && /opt/tc/bin/vmap4assembler Buildings vmaps"]
+
+  bnetserver:
+    <<: *runner
+    depends_on:
+      db: { condition: service_healthy }
+    ports: ["1119:1119", "8081:8081"]
+    command: ["bash", "-c", "bash /src/contrib/mop-dev/scripts/make-conf.sh bnetserver && exec ./bnetserver -c /opt/tc/etc/bnetserver.conf"]
+
+  worldserver:
+    <<: *runner
+    depends_on:
+      db: { condition: service_healthy }
+      bnetserver: { condition: service_started }
+    ports: ["8085:8085", "8086:8086"]
+    stdin_open: true
+    tty: true
+    command: ["bash", "-c", "bash /src/contrib/mop-dev/scripts/make-conf.sh worldserver && { ls /tdb/TDB_full_*.sql >/dev/null 2>&1 || { echo 'TDB missing: run docker compose --profile setup run --rm tdb'; exit 1; }; } && ln -sf /tdb/*.sql /opt/tc/bin/ && exec ./worldserver -c /opt/tc/etc/worldserver.conf"]
+
+volumes: { build: {}, ccache: {}, install: {}, data: {}, tdb: {}, mysql: {} }

@@ -590,9 +590,11 @@ WorldPacket const* UndeleteCharacterResponse::Write()
 
 WorldPacket const* UndeleteCooldownStatusResponse::Write()
 {
-    _worldPacket.WriteBit(OnCooldown);
+    // 5.5.x layout: WowPacketParser V5_5_0_61735 CharacterHandler.cs:672
     _worldPacket << uint32(MaxCooldown);
     _worldPacket << uint32(CurrentCooldown);
+    _worldPacket.WriteBit(OnCooldown);
+    _worldPacket.FlushBits();
     return &_worldPacket;
 }
 

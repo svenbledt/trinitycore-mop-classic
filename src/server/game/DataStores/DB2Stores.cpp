@@ -714,7 +714,7 @@ uint32 DB2Manager::LoadStores(std::string const& dataPath, LocaleConstant defaul
     LOAD_DB2(sPowerTypeStore);
     LOAD_DB2(sPrestigeLevelInfoStore);
     LOAD_DB2(sPVPDifficultyStore);
-    LOAD_DB2(sPVPItemStore);
+    // PVPItem.db2 does not exist in 5.5.x clients; sPVPItemStore stays empty
     LOAD_DB2(sPvpSeasonStore);
     LOAD_DB2(sPvpTierStore);
     LOAD_DB2(sQuestFactionRewardStore);

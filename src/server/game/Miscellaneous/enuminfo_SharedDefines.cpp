@@ -135,12 +135,14 @@ TC_API_EXPORT EnumText EnumUtils<Powers>::ToString(Powers value)
         case POWER_ALTERNATE_MOUNT: return { "POWER_ALTERNATE_MOUNT", "Alternate (Mount)", "" };
         case POWER_BALANCE: return { "POWER_BALANCE", "Balance", "" };
         case POWER_HAPPINESS: return { "POWER_HAPPINESS", "Happiness", "" };
+        case POWER_SHADOW_ORBS: return { "POWER_SHADOW_ORBS", "Shadow Orbs", "" };
+        case POWER_RUNE_DEATH: return { "POWER_RUNE_DEATH", "Death Runes", "" };
         default: throw std::out_of_range("value");
     }
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<Powers>::Count() { return 27; }
+TC_API_EXPORT size_t EnumUtils<Powers>::Count() { return 29; }
 
 template <>
 TC_API_EXPORT Powers EnumUtils<Powers>::FromIndex(size_t index)
@@ -176,6 +178,8 @@ TC_API_EXPORT Powers EnumUtils<Powers>::FromIndex(size_t index)
         case 26: return POWER_ALTERNATE_MOUNT;
         case 27: return POWER_BALANCE;
         case 28: return POWER_HAPPINESS;
+        case 29: return POWER_SHADOW_ORBS;
+        case 30: return POWER_RUNE_DEATH;
         default: throw std::out_of_range("index");
     }
 }
@@ -214,6 +218,8 @@ TC_API_EXPORT size_t EnumUtils<Powers>::ToIndex(Powers value)
         case POWER_ALTERNATE_MOUNT: return 26;
         case POWER_BALANCE: return 27;
         case POWER_HAPPINESS: return 28;
+        case POWER_SHADOW_ORBS: return 29;
+        case POWER_RUNE_DEATH: return 30;
         default: throw std::out_of_range("value");
     }
 }

@@ -307,6 +307,8 @@ namespace WorldPackets
             WorldPacket const* Write() override;
 
             std::array<uint8, 32> const& EncryptionKey;
+            // Client CertStore key id (5.5.4: ids 1-12 from CASC FileDataID 7725530; 0 has no key); launcher replaces the keys
+            int32 RegionGroup = 1;
             bool Enabled = false;
         };
 

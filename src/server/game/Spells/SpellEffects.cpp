@@ -415,6 +415,23 @@ NonDefaultConstructible<SpellEffectHandlerFn> SpellEffectHandlers[TOTAL_SPELL_EF
     &Spell::EffectAddComboPoints,                           //328 SPELL_EFFECT_ADD_COMBO_POINTS
     &Spell::EffectResurrectNew,                             //329 SPELL_EFFECT_RESURRECT_NEW
     &Spell::EffectActivateRune,                             //330 SPELL_EFFECT_ACTIVATE_RUNE
+    &Spell::EffectNULL,                                     //331 SPELL_EFFECT_331
+    &Spell::EffectNULL,                                     //332 SPELL_EFFECT_332
+    &Spell::EffectNULL,                                     //333 SPELL_EFFECT_333
+    &Spell::EffectNULL,                                     //334 SPELL_EFFECT_334
+    &Spell::EffectNULL,                                     //335 SPELL_EFFECT_335
+    &Spell::EffectNULL,                                     //336 SPELL_EFFECT_336
+    &Spell::EffectNULL,                                     //337 SPELL_EFFECT_337
+    &Spell::EffectNULL,                                     //338 SPELL_EFFECT_338
+    &Spell::EffectNULL,                                     //339 SPELL_EFFECT_339
+    &Spell::EffectNULL,                                     //340 SPELL_EFFECT_340
+    &Spell::EffectNULL,                                     //341 SPELL_EFFECT_341
+    &Spell::EffectNULL,                                     //342 SPELL_EFFECT_342
+    &Spell::EffectNULL,                                     //343 SPELL_EFFECT_343
+    &Spell::EffectNULL,                                     //344 SPELL_EFFECT_344
+    &Spell::EffectNULL,                                     //345 SPELL_EFFECT_345
+    &Spell::EffectNULL,                                     //346 SPELL_EFFECT_346
+    &Spell::EffectNULL,                                     //347 SPELL_EFFECT_347
 };
 
 void Spell::EffectNULL()

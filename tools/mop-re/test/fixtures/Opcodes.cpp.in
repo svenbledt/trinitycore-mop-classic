@@ -1,0 +1,24 @@
+void OpcodeTable::InitializeClientOpcodes()
+{
+#define DEFINE_HANDLER(opcode, status, processing, handler) \
+    ValidateAndSetClientOpcode(opcode, #opcode, status, &CallHandlerWrapper<typename get_packet_class<decltype(handler)>::type, handler>, processing)
+
+    DEFINE_HANDLER(CMSG_ACCEPT_TRADE,                                       STATUS_LOGGEDIN,  PROCESS_THREADUNSAFE, &WorldSession::HandleAcceptTradeOpcode);
+    DEFINE_HANDLER(CMSG_AUTH_SESSION,                                       STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_EarlyProccess);
+    DEFINE_HANDLER(CMSG_QUERY_VOID_STORAGE,                                 STATUS_LOGGEDIN,  PROCESS_INPLACE,      &WorldSession::HandleVoidStorageQuery);
+
+#undef DEFINE_HANDLER
+}
+
+void OpcodeTable::InitializeServerOpcodes()
+{
+#define DEFINE_SERVER_OPCODE_HANDLER(opcode, status, con) \
+    static_assert((status) == STATUS_NEVER || (status) == STATUS_UNHANDLED, "Invalid status for server opcode"); \
+    ValidateAndSetServerOpcode(opcode, #opcode, status, con)
+
+    DEFINE_SERVER_OPCODE_HANDLER(SMSG_AUTH_CHALLENGE,                          STATUS_NEVER,        CONNECTION_TYPE_REALM);
+    DEFINE_SERVER_OPCODE_HANDLER(SMSG_AUTH_RESPONSE,                           STATUS_NEVER,        CONNECTION_TYPE_REALM);
+    DEFINE_SERVER_OPCODE_HANDLER(SMSG_WEEKLY_REWARDS_RESULT,                   STATUS_UNHANDLED,    CONNECTION_TYPE_INSTANCE);
+
+#undef DEFINE_SERVER_OPCODE_HANDLER
+}

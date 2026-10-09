@@ -43,6 +43,7 @@ namespace WorldPackets
             bool SuggestionsEnabled = false;
 
             SavedThrottleObjectState ThrottleState;
+            SavedThrottleObjectState ExpensiveThrottleState; // 5.5.x: TC master; client reads two states (IDA 0x1405A8450)
         };
 
         struct GameRuleValuePair
@@ -256,6 +257,9 @@ namespace WorldPackets
             std::vector<GameRuleValuePair> GameRuleValues;
             int32 ActiveTimerunningSeasonID                       = 0;
             int32 RemainingTimerunningSeasonSeconds               = 0;
+            // TODO(verify): 5.5.4 additions (IDA 0x1405A8450), meaning unknown; sent empty/zero
+            std::array<bool, 3> Unk554Bits                        = { };
+            std::array<int32, 2> Unk554Ints                       = { };
             int16 MaxPlayerGuidLookupsPerRequest                  = 50;
             int16 NameLookupTelemetryInterval                     = 600;
             Duration<Seconds, uint32> NotFoundCacheTimeSeconds    = 10s;

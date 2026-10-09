@@ -9596,6 +9596,8 @@ void Unit::UpdateUnitMod(UnitMods unitMod)
         case UNIT_MOD_ALTERNATE_QUEST:
         case UNIT_MOD_ALTERNATE_ENCOUNTER:
         case UNIT_MOD_ALTERNATE_MOUNT:
+        case UNIT_MOD_SHADOW_ORBS:
+        case UNIT_MOD_RUNE_DEATH:
         case UNIT_MOD_BALANCE:             UpdateMaxPower(Powers(unitMod - UNIT_MOD_POWER_START));     break;
 
         case UNIT_MOD_RESISTANCE_HOLY:
@@ -12408,6 +12410,10 @@ void Unit::Regenerate(Powers power, uint32 diff)
         MAX_RATES, // alternate
         MAX_RATES, // alternate
         MAX_RATES, // alternate
+        MAX_RATES, // balance
+        MAX_RATES, // happiness
+        MAX_RATES, // shadow orbs
+        MAX_RATES, // death runes
     };
 
     if (RatesForPower[power] != MAX_RATES)

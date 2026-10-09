@@ -345,7 +345,9 @@ enum Powers : int8
     POWER_ALTERNATE_MOUNT               = 25, // TITLE Alternate (Mount)
     POWER_BALANCE                       = 26, // TITLE Balance
     POWER_HAPPINESS                     = 27, // TITLE Happiness
-    MAX_POWERS                          = 28  // SKIP
+    POWER_SHADOW_ORBS                   = 28, // TITLE Shadow Orbs
+    POWER_RUNE_DEATH                    = 29, // TITLE Death Runes
+    MAX_POWERS                          = 30  // SKIP
 };
 
 #define MAX_POWERS_PER_CLASS            10
@@ -1655,6 +1657,24 @@ enum SpellEffects
     SPELL_EFFECT_ADD_COMBO_POINTS                   = 328,
     SPELL_EFFECT_RESURRECT_NEW                      = 329,
     SPELL_EFFECT_ACTIVATE_RUNE                      = 330,
+    // TODO(verify): placeholder ids present in 5.5.4 SpellEffect.db2; names and behaviour unknown
+    SPELL_EFFECT_331                                = 331,
+    SPELL_EFFECT_332                                = 332,
+    SPELL_EFFECT_333                                = 333,
+    SPELL_EFFECT_334                                = 334,
+    SPELL_EFFECT_335                                = 335,
+    SPELL_EFFECT_336                                = 336,
+    SPELL_EFFECT_337                                = 337,
+    SPELL_EFFECT_338                                = 338,
+    SPELL_EFFECT_339                                = 339,
+    SPELL_EFFECT_340                                = 340,
+    SPELL_EFFECT_341                                = 341,
+    SPELL_EFFECT_342                                = 342,
+    SPELL_EFFECT_343                                = 343,
+    SPELL_EFFECT_344                                = 344,
+    SPELL_EFFECT_345                                = 345,
+    SPELL_EFFECT_346                                = 346,
+    SPELL_EFFECT_347                                = 347,
     TOTAL_SPELL_EFFECTS
 };
 

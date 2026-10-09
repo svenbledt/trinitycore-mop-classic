@@ -710,6 +710,25 @@ enum AuraType : uint32
     SPELL_AURA_MOD_SPELL_COOLDOWN_BY_HASTE                  = 622,
     SPELL_AURA_MOD_GATHERING_ITEMS_GAINED_PERCENT           = 623, // NYI
     SPELL_AURA_MOD_DAMAGE_FROM_MANA                         = 624, // NYI
+    // TODO(verify): placeholder ids present in 5.5.4 SpellEffect.db2 (EffectAura); names and behaviour unknown
+    SPELL_AURA_625                                          = 625,
+    SPELL_AURA_626                                          = 626,
+    SPELL_AURA_627                                          = 627,
+    SPELL_AURA_628                                          = 628,
+    SPELL_AURA_629                                          = 629,
+    SPELL_AURA_630                                          = 630,
+    SPELL_AURA_631                                          = 631,
+    SPELL_AURA_632                                          = 632,
+    SPELL_AURA_633                                          = 633,
+    SPELL_AURA_634                                          = 634,
+    SPELL_AURA_635                                          = 635,
+    SPELL_AURA_636                                          = 636,
+    SPELL_AURA_637                                          = 637,
+    SPELL_AURA_638                                          = 638,
+    SPELL_AURA_639                                          = 639,
+    SPELL_AURA_640                                          = 640,
+    SPELL_AURA_641                                          = 641,
+    SPELL_AURA_642                                          = 642,
 
     TOTAL_AURAS
 };

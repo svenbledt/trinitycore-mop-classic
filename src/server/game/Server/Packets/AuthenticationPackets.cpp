@@ -102,7 +102,7 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Auth::AuthWaitInfo const&
 {
     data << uint32(waitInfo.WaitCount);
     data << uint32(waitInfo.WaitTime);
-    data << uint32(waitInfo.AllowedFactionGroupForCharacterCreate);
+    data << uint8(waitInfo.AllowedFactionGroupForCharacterCreate); // 5.5.x layout: WowPacketParser V5_5_0_61735 AuthenticationHandler.cs:181
     data.WriteBit(waitInfo.HasFCM);
     data.WriteBit(waitInfo.CanCreateOnlyIfExisting);
     data.FlushBits();
@@ -361,6 +361,8 @@ WorldPacket const* WorldPackets::Auth::EnterEncryptedMode::Write()
 
     ed25519.SignWithContext(toSign, { EnableEncryptionContext.begin(), EnableEncryptionContext.end() }, signature);
 
+    // 5.5.x layout: TC master AuthenticationPackets.cpp; client read in IDA 0x140616FF0 (case 0x4D0004)
+    _worldPacket << int32(RegionGroup);
     _worldPacket.append(signature.data(), signature.size());
     _worldPacket.WriteBit(Enabled);
     _worldPacket.FlushBits();

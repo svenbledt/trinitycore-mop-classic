@@ -447,7 +447,7 @@ bool WorldSession::MeetsChrCustomizationReq(ChrCustomizationReqEntry const* req,
     if (req->ClassMask && !(req->ClassMask & (1 << (playerClass - 1))))
         return false;
 
-    if (race != RACE_NONE && !req->RaceMask.IsEmpty() && req->RaceMask.RawValue != -1 && !req->RaceMask.HasRace(race))
+    if (Trinity::RaceMask<int64> raceMask = MakeRaceMask(req->RaceMask); race != RACE_NONE && !raceMask.IsEmpty() && raceMask.RawValue != -1 && !raceMask.HasRace(race))
         return false;
 
     if (req->AchievementID /*&& !HasAchieved(req->AchievementID)*/)
