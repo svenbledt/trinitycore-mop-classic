@@ -379,7 +379,6 @@ WorldSocket::ReadDataHandlerResult WorldSocket::ReadDataHandler()
 
     packet.SetOpcode(opcode);
 
-
     if (sPacketLog->CanLogPacket())
         sPacketLog->LogPacket(packet, CLIENT_TO_SERVER, GetRemoteIpAddress(), GetRemotePort(), GetConnectionType());
 

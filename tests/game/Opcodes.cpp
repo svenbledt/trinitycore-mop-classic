@@ -48,12 +48,14 @@ TEST_CASE("Opcodes absent in the client build are never valid", "[Opcodes]")
 
 TEST_CASE("Login path opcodes match client build 5.5.4.70032", "[Opcodes]")
 {
-    // Hand-verified values, see docs/mop-port/re-notes.md
+    // Values verified against the client (dispatch + handlers), see docs/mop-port/re-notes.md
     REQUIRE(CMSG_AUTH_SESSION == 0x450001);
     REQUIRE(CMSG_ENUM_CHARACTERS == 0x440014);
-    REQUIRE(SMSG_AUTH_CHALLENGE == 0x4D0003);
+    REQUIRE(SMSG_AUTH_CHALLENGE == 0x4D0000);
     REQUIRE(SMSG_AUTH_RESPONSE == 0x460001);
     REQUIRE(SMSG_ENUM_CHARACTERS_RESULT == 0x460018);
+    REQUIRE(SMSG_ENTER_ENCRYPTED_MODE == 0x4D0004);
+    REQUIRE(SMSG_SOCIAL_CONTRACT_REQUEST_RESPONSE == 0x460320);
     for (OpcodeClient op : { CMSG_AUTH_SESSION, CMSG_ENUM_CHARACTERS, CMSG_PING })
         REQUIRE(GetOpcodeArrayIndex(op) >= 0);
     for (OpcodeServer op : { SMSG_AUTH_CHALLENGE, SMSG_AUTH_RESPONSE, SMSG_ENUM_CHARACTERS_RESULT })
