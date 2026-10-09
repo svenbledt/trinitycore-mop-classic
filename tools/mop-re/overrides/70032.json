@@ -1,6 +1,9 @@
 {
+  "_comment": "Top-level keys record hand-verified opcode values the monotone matcher can't anchor without collapsing their group; match.ts ignores them, so Opcodes.h carries them (see docs/mop-port/re-notes.md).",
   "SMSG_NPC_INTERACTION_OPEN_RESULT": 4588309,
   "SMSG_SOCIAL_CONTRACT_REQUEST_RESPONSE": 4588320,
+  "SMSG_CREATE_CHAR": 4587951,
+  "SMSG_DELETE_CHAR": 4587952,
   "groupMap": {
     "CMSG": { "0x2d": "0x2d", "0x2f": "0x2f", "0x30": "0x30", "0x31": "0x31", "0x33": "0x3e", "0x34": "0x3f", "0x35": "0x41", "0x36": "0x42", "0x38": "0x44", "0x39": "0x45" },
     "SMSG": { "0x3a": "0x46", "0x3e": "0x4a", "0x3f": "0x4b", "0x40": "0x4c", "0x41": "0x4d", "0x51": "0x50" }

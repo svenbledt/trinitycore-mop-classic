@@ -1119,7 +1119,7 @@ enum OpcodeServer : uint32
     SMSG_CRAFTING_ORDER_RELEASE_RESULT                 = UNKNOWN_OPCODE,
     SMSG_CRAFTING_ORDER_UPDATE_STATE                   = UNKNOWN_OPCODE,
     SMSG_CRAFT_ENCHANT_RESULT                          = UNKNOWN_OPCODE,
-    SMSG_CREATE_CHAR                                   = 0x4601AF, // TODO(verify): low-confidence match
+    SMSG_CREATE_CHAR                                   = 0x4601AF,
     SMSG_CREATE_SHIPMENT_RESPONSE                      = UNKNOWN_OPCODE,
     SMSG_CREATOR_VISUALS_OVERRIDE                      = UNKNOWN_OPCODE,
     SMSG_CRITERIA_DELETED                              = 0x460195, // TODO(verify): low-confidence match
@@ -1133,7 +1133,7 @@ enum OpcodeServer : uint32
     SMSG_DEATH_RELEASE_LOC                             = 0x460181, // TODO(verify): low-confidence match
     SMSG_DEBUG_MENU_MANAGER_FULL_UPDATE                = 0x460101, // TODO(verify): low-confidence match
     SMSG_DEFENSE_MESSAGE                               = 0x4B000C, // TODO(verify): low-confidence match
-    SMSG_DELETE_CHAR                                   = 0x4601B0, // TODO(verify): low-confidence match
+    SMSG_DELETE_CHAR                                   = 0x4601B0,
     SMSG_DELETE_EXPIRED_MISSIONS_RESULT                = UNKNOWN_OPCODE,
     SMSG_DESTROY_ARENA_UNIT                            = 0x4601F0, // TODO(verify): low-confidence match
     SMSG_DESTRUCTIBLE_BUILDING_DAMAGE                  = 0x4601A7, // TODO(verify): low-confidence match

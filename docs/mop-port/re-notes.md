@@ -136,3 +136,16 @@ Method for future low-confidence SMSG in group 0x46: scope `search_text "<idx>"`
 ### Phase 1 review follow-ups (2026-10-09)
 - Added `tools/mop-re/test/opcodes_unique.test.ts`: fails if two opcode names share a value (the 0x460320 collision class). `gen_opcodes.ts` already rejects dupes at generation; this guards the committed header against hand-edits.
 - `EnumUtils<Powers>::Count()` returns 29 while FromIndex/ToIndex span 31 — pre-existing TC pattern (Count == MAX_POWERS-1), not a regression; confirmed nothing sizes an array by it. Deferred.
+
+## Phase 2a (2026-10-09): character create/delete opcode harvest
+
+Harvested from the client dump (IDA db 23ceab28, imagebase 0x140000000) by reading each packet class's getter + (de)serializer. All four repo values were already correct; the SMSG pair is now client-verified (TODO markers dropped).
+
+- **SMSG_CREATE_CHAR = `0x4601AF`.** Getter `sub_1405BDE00`; ctor `sub_1405BDE10` reads `{uint32 Code @+32, ObjectGuid Guid @+40}` (code via `sub_142E4CB60` = 4-byte read; GUID via `sub_142E9E600`). Matches `{Code, Guid}`. (The index-stable candidates are other packets: `0x4601A4` reads one string, `0x4601A5` reads `{Guid,u32}`.)
+- **SMSG_DELETE_CHAR = `0x4601B0`.** Getter `sub_1405BDE90`; ctor `sub_1405BDEA0` reads `{uint32 Code @+32}` only, no GUID. Matches `{Code}`.
+- Both drifted **+0xB** from WPP 5.5.3 (`0x3A01A4`/`0x3A01A5`), bracketed by verified anchors ACCOUNT_DATA_TIMES (`0x3A01AE→0x4601B9`) and SERVER_TIME_OFFSET (`0x3A01B8→0x4601C3`). Game-time moved to `0x4601BA`/`0x4601BB`, so `0x4601AF`/`0x4601B0` are create/delete, not game-time.
+- **CMSG_CREATE_CHARACTER = `0x440070`.** Getter `sub_140591860`; header writer `sub_140591820` emits `0x440070`; body writer `sub_14066AD50` serializes name-length bits, 4 flag bits, race/class/sex bytes, customizations count, season id, name string, optional TemplateSet, then N×`{u32 optionId, u32 choiceId}`.
+- **CMSG_CHAR_DELETE = `0x4400CD`.** Getter `sub_140596C30`; body writer `sub_140586660` writes one GUID (`sub_142E9E630`). CMSG neighborhood drifted **+1** (WPP CHAR_DELETE `0xCC→0xCD`).
+- **`0x4400CC` resolved: = CMSG_SERVER_TIME_OFFSET_REQUEST** (empty body `sub_1401EF480`; WPP SERVER_TIME_OFFSET_REQUEST `0xCB→0xCC`, +1). This is the no-arg packet the client sends at the char screen — not char-delete; already mapped correctly in the repo.
+- **Task 2/4 carry-forward:** client reads the SMSG create/delete `Code` as **uint32** (`sub_142E4CB60`, 4-byte). Repo `CreateChar`/`DeleteChar::Write` emit `uint8 Code` — widen in Phase 2a Task 2/4.
+- **Tooling note (deferred):** `src/match.ts` assumes a single monotone index offset per group, but 5.5.4 drift is piecewise non-monotone, so hand-verified high-index opcodes (SOCIAL_CONTRACT, NPC_INTERACTION, now CREATE/DELETE) can't be fed into `names` without collapsing the group alignment. They're kept as top-level provenance keys (ignored by the matcher) and carried directly in the committed `Opcodes.h`. A non-collapsing override overlay in `match.ts` would restore a clean `match.ts`+`gen_opcodes` reproduction.

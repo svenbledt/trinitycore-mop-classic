@@ -61,3 +61,18 @@ TEST_CASE("Login path opcodes match client build 5.5.4.70032", "[Opcodes]")
     for (OpcodeServer op : { SMSG_AUTH_CHALLENGE, SMSG_AUTH_RESPONSE, SMSG_ENUM_CHARACTERS_RESULT })
         REQUIRE(GetOpcodeArrayIndex(op) >= 0);
 }
+
+TEST_CASE("Character create/delete opcodes match client build 5.5.4.70032", "[Opcodes]")
+{
+    // Harvested from the client dump (packet-class getters + (de)serializers), see docs/mop-port/re-notes.md.
+    REQUIRE(CMSG_CREATE_CHARACTER == 0x440070);
+    REQUIRE(CMSG_CHAR_DELETE == 0x4400CD);
+    REQUIRE(SMSG_CREATE_CHAR == 0x4601AF);
+    REQUIRE(SMSG_DELETE_CHAR == 0x4601B0);
+    // 0x4400CC is the no-arg SERVER_TIME_OFFSET_REQUEST (sent at the char screen), not char-delete.
+    REQUIRE(CMSG_SERVER_TIME_OFFSET_REQUEST == 0x4400CC);
+    for (OpcodeClient op : { CMSG_CREATE_CHARACTER, CMSG_CHAR_DELETE })
+        REQUIRE(GetOpcodeArrayIndex(op) >= 0);
+    for (OpcodeServer op : { SMSG_CREATE_CHAR, SMSG_DELETE_CHAR })
+        REQUIRE(GetOpcodeArrayIndex(op) >= 0);
+}
