@@ -1,7 +1,7 @@
-# Structural opcode audit: align WowPacketParser 5.5.3 opcode names to client 70032 packets by comparing the
-# client's (de)serializer primitive sequence with WPP's parser. Method: docs/mop-port/opcode-harvest.md
+# Structural opcode audit: align WowPacketParser's nearest Classic-family opcode table (REF) to client 70032 packets by
+# comparing the client's (de)serializer primitive sequence with WPP's parser. Method: docs/mop-port/opcode-harvest.md
 # Usage: py -3.12 audit_opcodes.py <dump.exe> <layouts.json> <wpp root> <Opcodes.h> <overrides.json> <out dir>
-import difflib, json, re, struct, sys
+import difflib, json, os, re, struct, sys
 from pathlib import Path
 import pefile
 from capstone import Cs, CS_ARCH_X86, CS_MODE_64
@@ -15,6 +15,8 @@ CMSG_PRIM = {0x142E4D5B0: "I", 0x142E4D470: "B", 0x142E9E630: "G", 0x140583600: 
 NOISE = {0x142E027A0, 0x142DE2EA0, 0x142DE2D80, 0x142FC00E0, 0x142FC0780, 0x1401D0C60}
 CMSG_MAX_GROUP = 0x45
 MAX_TOKENS = 40
+# WoW Forever beta 1.60.69876: same opcode groups as 70032, small piecewise index shifts (5.5.3 used other group ids)
+REF = os.environ.get("MOP_REF", "V1_60_69876")
 
 WPP_TOK = [
     (r"ReadPackedGuid128|ReadGuid\b", "G"),
@@ -79,9 +81,15 @@ class Client:
         return out
 
 
+# parser modules by closeness to 5.5.x Classic; a packet without a 5.5.0 parser takes the first module that has one
+WPP_MODULES = ["V5_5_0_61735", "V1_60_1_69876", "V4_4_0_54481", "V3_4_0_45166", "V2_5_1_38707", "V1_13_2_31446",
+               "V12_0_0_65390", "V11_0_0_55666"]
+
+
 def wpp_methods(root):
     methods, parsers = {}, {}
-    for f in Path(root).glob("WowPacketParserModule.V5_5_0_61735/Parsers/*.cs"):
+    files = [f for mod in WPP_MODULES for f in sorted(Path(root).glob(f"WowPacketParserModule.{mod}/Parsers/*.cs"))]
+    for f in files:
         src = f.read_text(encoding="utf-8", errors="replace")
         cls = f.stem
         for m in re.finditer(r"((?:\s*\[Parser\([^\]]*\)\]\s*)*)\s*public static \w+(?:<[^>]*>)? (\w+)\(\s*Packet packet[^)]*\)\s*\{", src):
@@ -91,9 +99,9 @@ def wpp_methods(root):
                 i += 1
             body = src[m.end():i - 1]
             methods.setdefault(m.group(2), body)
-            methods[f"{cls}.{m.group(2)}"] = body
+            methods.setdefault(f"{cls}.{m.group(2)}", body)
             for op in re.findall(r"Opcode\.(\w+)", m.group(1)):
-                parsers[op] = body
+                parsers.setdefault(op, body)
     return methods, parsers
 
 
@@ -114,9 +122,9 @@ def wpp_tokens(body, methods, depth=0):
 
 
 def wpp_opcodes(root):
-    src = (Path(root) / "WowPacketParser/Enums/Version/V5_5_3_64802/Opcodes.cs").read_text()
+    src = (Path(root) / f"WowPacketParser/Enums/Version/{REF}/Opcodes.cs").read_text()
     res = {}
-    for m in re.finditer(r"\{\s*Opcode\.((?:CMSG|SMSG)_\w+),\s*0x([0-9A-Fa-f]+)\s*\}", src):
+    for m in re.finditer(r"\{\s*Opcode\.((?:CMSG|SMSG)_\w+)\s*,\s*0x([0-9A-Fa-f]+)\s*\}", src):
         res[m.group(1)] = int(m.group(2), 16)
     return res
 
@@ -153,7 +161,7 @@ def align(wl, cl, score, anchors):
                 g = 1000.0 if anchors[name] == cidx else None
             elif cidx in anchors.values():
                 g = None
-            elif -4 <= cidx - widx <= 0x40:
+            elif -0x20 <= cidx - widx <= 0x40:
                 g = score(name, cidx) - 0.5 - 0.002 * abs(cidx - widx)  # ties: prefer the smaller shift
             else:
                 g = None
@@ -216,8 +224,8 @@ def main(dump, layouts, wpp_root, opcodes_h, overrides, outdir):
 
     def score(name, cop):
         a, b = wtok.get(name), ctok.get(cop)
-        if a is None or b is None:
-            return 0.55  # no parser / unresolved ctor: positional evidence only
+        if a is None or b is None or b == "S":
+            return 0.55  # no parser / unresolved ctor / raw payload left to the handler: positional evidence only
         if not a and not b:
             return 0.6
         return difflib.SequenceMatcher(None, a, b, autojunk=False).ratio()
@@ -234,7 +242,8 @@ def main(dump, layouts, wpp_root, opcodes_h, overrides, outdir):
         wgroups.setdefault((n[:4], v >> 16), []).append((n, v & 0xFFFF))
 
     # group map: verified pairs from overrides stay fixed; the rest are assigned one-to-one by alignment gain
-    fixed = {(d, int(w, 16)): int(c, 16) for d, gm in ov.get("groupMap", {}).items() for w, c in gm.items()}
+    gmo = ov.get("groupMap", {}).get(REF, {})
+    fixed = {(d, int(w, 16)): int(c, 16) for d, gm in gmo.items() if isinstance(gm, dict) for w, c in gm.items()}
     cand = []
     for (d, wg), wl in sorted(wgroups.items()):
         wl.sort(key=lambda x: x[1])
@@ -279,14 +288,14 @@ def main(dump, layouts, wpp_root, opcodes_h, overrides, outdir):
            re.finditer(r"^\s+((?:CMSG|SMSG)_\w+)\s*=\s*0x([0-9A-Fa-f]+)", Path(opcodes_h).read_text(), re.M)}
     Path(outdir).mkdir(parents=True, exist_ok=True)
     json.dump({"groupMap": gmap, "names": result, "clientTokens": {hex(k): v for k, v in ctok.items()}},
-              open(Path(outdir) / "audit.json", "w"), indent=1)
+              open(Path(outdir) / f"audit.{REF}.json", "w"), indent=1)
     diffs = []
     for n, r in sorted(result.items()):
         if "collision" in r:
             continue
         if cur.get(n) != r["value"]:
             diffs.append((n, cur.get(n), r))
-    with open(Path(outdir) / "audit-diff.md", "w") as f:
+    with open(Path(outdir) / f"audit-diff.{REF}.md", "w") as f:
         f.write("| Name | Opcodes.h | Audit | Confidence | Score | WPP tokens | Client tokens |\n|---|---|---|---|---|---|---|\n")
         for n, c, r in diffs:
             f.write(f"| {n} | {hex(c) if c is not None else '-'} | {r['value']:#x} | {r['confidence']} | {r['score']} | "

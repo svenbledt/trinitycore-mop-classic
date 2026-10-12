@@ -34,28 +34,6 @@
   "SMSG_TUTORIAL_FLAGS": 4588146,
   "SMSG_UNDELETE_COOLDOWN_STATUS_RESPONSE": 4588160,
   "SMSG_UPDATE_GAME_TIME_STATE": 4588251,
-  "groupMap": {
-    "CMSG": {
-      "0x2d": "0x2d",
-      "0x2f": "0x2f",
-      "0x30": "0x30",
-      "0x31": "0x31",
-      "0x33": "0x3e",
-      "0x34": "0x3f",
-      "0x35": "0x41",
-      "0x36": "0x42",
-      "0x38": "0x44",
-      "0x39": "0x45"
-    },
-    "SMSG": {
-      "0x3a": "0x46",
-      "0x3e": "0x4a",
-      "0x3f": "0x4b",
-      "0x40": "0x4c",
-      "0x41": "0x4d",
-      "0x51": "0x50"
-    }
-  },
   "names": {
     "SMSG_AUTH_CHALLENGE": 5046272,
     "SMSG_ENTER_ENCRYPTED_MODE": 5046276,
@@ -83,5 +61,40 @@
     "CMSG_HOTFIX_REQUEST": 4456465,
     "CMSG_ENUM_CHARACTERS": 4456468,
     "CMSG_PLAYER_LOGIN": 4456470
+  },
+  "groupMap": {
+    "_comment": "per reference table: REF group -> client group, pinned where anchors prove it",
+    "V1_60_69876": {
+      "SMSG": {
+        "0x46": "0x46",
+        "0x4a": "0x4a",
+        "0x4d": "0x4d"
+      },
+      "CMSG": {
+        "0x44": "0x44"
+      }
+    },
+    "V5_5_3_64802": {
+      "CMSG": {
+        "0x2d": "0x2d",
+        "0x2f": "0x2f",
+        "0x30": "0x30",
+        "0x31": "0x31",
+        "0x33": "0x3e",
+        "0x34": "0x3f",
+        "0x35": "0x41",
+        "0x36": "0x42",
+        "0x38": "0x44",
+        "0x39": "0x45"
+      },
+      "SMSG": {
+        "0x3a": "0x46",
+        "0x3e": "0x4a",
+        "0x3f": "0x4b",
+        "0x40": "0x4c",
+        "0x41": "0x4d",
+        "0x51": "0x50"
+      }
+    }
   }
 }

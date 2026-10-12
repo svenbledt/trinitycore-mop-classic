@@ -15,12 +15,12 @@ def main(audit, getters, old, opcodes_h, out, overrides):
     for n, v in sorted(anchors.items()):
         matched.append({"name": n, "value": v, "dir": n[:4], "confidence": "high"})
         taken[v] = n
-    for n, r in sorted(names.items()):
+    # solid names claim their slots before low-confidence guesses
+    for n, r in sorted(names.items(), key=lambda x: (x[1].get("confidence") not in ("verified", "high"), x[0])):
         if n in anchors or r["value"] in taken:
             continue
-        # only an exact layout match counts; a near miss can still crash the client (unverified SMSGs are not sent)
-        exact = r.get("confidence") == "high" and r["score"] >= 0.999
-        conf = "high" if r.get("confidence") == "verified" or exact else "low"
+        # merge_audits.py: high = exact layout, or both orderings/brackets backed by the layout (unverified SMSGs are not sent)
+        conf = "high" if r.get("confidence") in ("verified", "high") else "low"
         matched.append({"name": n, "value": r["value"], "dir": n[:4], "confidence": conf})
         taken[r["value"]] = n
     kept = dropped = 0
