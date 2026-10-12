@@ -24,6 +24,7 @@
 namespace WorldPackets::Character
 {
     ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterInfoBasic const& charInfo);
+    ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterInfoBasic::VisualItemInfo const& visualItem);
 }
 
 // The 5.5.4.70032 client reads the SMSG_CREATE_CHAR/DELETE_CHAR result code as a uint32
@@ -157,4 +158,25 @@ TEST_CASE("SMSG_ENUM_CHARACTERS_RESULT writes the 5.5.4 RaceUnlockData entry", "
     for (size_t i = 5; i > 1; --i)
         REQUIRE(copy[copy.size() - i] == 0);
     REQUIRE(copy[copy.size() - 1] == 0x80);
+}
+
+// The glue copy (sub_1418001F0) puts InvType at byte 9 and DisplayID at byte 10; the model is drawn from DisplayID
+TEST_CASE("Enum character VisualItem places InvType and DisplayID where the 5.5.4 client draws them", "[Packets]")
+{
+    WorldPackets::Character::EnumCharactersResult::CharacterInfoBasic::VisualItemInfo item;
+    item.DisplayID = 5729;
+    item.DisplayEnchantID = 11;
+    item.InvType = 5;
+    item.Subclass = 1;
+
+    ByteBuffer buf;
+    buf << item;
+
+    REQUIRE(buf.size() == 23);
+    REQUIRE(buf.read<uint32>(0) == 0);
+    REQUIRE(buf.read<uint32>(4) == 0);
+    REQUIRE(buf.read<uint8>(8) == 1);
+    REQUIRE(buf.read<uint8>(9) == 5);
+    REQUIRE(buf.read<uint32>(10) == 5729);
+    REQUIRE(buf.read<uint32>(14) == 11);
 }

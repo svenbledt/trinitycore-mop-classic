@@ -186,15 +186,15 @@ EnumCharactersResult::CharacterInfoBasic::CharacterInfoBasic(Field const* fields
 
 ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterInfoBasic::VisualItemInfo const& visualItem)
 {
-    // 5.5.4 reader sub_1405A1160 reads u32 u32 u8 u8 u32 u32 u32 u8 (23 bytes)
-    // TODO(verify): field-to-slot mapping is by size only; trailing u8 meaning unknown
-    data << uint32(visualItem.DisplayID);
-    data << uint32(visualItem.DisplayEnchantID);
-    data << uint8(visualItem.InvType);
-    data << uint8(visualItem.Subclass);
-    data << int32(visualItem.SecondaryItemModifiedAppearanceID);
+    // 5.5.4 order from the glue copy sub_1418001F0 + model setup sub_141808950 (re-notes.md)
+    // TODO(verify): which of the three non-display u32s are ItemID / TransmogrifiedItemID / SecondaryIMAID
     data << uint32(visualItem.ItemID);
     data << uint32(visualItem.TransmogrifiedItemID);
+    data << uint8(visualItem.Subclass);
+    data << uint8(visualItem.InvType);
+    data << uint32(visualItem.DisplayID);
+    data << uint32(visualItem.DisplayEnchantID);
+    data << int32(visualItem.SecondaryItemModifiedAppearanceID);
     data << uint8(0);
 
     return data;

@@ -7,7 +7,7 @@ Last updated: 2026-10-12
 | Base | TrinityCore `cata_classic` @ `0614c9fd941` (4.4.2.60895) |
 | Target | MoP Classic 5.5.4.70032 (dump at `d:\WoW\World of Warcraft\_classic_\WowClassic_dump.exe`) |
 | Current phase | **2a — DONE: live create, list and delete verified against the 5.5.4 client (2026-10-12)** |
-| Next | Review/merge `mop/phase2a`; Phase 2b enter world (starting gear missing from char list, see below) |
+| Next | Review/merge `mop/phase2a`; Phase 2b enter world (branch `mop/phase2b`) |
 
 ## Phase 2a live e2e (2026-10-12)
 Verified in the 5.5.4 client: races selectable, create, list (correct name/race/sex) and delete all work. Fixes, each checked against the client reader (details in `re-notes.md` "Phase 2a live fixes"):
@@ -15,7 +15,7 @@ Verified in the 5.5.4 client: races selectable, create, list (correct name/race/
 - Races locked: RaceUnlock entry is `u8 RaceID, u32 ClassUnlockCount, 5 bits`; header has 10 bits.
 - Char list garbled: VisualItem is 23 bytes, extra u64 after LastPlayedTime, restrictions block has 4 bits + extra u32.
 - Delete hung: `ResponseCodes` renumbered from the client's string table (3 codes inserted since Cata; DELETE_SUCCESS 65→66).
-- Open: characters show naked in the list (starting items or VisualItem field order, unverified); `0x44012E` mis-mapped as CMSG_BATTLENET_REQUEST; Pandaren lack `race_unlock_requirement` rows.
+- Starting gear now shows in the list (VisualItem order fixed 2026-10-12, Phase 2b branch). Open: `0x44012E` mis-mapped as CMSG_BATTLENET_REQUEST; Pandaren lack `race_unlock_requirement` rows.
 
 ## Opcode audit + game-time state (2026-10-10)
 - Root cause of "active game time required": the client's game-time state (`NetClient+0x7F4`, read by IsTrialAccount/IsVeteranTrialAccount/GetBillingPlan) is set only by **SMSG_UPDATE_GAME_TIME_STATE 0x4602DB**, which we had at the wrong value and never sent. Now sent after AUTH_RESPONSE with BillingPlan 1 (`game-time-state.md`). Pending live confirmation.
