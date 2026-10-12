@@ -659,9 +659,8 @@ void WorldSession::LogoutPlayer(bool save)
         TC_METRIC_EVENT("player_events", "Logout", _player->GetName());
 
         //! Remove the player from the world
-        // the player may not be in the world when logging out
-        // e.g if he got disconnected during a transfer to another map
-        // calls to GetMap in this case may cause crashes
+        // the player may not be in the world (e.g. disconnected during a map transfer),
+        // so GetMap here may crash
         _player->SetDestroyedObject(true);
         _player->CleanupsBeforeDelete();
         TC_LOG_INFO("entities.player.character", "Account: {} (IP: {}) Logout Character:[{}] {} Level: {}, XP: {}/{} ({} left)",
@@ -1265,6 +1264,7 @@ void WorldSession::InitializeSessionCallback(LoginDatabaseQueryHolder const& hol
     SetInQueue(false);
     ResetTimeOutTime(false);
 
+    SendGameTimeState();
     SendSetTimeZoneInformation();
     SendFeatureSystemStatusGlueScreen();
     SendClientCacheVersion(sWorld->getIntConfig(CONFIG_CLIENTCACHE_VERSION));

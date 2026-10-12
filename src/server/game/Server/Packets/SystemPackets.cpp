@@ -258,9 +258,9 @@ WorldPacket const* FeatureSystemStatusGlueScreen::Write()
 
     _worldPacket << Bits<11>(RealmHiddenAlert.length() + 1);
 
-    _worldPacket << Bits<1>(BNSendWhisperUseV2Services);
-    _worldPacket << Bits<1>(BNSendGameDataUseV2Services);
+    // 70032 reads 6 bits here; the 2nd is copied to byte_143D796BF, returned by IsWowTokenLimitedModeEnabled (handler 0x1417F3CF0)
     _worldPacket << Bits<1>(CharacterSelectListModeRealmless);
+    _worldPacket << Bits<1>(WowTokenLimitedMode);
     for (bool unk : Unk554Bits)
         _worldPacket << Bits<1>(unk);
 
@@ -296,8 +296,8 @@ WorldPacket const* FeatureSystemStatusGlueScreen::Write()
     if (LaunchDurationETA)
         _worldPacket << int32(*LaunchDurationETA);
 
-    if (!RealmHiddenAlert.empty())
-        _worldPacket << RealmHiddenAlert;
+    // Always write the NUL: length is sent as size + 1, and 5.5.4 reads this string before the arrays below
+    _worldPacket << RealmHiddenAlert;
 
     if (!LiveRegionCharacterCopySourceRegions.empty())
         _worldPacket.append(LiveRegionCharacterCopySourceRegions.data(), LiveRegionCharacterCopySourceRegions.size());

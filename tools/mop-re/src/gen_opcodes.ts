@@ -72,8 +72,8 @@ export function rewriteOpcodesCpp(src: string, r: MatchResult): string {
 }
 
 if (import.meta.main) {
-  const [build, root] = Bun.argv.slice(2);
-  const r = await Bun.file(`${import.meta.dir}/../out/${build}/match.json`).json();
+  const [build, root, matchFile] = Bun.argv.slice(2);
+  const r = await Bun.file(matchFile ?? `${import.meta.dir}/../out/${build}/match.json`).json();
   const hp = `${root}/src/server/game/Server/Protocol/Opcodes.h`, cp = `${root}/src/server/game/Server/Protocol/Opcodes.cpp`;
   const crlf = (await Bun.file(hp).text()).includes("\r\n");
   const norm = (s: string) => s.replace(/\r\n/g, "\n"), back = (s: string) => (crlf ? s.replace(/\n/g, "\r\n") : s);

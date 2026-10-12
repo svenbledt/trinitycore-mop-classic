@@ -1,7 +1,7 @@
 # Phase 2a blocker — "active game time required to create a character"
 
-**Status:** UNRESOLVED. Blocks the live create/delete e2e only; the Phase 2a packet
-work (opcodes + layouts, 43/43 ctest) is complete and committed independently.
+**Status:** RESOLVED 2026-10-12. The real gate was WowTokenLimitedMode in the glue feature status
+(see `re-notes.md` "Phase 2a live fixes"); the game-time-state packet was not the cause. History kept for context.
 
 ## Symptom
 MoP Classic 5.5.4.70032 client, at the character-select screen:

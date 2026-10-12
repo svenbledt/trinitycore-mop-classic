@@ -56,8 +56,8 @@ TEST_CASE("SMSG_DELETE_CHAR writes a uint32 result code", "[Packets]")
     REQUIRE(copy.rpos() == copy.size());
 }
 
-// Decodes a serialized CharacterInfoBasic following WowPacketParser V5_5_0_61735
-// ReadBasicCharacterListEntry and checks the fields Phase 1's empty list never hit.
+// Decodes a serialized CharacterInfoBasic following the 5.5.4 client reader sub_1405A1160
+// (WPP V5_5_0_61735 ReadBasicCharacterListEntry lacks the 5.5.4 additions).
 TEST_CASE("Enum character record matches the 5.5.4 per-character layout", "[Packets]")
 {
     using WorldPackets::Character::EnumCharactersResult;
@@ -115,12 +115,13 @@ TEST_CASE("Enum character record matches the 5.5.4 per-character layout", "[Pack
 
     for (int i = 0; i < 19; ++i)         // VisualItems
     {
-        buf.read<uint32>(); buf.read<uint8>(); buf.read<uint32>(); buf.read<uint8>();
-        buf.read<int32>(); buf.read<int32>(); buf.read<int32>();
+        buf.read<uint32>(); buf.read<uint32>(); buf.read<uint8>(); buf.read<uint8>();
+        buf.read<int32>(); buf.read<int32>(); buf.read<int32>(); buf.read<uint8>();
     }
 
     REQUIRE(buf.read<int32>() == 0);     // SaveVersion (Unknown703)
     buf.read<int64>();                   // LastPlayedTime
+    REQUIRE(buf.read<uint64>() == 0);    // 5.5.4 second u64
     REQUIRE(buf.read<int32>() == 0);     // LastLoginVersion
     for (int i = 0; i < 5; ++i)
         REQUIRE(buf.read<int32>() == -1); // PersonalTabard defaults
@@ -137,4 +138,23 @@ TEST_CASE("Enum character record matches the 5.5.4 per-character layout", "[Pack
     buf.ReadBit();                       // Unused1110_3
     REQUIRE(buf.ReadString(8) == "Testchar");
     REQUIRE(buf.rpos() == buf.size());
+}
+
+// Client 5.5.4 reader sub_1405A2280: u8 RaceID, u32 class-unlock count, then 5 bits; a misread locks every race
+TEST_CASE("SMSG_ENUM_CHARACTERS_RESULT writes the 5.5.4 RaceUnlockData entry", "[Packets]")
+{
+    WorldPackets::Character::EnumCharactersResult packet;
+    WorldPacket empty(*packet.Write());
+
+    WorldPackets::Character::EnumCharactersResult withRace;
+    WorldPackets::Character::EnumCharactersResult::RaceUnlock& raceUnlock = withRace.RaceUnlockData.emplace_back();
+    raceUnlock.RaceID = 1;
+    raceUnlock.HasExpansion = true;
+    WorldPacket copy(*withRace.Write());
+
+    REQUIRE(copy.size() == empty.size() + 6);
+    REQUIRE(copy[copy.size() - 6] == 1);
+    for (size_t i = 5; i > 1; --i)
+        REQUIRE(copy[copy.size() - i] == 0);
+    REQUIRE(copy[copy.size() - 1] == 0x80);
 }

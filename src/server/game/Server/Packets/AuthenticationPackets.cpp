@@ -110,6 +110,20 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Auth::AuthWaitInfo const&
     return data;
 }
 
+ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Auth::AuthResponse::AuthSuccessInfo::GameTime const& gameTime)
+{
+    data << uint32(gameTime.BillingPlan);
+    data << uint32(gameTime.TimeRemain);
+    data << uint32(gameTime.Unknown735);
+    // 3x same bit is not a mistake - preserves legacy client behavior of BillingPlanFlags::SESSION_IGR
+    data.WriteBit(gameTime.InGameRoom); // inGameRoom check in function checking which lua event to fire when remaining time is near end - BILLING_NAG_DIALOG vs IGR_BILLING_NAG_DIALOG
+    data.WriteBit(gameTime.InGameRoom); // inGameRoom lua return from Script_GetBillingPlan
+    data.WriteBit(gameTime.InGameRoom); // not used anywhere in the client
+    data.FlushBits();
+
+    return data;
+}
+
 WorldPacket const* WorldPackets::Auth::AuthResponse::Write()
 {
     _worldPacket << uint32(Result);
@@ -152,16 +166,7 @@ WorldPacket const* WorldPackets::Auth::AuthResponse::Write()
         _worldPacket.WriteBit(SuccessInfo->NewBuildKeys.has_value());
         _worldPacket.FlushBits();
 
-        {
-            _worldPacket << uint32(SuccessInfo->GameTimeInfo.BillingPlan);
-            _worldPacket << uint32(SuccessInfo->GameTimeInfo.TimeRemain);
-            _worldPacket << uint32(SuccessInfo->GameTimeInfo.Unknown735);
-            // 3x same bit is not a mistake - preserves legacy client behavior of BillingPlanFlags::SESSION_IGR
-            _worldPacket.WriteBit(SuccessInfo->GameTimeInfo.InGameRoom); // inGameRoom check in function checking which lua event to fire when remaining time is near end - BILLING_NAG_DIALOG vs IGR_BILLING_NAG_DIALOG
-            _worldPacket.WriteBit(SuccessInfo->GameTimeInfo.InGameRoom); // inGameRoom lua return from Script_GetBillingPlan
-            _worldPacket.WriteBit(SuccessInfo->GameTimeInfo.InGameRoom); // not used anywhere in the client
-            _worldPacket.FlushBits();
-        }
+        _worldPacket << SuccessInfo->GameTimeInfo;
 
         if (SuccessInfo->NumPlayersHorde)
             _worldPacket << uint16(*SuccessInfo->NumPlayersHorde);
@@ -212,6 +217,13 @@ WorldPacket const* WorldPackets::Auth::AuthResponse::Write()
 WorldPacket const* WorldPackets::Auth::WaitQueueUpdate::Write()
 {
     _worldPacket << WaitInfo;
+
+    return &_worldPacket;
+}
+
+WorldPacket const* WorldPackets::Auth::UpdateGameTimeState::Write()
+{
+    _worldPacket << GameTimeInfo;
 
     return &_worldPacket;
 }

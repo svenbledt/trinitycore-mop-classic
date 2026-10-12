@@ -29,13 +29,17 @@ namespace WorldPackets
         class AccountDataTimes final : public ServerPacket
         {
         public:
-            AccountDataTimes() : ServerPacket(SMSG_ACCOUNT_DATA_TIMES, 16 + 8 + 8 * NUM_ACCOUNT_DATA_TYPES) { }
+            // 5.5.4.70032 ctor sub_1405BE7D0 reads 20 slots; types 17-19 are TODO(verify) and sent as 0
+            static constexpr std::size_t ClientAccountDataTypes = 20;
+            static_assert(ClientAccountDataTypes >= NUM_ACCOUNT_DATA_TYPES);
+
+            AccountDataTimes() : ServerPacket(SMSG_ACCOUNT_DATA_TIMES, 16 + 8 + 8 * ClientAccountDataTypes) { }
 
             WorldPacket const* Write() override;
 
             ObjectGuid PlayerGuid;
             Timestamp<> ServerTime;
-            std::array<Timestamp<>, NUM_ACCOUNT_DATA_TYPES> AccountTimes = { };
+            std::array<Timestamp<>, ClientAccountDataTypes> AccountTimes = { };
         };
 
         class ClientCacheVersion final : public ServerPacket

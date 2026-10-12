@@ -186,13 +186,16 @@ EnumCharactersResult::CharacterInfoBasic::CharacterInfoBasic(Field const* fields
 
 ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterInfoBasic::VisualItemInfo const& visualItem)
 {
+    // 5.5.4 reader sub_1405A1160 reads u32 u32 u8 u8 u32 u32 u32 u8 (23 bytes)
+    // TODO(verify): field-to-slot mapping is by size only; trailing u8 meaning unknown
     data << uint32(visualItem.DisplayID);
-    data << uint8(visualItem.InvType);
     data << uint32(visualItem.DisplayEnchantID);
+    data << uint8(visualItem.InvType);
     data << uint8(visualItem.Subclass);
     data << int32(visualItem.SecondaryItemModifiedAppearanceID);
     data << uint32(visualItem.ItemID);
     data << uint32(visualItem.TransmogrifiedItemID);
+    data << uint8(0);
 
     return data;
 }
@@ -228,6 +231,7 @@ ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterInfoBasi
 
     data << int32(charInfo.Unknown703);
     data << charInfo.LastPlayedTime;
+    data << uint64(0); // TODO(verify): 5.5.4 second u64 (sub_1405A1160 +200), meaning unknown
     data << int32(charInfo.LastLoginVersion);
     data << charInfo.PersonalTabard;
 
@@ -259,13 +263,13 @@ ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterRestrict
 
     data << Bits<1>(restrictionsAndMails.BoostInProgress);
     data << Bits<2>(restrictionsAndMails.EraChoiceState);
-    data << Bits<1>(restrictionsAndMails.RpeResetAvailable);
-    data << Bits<1>(restrictionsAndMails.RpeResetQuestClearAvailable);
+    data << Bits<1>(restrictionsAndMails.RpeResetAvailable); // 5.5.4 reads 4 bits here (sub_1405A16A0)
     data.FlushBits();
 
     data << uint32(restrictionsAndMails.Flags4);
     data << uint32(restrictionsAndMails.MailSenders.size());
     data << uint32(restrictionsAndMails.MailSenderTypes.size());
+    data << uint32(0); // TODO(verify): 5.5.4 u32 after the counts (sub_1405A16A0 +64), meaning unknown
 
     if (!restrictionsAndMails.MailSenderTypes.empty())
         data.append(restrictionsAndMails.MailSenderTypes.data(), restrictionsAndMails.MailSenderTypes.size());
@@ -276,8 +280,7 @@ ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterRestrict
     data.FlushBits();
 
     for (std::string const& str : restrictionsAndMails.MailSenders)
-        if (!str.empty())
-            data << str;
+        data << str; // length is sent as size + 1, so the NUL is always needed
 
     return data;
 }
@@ -304,7 +307,9 @@ ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::RegionwideCharact
 
 ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::RaceUnlock const& raceUnlock)
 {
-    data << int32(raceUnlock.RaceID);
+    // 5.5.4 reader sub_1405A2280: u8 RaceID, u32 count of (u8, u32, bit) class unlocks, then the bits
+    data << uint8(raceUnlock.RaceID);
+    data << uint32(0); // TODO(verify): JamClassUnlock entries, meaning unknown; sent empty
     data << Bits<1>(raceUnlock.HasExpansion);
     data << Bits<1>(raceUnlock.HasAchievement);
     data << Bits<1>(raceUnlock.HasHeritageArmor);
@@ -373,6 +378,7 @@ WorldPacket const* EnumCharactersResult::Write()
     _worldPacket << Bits<1>(IsNewPlayerRestricted);
     _worldPacket << Bits<1>(IsNewPlayer);
     _worldPacket << Bits<1>(IsTrialAccountRestricted);
+    _worldPacket << Bits<1>(false); // TODO(verify): 5.5.4 8th header bit (sub_1405A2280 +100), meaning unknown
     _worldPacket << OptionalInit(DisabledClassesMask);
     _worldPacket << Bits<1>(DontCreateCharacterDisplays);
     _worldPacket << uint32(Characters.size());

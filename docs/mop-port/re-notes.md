@@ -4,6 +4,9 @@ Dump: `WowClassic_dump.exe` FileVersion 5.5.4.70032. Addresses are IDA EAs in th
 
 ## Opcode tables
 
+> 2026-10-10: superseded as the source of `Opcodes.h` by the getter harvest + structural audit in
+> `opcode-harvest.md`. Several "confirmed" values below were wrong (e.g. SOCIAL_CONTRACT 0x460320, NPC_INTERACTION 0x460315).
+
 Opcode = `(group << 16) | index`, sent as a 32-bit value on the wire (as in TrinityCore's `IncomingPacketHeader::EncryptedOpcode`).
 
 - **Receive path:** `NetClient` HandleData `0x1413DF250`.
@@ -169,3 +172,13 @@ Diffed the repo's `EnumCharactersResult` writers against WPP V5_5_0_61735 `Handl
 - `CMSG_CHAR_DELETE` (`CharDelete::Read` = `>> Guid`) matches WPP V5_5_0 `HandleClientCharDelete` (one packed GUID) and the client sender `sub_140586660` (writes one GUID). No change.
 - `SMSG_DELETE_CHAR` (`DeleteChar::Write`) result code is uint32 for 5.5.4 — fixed and unit-tested in Task 2 (shared finding with SMSG_CREATE_CHAR).
 - `WorldSession::HandleCharDeleteOpcode` (`CharacterHandler.cpp:863`) already rejects a GUID the account does not own (`accountId != initAccountId` -> `OnPlayerFailedDelete`, return) and guards guild-leader / arena-captain / loaded-character cases. Upstream validation intact; the stack is not relaxed.
+
+## Phase 2a live fixes (2026-10-12)
+
+WPP V5_5_0_61735 layouts were wrong for 5.5.4 in each case below; all verified against the client reader.
+
+- **SMSG_FEATURE_SYSTEM_STATUS_GLUE_SCREEN 0x460064** (reader `sub_1405A8450`, handler `sub_1417F3CF0`): after the 11-bit RealmHiddenAlert length come 6 bits; the 2nd lands at packet+365 = `byte_143D796BF`, returned by Lua `IsWowTokenLimitedModeEnabled()`, which disables the Create button. Writer: RealmlessCharSelect (TODO verify), WowTokenLimitedMode, 4 unknown bits. RealmHiddenAlert length is sent as size+1 (NUL always written).
+- **SMSG_ENUM_CHARACTERS_RESULT 0x460018** (reader `sub_1405A2280`): 10 header bits; RaceUnlock = `u8 RaceID, u32 ClassUnlockCount, 5 bits (HasExpansion, HasAchievement, HasHeritageArmor, IsLocked, Unused)`, then per class `{u8, u32, 1 bit}`. Race list built in `sub_1417FC9D0` from `qword_145E84AB0`.
+- **Per-character record** (reader `sub_1405A1160`): VisualItem = `u32 DisplayID, u32 DisplayEnchantID, u8 InvType, u8 Subclass, u32, u32, u32, u8` (23 bytes; field mapping by size, TODO verify); `u64` after LastPlayedTime. Restrictions (`sub_1405A16A0`): 4 bits, u32 Flags4, u32 senders, u32 types, **u32 (new)**, types, 6-bit lengths, strings.
+- **ResponseCodes**: index into the client string table at `0x143209B70` (113 names). Inserted vs Cata: CHAR_CREATE_RACECLASS_ACHIEVEMENT 50, CHAR_DELETE_FAILED_NEIGHBORHOOD_OWNER 76, CHAR_DELETE_FAILED_HOUSE_OWNER 77. Sending the old 65 meant DELETE_IN_PROGRESS, so the client hung.
+- Unhandled but harmless: `0x2D0036` (empty, from Lua `SetInCharacterSelect`), `0x4401AE`; `0x44012E` is mis-mapped as CMSG_BATTLENET_REQUEST (client sends an empty body, `sub_14059A860`).

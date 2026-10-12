@@ -995,6 +995,7 @@ class TC_GAME_API WorldSession
 
         /// Handle the authentication waiting queue (to be completed)
         void SendAuthWaitQueue(uint32 position);
+        void SendGameTimeState();
 
         void SendSetTimeZoneInformation();
         void SendFeatureSystemStatus();
