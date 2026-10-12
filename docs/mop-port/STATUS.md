@@ -13,7 +13,7 @@ Last updated: 2026-10-12
 Every packet name is being proven from client code in IDA (method: `opcode-harvest.md`, steps 1–7; verifier brief `tools/mop-re/verify/AGENT.md`).
 - Done: round 1 (`chunks/` c00–c11; the u00–u04 names were folded into round 2), round 2 (`chunks2/` r00–r22), round 3 rechecks s00–s21 (`chunks3/`). ~1200 values proven (anchors with evidence in `overrides/70032.json`), 300 SMSGs still unverified.
 - **Resume:** run verifiers for `chunks3/s22.json` and `s23.json`; then `pe/apply_verified.py`, regenerate (pipeline in `opcode-harvest.md`), build, commit. Downgrade "proven" results that rest only on order/layout/Cata enums before applying. Max 6 verifiers at once.
-- Afterwards: second pass on `ambiguous`/`unknown` results; then fix the server writers/readers listed in `tools/mop-re/out/70032/verify/layout-diffs.md` (e.g. MovementInfo extra f32 + bit, WORLD_SERVER_INFO, FEATURE_SYSTEM_STATUS, spell logs, quest credit width) before the next Enter World test.
+- Server layout fixes from the verifiers: DONE 2026-10-12 (commit 1fb50d674c, table in `re-notes.md` "5.5.4 packet layout fixes"). Still open: second pass on `ambiguous`/`unknown`, FEATURE_SYSTEM_STATUS bit names, and the update-field layout for UPDATE_OBJECT (largest remaining Enter World risk).
 - D: (Phison NVMe with dump + IDB) dropped off the bus once at 15:07; scans after restart found no errors.
 
 ## Phase 2a live e2e (2026-10-12)
