@@ -18,7 +18,9 @@ def main(audit, getters, old, opcodes_h, out, overrides):
     for n, r in sorted(names.items()):
         if n in anchors or r["value"] in taken:
             continue
-        conf = "high" if r.get("confidence") in ("verified", "high") else "low"
+        # only an exact layout match counts; a near miss can still crash the client (unverified SMSGs are not sent)
+        exact = r.get("confidence") == "high" and r["score"] >= 0.999
+        conf = "high" if r.get("confidence") == "verified" or exact else "low"
         matched.append({"name": n, "value": r["value"], "dir": n[:4], "confidence": conf})
         taken[r["value"]] = n
     kept = dropped = 0

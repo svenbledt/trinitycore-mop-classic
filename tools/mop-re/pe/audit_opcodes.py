@@ -187,6 +187,22 @@ def main(dump, layouts, wpp_root, opcodes_h, overrides, outdir):
         # (CMSG serializers with identical bodies are legitimately folded into one function)
         smsg = e["opcode"] >> 16 > CMSG_MAX_GROUP
         ctok[e["opcode"]] = collapse(client.tokens(f, prim)) if f and not (smsg and f in shared) else None
+    # dispatcher-inlined ctors (harvest_inline.py): case calls, or the handler if the case only keeps the raw payload
+    ipath = Path(layouts).with_name("inline.json")
+    for op, r in (json.load(open(ipath)).items() if ipath.exists() else []):
+        op = int(op, 16)
+        if ctok.get(op):
+            continue
+        t = []
+        for c in r["calls"]:
+            if c in SMSG_PRIM:
+                t.append(SMSG_PRIM[c])
+            elif c not in NOISE:
+                t += client.tokens(c, SMSG_PRIM, 1)
+        t = collapse(t)
+        if t == "S" and len(r["handlers"]) == 1:
+            t = collapse(client.tokens(r["handlers"][0], SMSG_PRIM)) or "S"
+        ctok[op] = t or None
     # ctors that only keep the raw payload ("S") are parsed by their handler (harvest_handlers.py)
     hpath = Path(layouts).with_name("handlers.json")
     for op, h in (json.load(open(hpath)).items() if hpath.exists() else []):
