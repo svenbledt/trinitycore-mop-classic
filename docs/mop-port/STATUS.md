@@ -6,8 +6,15 @@ Last updated: 2026-10-12
 |---|---|
 | Base | TrinityCore `cata_classic` @ `0614c9fd941` (4.4.2.60895) |
 | Target | MoP Classic 5.5.4.70032 (dump at `d:\WoW\World of Warcraft\_classic_\WowClassic_dump.exe`) |
-| Current phase | **2a — DONE: live create, list and delete verified against the 5.5.4 client (2026-10-12)** |
-| Next | Review/merge `mop/phase2a`; Phase 2b enter world (branch `mop/phase2b`) |
+| Current phase | **2b — enter world; full opcode verification PAUSED (2026-10-12, to save session usage)** |
+| Next | Resume opcode verification (s22, s23), then fix server packet layouts, then Enter World test (branch `mop/phase2b`) |
+
+## Phase 2b opcode verification — PAUSED (2026-10-12)
+Every packet name is being proven from client code in IDA (method: `opcode-harvest.md`, steps 1–7; verifier brief `tools/mop-re/verify/AGENT.md`).
+- Done: round 1 (`chunks/` c00–c11; the u00–u04 names were folded into round 2), round 2 (`chunks2/` r00–r22), round 3 rechecks s00–s21 (`chunks3/`). ~1200 values proven (anchors with evidence in `overrides/70032.json`), 300 SMSGs still unverified.
+- **Resume:** run verifiers for `chunks3/s22.json` and `s23.json`; then `pe/apply_verified.py`, regenerate (pipeline in `opcode-harvest.md`), build, commit. Downgrade "proven" results that rest only on order/layout/Cata enums before applying. Max 6 verifiers at once.
+- Afterwards: second pass on `ambiguous`/`unknown` results; then fix the server writers/readers listed in `tools/mop-re/out/70032/verify/layout-diffs.md` (e.g. MovementInfo extra f32 + bit, WORLD_SERVER_INFO, FEATURE_SYSTEM_STATUS, spell logs, quest credit width) before the next Enter World test.
+- D: (Phison NVMe with dump + IDB) dropped off the bus once at 15:07; scans after restart found no errors.
 
 ## Phase 2a live e2e (2026-10-12)
 Verified in the 5.5.4 client: races selectable, create, list (correct name/race/sex) and delete all work. Fixes, each checked against the client reader (details in `re-notes.md` "Phase 2a live fixes"):
