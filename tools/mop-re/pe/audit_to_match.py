@@ -16,8 +16,9 @@ def main(audit, getters, old, opcodes_h, out, overrides):
         matched.append({"name": n, "value": v, "dir": n[:4], "confidence": "high"})
         taken[v] = n
     # solid names claim their slots before low-confidence guesses
+    absent = set(ov.get("absent", []))  # verified not to exist in this client: UNKNOWN_OPCODE
     for n, r in sorted(names.items(), key=lambda x: (x[1].get("confidence") not in ("verified", "high"), x[0])):
-        if n in anchors or r["value"] in taken:
+        if n in anchors or n in absent or r["value"] in taken:
             continue
         # merge_audits.py: high = exact layout, or both orderings/brackets backed by the layout (unverified SMSGs are not sent)
         conf = "high" if r.get("confidence") in ("verified", "high") else "low"
@@ -25,7 +26,7 @@ def main(audit, getters, old, opcodes_h, out, overrides):
         taken[r["value"]] = n
     kept = dropped = 0
     for n, v in sorted(cur.items()):
-        if n in names or n in anchors:
+        if n in names or n in anchors or n in absent:
             continue
         if v in client and v not in taken:
             matched.append({"name": n, "value": v, "dir": n[:4], "confidence": "low"})

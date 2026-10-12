@@ -77,8 +77,26 @@ TEST_CASE("Login-flow SMSGs match client build 5.5.4.70032", "[Opcodes]")
     REQUIRE(SMSG_SUSPEND_COMMS == 0x4D0005);
     REQUIRE(SMSG_PONG == 0x4D0009);
     REQUIRE(SMSG_MULTIPLE_PACKETS == 0x4D000D);
-    REQUIRE(SMSG_NEW_WORLD == 0x46002D);
+    // 0x46002D is PRELOAD_WORLD ("[Airlock] Received PreloadMap"); both share the position layout
+    REQUIRE(SMSG_NEW_WORLD == 0x46002C);
+    REQUIRE(SMSG_PRELOAD_WORLD == 0x46002D);
     for (OpcodeServer op : { SMSG_UPDATE_GAME_TIME_STATE, SMSG_TUTORIAL_FLAGS, SMSG_PONG, SMSG_MULTIPLE_PACKETS })
+        REQUIRE(GetOpcodeArrayIndex(op) >= 0);
+}
+
+TEST_CASE("Enter-world opcodes match client build 5.5.4.70032", "[Opcodes]")
+{
+    // Proven from client ctor/handler behaviour; evidence per name in tools/mop-re/overrides/70032.json
+    REQUIRE(SMSG_LOGIN_VERIFY_WORLD == 0x460030);
+    REQUIRE(SMSG_UPDATE_OBJECT == 0x5C0000);
+    REQUIRE(SMSG_TIME_SYNC_REQUEST == 0x5E0000);
+    REQUIRE(SMSG_INITIAL_SETUP == 0x460014);
+    REQUIRE(SMSG_UPDATE_ACTION_BUTTONS == 0x460084);
+    REQUIRE(SMSG_SPELL_GO == 0x66002A);
+    REQUIRE(SMSG_SPELL_START == 0x66002B);
+    REQUIRE(CMSG_WORLD_PORT_RESPONSE == 0x440025);
+    REQUIRE(CMSG_TIME_SYNC_RESPONSE == 0x42005C);
+    for (OpcodeServer op : { SMSG_UPDATE_OBJECT, SMSG_SPELL_GO, SMSG_TIME_SYNC_REQUEST })
         REQUIRE(GetOpcodeArrayIndex(op) >= 0);
 }
 

@@ -5,8 +5,10 @@ dump only (never executed). Addresses are IDA EAs, image base `0x140000000`.
 
 ## Pipeline (`tools/mop-re/pe/`, run with `py -3.12`, needs `pefile` + `capstone`)
 1. `harvest_getters.py <dump> getters.json`: every packet class has a getter `mov dword [rdx], OPCODE; mov rax, rdx; ret`
-   in its vtable. 70032: **2295 packets (860 CMSG + 1435 SMSG)**, one getter and one vtable each. This is the
-   complete set the client can send/parse, except the connection group handled in `NetClient::HandleData`.
+   in its vtable; packet vtables share the method after the getter slot, which filters out other classes with the same
+   getter shape (70032: groups 0xAD/0xAE). 70032: **2482 packets** in groups 0x2D..0x69. Until 2026-10-12 the harvest
+   capped groups at 0x60 and missed 187 packets (spells 0x66, 0x63, 0x64, 0x67...), so spell names were aligned into the
+   garrison group 0x50. The connection group is handled in `NetClient::HandleData`.
 2. `harvest_layouts.py <dump> getters.json layouts.json`: vtable = getter slot - 0x18. SMSG ctor = function storing the
    vtable (it is the deserializer, called from the group dispatch); CMSG body serializer = vtable slot +8.
 3. `harvest_handlers.py <dump> layouts.json handlers.json`: each SMSG has a 16-byte thunk right before its getter

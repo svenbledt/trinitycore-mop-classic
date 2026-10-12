@@ -32,6 +32,17 @@ Where the layout is:
 - CMSG: `writer` is the body serializer. To learn what the packet means, find who builds it (xrefs to its vtable/ctor)
   and the Lua API or UI function around that (strings).
 - Handler meaning: strings, Lua event names, the game subsystem it touches, and which fields it uses.
+- Shortcut: in `out/70032/harvest/getters.json` the vtable starts at the getter `slot` - 0x18; xrefs to that address
+  lead to the builder (CMSG) or ctor (SMSG). Group dispatchers switch on the full opcode value (`cmp reg, 66001Ah`).
+- Lua events are fired by 64-bit hash: search the binary for the hash bytes, then follow the `lea r15` at match+33 to
+  the event-name string. Game error N: string pointer at `0x143B5AB70 + 24*N`. Calendar packets use callbacks stored
+  in `0x143B32xxx` globals (registered in `0x141C7D540`), which the harvested handler list misses.
+- A slot whose handler global is never written is ignored by the client: only order can name it (`ambiguous`).
+- Never use TrinityCore enum values (errors, results) as proof unless you confirmed the value in the client.
+
+Re-check chunks (`chunks3/`, items with `recheck`): the single candidate was placed by an exact layout match or by
+index order only, which was wrong in several places. Confirm it with client behaviour, or refute it and find the right
+slot (neighbouring slots are the usual answer).
 
 ## Proof standard
 A value is **proven** only if client code ties the slot to the packet's meaning:

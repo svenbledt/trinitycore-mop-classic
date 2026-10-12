@@ -37,11 +37,17 @@ def main(rdir, overrides, diffs_md):
             added += 1
         r = next(x for x in res if x["name"] == n and x.get("verdict") == "proven")
         ev[n] = r["evidence"]
+    absent = set(ov.get("absent", []))
+    for r in res:
+        if r.get("verdict") == "absent" and r["name"] not in anchors and r["name"] not in proven:
+            absent.add(r["name"])
+            ev[r["name"]] = "absent: " + r["evidence"]
     keys = sorted(k for k in ov if isinstance(ov[k], int))
     out = {"_comment": ov["_comment"], **{k: ov[k] for k in keys}, "groupMap": ov["groupMap"],
-           "evidence": dict(sorted(ev.items()))}
-    json.dump(out, open(overrides, "w"), indent=2)
-    open(overrides, "a").write("\n")
+           "absent": sorted(absent), "evidence": dict(sorted(ev.items()))}
+    with open(overrides, "w", newline="\n") as f:
+        json.dump(out, f, indent=2)
+        f.write("\n")
     with open(diffs_md, "w") as f:
         f.write("| Packet | Value | Client layout | Differences vs TrinityCore |\n|---|---|---|---|\n")
         for r in sorted(res, key=lambda x: x["name"]):

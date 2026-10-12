@@ -15,7 +15,7 @@ def main(path, out):
     getters = {}
     for m in re.finditer(rb"\xC7\x02(....)\x48\x8B\xC2\xC3", tb, re.S):
         op = struct.unpack("<I", m.group(1))[0]
-        if 0x2C <= op >> 16 <= 0x60 and (op & 0xFFFF) < 0x1000:
+        if op >> 16 and (op & 0xFFFF) < 0x1000:  # no group cap: 70032 has packet groups above 0x60
             getters[tva + m.start()] = op
     # vtable slots referencing each getter
     slots = {}
@@ -28,6 +28,14 @@ def main(path, out):
             if q in getters:
                 ctx = [struct.unpack_from("<Q", b, off + 8 * k)[0] for k in range(-6, 7)]
                 slots.setdefault(q, []).append({"slot": sva + off, "ctx": ctx})
+    # packet classes share the method after the getter slot; other classes reuse the getter shape (70032: 0xAD/0xAE)
+    nxt = {}
+    for vs in slots.values():
+        for v in vs:
+            nxt[v["ctx"][7]] = nxt.get(v["ctx"][7], 0) + 1
+    common = max(nxt, key=nxt.get)
+    slots = {g: [v for v in vs if v["ctx"][7] == common] for g, vs in slots.items()}
+    getters = {g: op for g, op in getters.items() if slots.get(g)}
     res = [{"getter": g, "opcode": op, "vtables": slots.get(g, [])} for g, op in sorted(getters.items(), key=lambda x: x[1])]
     json.dump(res, open(out, "w"), indent=0)
     print(len(res), "getters;", sum(1 for r in res if r["vtables"]), "with vtable refs")
