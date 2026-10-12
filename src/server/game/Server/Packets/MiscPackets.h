@@ -269,6 +269,7 @@ namespace WorldPackets
             WorldPacket const* Write() override;
 
             uint32 DifficultyID     = 0;
+            std::array<ObjectGuid, 4> UnkGuids; // TODO(verify): meaning unknown, client 5.5.4 reads 4 packed GUIDs here
             bool IsTournamentRealm  = false;
             bool XRealmPvpAlert     = false;
             Optional<uint32> RestrictedAccountMaxLevel;

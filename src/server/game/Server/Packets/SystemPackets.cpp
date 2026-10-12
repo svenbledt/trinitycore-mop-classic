@@ -60,6 +60,7 @@ ByteBuffer& operator<<(ByteBuffer& data, DebugTimeEventInfo const& debugTimeEven
     return data;
 }
 
+// 5.5.4 layout: client reader IDA 0x1405A7960 (70032); bit names not yet tied to the client are sent as false
 WorldPacket const* FeatureSystemStatus::Write()
 {
     _worldPacket << uint8(ComplaintStatus);
@@ -78,11 +79,10 @@ WorldPacket const* FeatureSystemStatus::Write()
     _worldPacket << int64(RedeemForBalanceAmount);
 
     _worldPacket << uint32(BpayStorePurchaseTimeout);
-
     _worldPacket << uint32(ClubsPresenceDelay);
-    _worldPacket << uint32(ClubPresenceUnsubscribeDelay);
-
     _worldPacket << int32(ContentSetID);
+
+    _worldPacket << uint32(0); // TODO(verify): count of a 5.5.4 array of {u8, u32, u32}, meaning unknown
     _worldPacket << uint32(GameRules.size());
     _worldPacket << int32(ActiveTimerunningSeasonID);
     _worldPacket << int32(RemainingTimerunningSeasonSeconds);
@@ -96,76 +96,31 @@ WorldPacket const* FeatureSystemStatus::Write()
     _worldPacket << int32(AddonChatThrottle.MaxTries);
     _worldPacket << int32(AddonChatThrottle.TriesRestoredPerSecond);
     _worldPacket << int32(AddonChatThrottle.UsedTriesPerMessage);
+    for (std::size_t i = 0; i < 7; ++i)
+        _worldPacket << uint32(0); // TODO(verify): 5.5.4 adds 7 x 4 bytes (WPP 5.5.0 names the first 3 AddonPerformanceMsg*)
 
     for (GameRuleValuePair const& gameRuleValue : GameRules)
         _worldPacket << gameRuleValue;
 
+    // byte 1: bit 6 = EuropaTicketSystemStatus, bit 3 = SessionAlert (other bits not yet identified)
     _worldPacket << Bits<1>(VoiceEnabled);
     _worldPacket << OptionalInit(EuropaTicketSystemStatus);
-    _worldPacket << Bits<1>(BpayStoreEnabled);
-    _worldPacket << Bits<1>(BpayStoreAvailable);
-    _worldPacket << Bits<1>(BpayStoreDisabledByParentalControls);
-    _worldPacket << Bits<1>(ItemRestorationButtonEnabled);
-    _worldPacket << Bits<1>(BrowserEnabled);
+    _worldPacket << Bits<2>(0);
     _worldPacket << OptionalInit(SessionAlert);
+    _worldPacket << Bits<3>(0);
 
-    _worldPacket << Bits<1>(RAFSystem.Enabled);
-    _worldPacket << Bits<1>(RAFSystem.RecruitingEnabled);
-    _worldPacket << Bits<1>(CharUndeleteEnabled);
-    _worldPacket << Bits<1>(RestrictedAccount);
-    _worldPacket << Bits<1>(CommerceServerEnabled);
-    _worldPacket << Bits<1>(TutorialEnabled);
-    _worldPacket << Bits<1>(VeteranTokenRedeemWillKick);
-    _worldPacket << Bits<1>(WorldTokenRedeemWillKick);
+    _worldPacket << Bits<32>(0); // TODO(verify): 4 bytes of feature flags not yet mapped to names
 
-    _worldPacket << Bits<1>(KioskModeEnabled);
-    _worldPacket << Bits<1>(CompetitiveModeEnabled);
-    _worldPacket << Bits<1>(RedeemForBalanceAvailable);
-    _worldPacket << Bits<1>(WarModeEnabled);
-    _worldPacket << Bits<1>(CommunitiesEnabled);
-    _worldPacket << Bits<1>(BnetGroupsEnabled);
-    _worldPacket << Bits<1>(CharacterCommunitiesEnabled);
-    _worldPacket << Bits<1>(ClubPresenceAllowSubscribeAll);
-
-    _worldPacket << Bits<1>(VoiceChatParentalDisabled);
-    _worldPacket << Bits<1>(VoiceChatParentalMuted);
-    _worldPacket << Bits<1>(QuestSessionEnabled);
-    _worldPacket << Bits<1>(IsChatMuted);
-    _worldPacket << Bits<1>(ClubFinderEnabled);
-    _worldPacket << Bits<1>(CommunityFinderEnabled);
-    _worldPacket << Bits<1>(BrowserCrashReporterEnabled);
-    _worldPacket << Bits<1>(SpeakForMeAllowed);
-
-    _worldPacket << Bits<1>(DoesAccountNeedAADCPrompt);
-    _worldPacket << Bits<1>(IsAccountOptedInToAADC);
-    _worldPacket << Bits<1>(LfgRequireAuthenticatorEnabled);
-    _worldPacket << Bits<1>(ScriptsDisallowedForBeta);
-    _worldPacket << Bits<1>(WarGamesEnabled);
+    _worldPacket << Bits<2>(0);
     _worldPacket << OptionalInit(RaceClassExpansionLevels);
-    _worldPacket << Bits<1>(Unk441_0);
-    _worldPacket << Bits<1>(Unk441_1);
+    _worldPacket << Bits<5>(0);
 
-    _worldPacket << Bits<1>(GroupFinderEnabled);
-    _worldPacket << Bits<1>(PremadeGroupEnabled);
-    _worldPacket << Bits<1>(LFDEnabled);
-    _worldPacket << Bits<1>(LFREnabled);
-    _worldPacket << Bits<1>(UseActivePlayerDataQuestCompleted);
-    _worldPacket << Bits<1>(PetHappinessEnabled);
-    _worldPacket << Bits<1>(GuildEventsEditsEnabled);
-    _worldPacket << Bits<1>(GuildTradeSkillsEnabled);
-
-    _worldPacket << BitsSize<7>(Unknown1027);
-    _worldPacket << Bits<1>(BNSendWhisperUseV2Services);
-    _worldPacket << Bits<1>(BNSendGameDataUseV2Services);
-    _worldPacket << Bits<1>(IsAccountCurrencyTransferEnabled);
-    _worldPacket << Bits<1>(false); // unused 11.0.7
-    _worldPacket << Bits<1>(LobbyMatchmakerQueueFromMainlineEnabled);
-    _worldPacket << Bits<1>(CanSendLobbyMatchmakerPartyCustomizations);
-
+    _worldPacket << Bits<3>(0);
+    _worldPacket << BitsSize<10>(Unknown1027);
+    _worldPacket << Bits<7>(0);
     _worldPacket.FlushBits();
 
     {
-        _worldPacket.WriteBit(QuickJoinConfig.ToastsDisabled);
         _worldPacket << float(QuickJoinConfig.ToastDuration);
         _worldPacket << float(QuickJoinConfig.DelayDuration);
         _worldPacket << float(QuickJoinConfig.QueueMultiplier);
@@ -188,6 +143,8 @@ WorldPacket const* FeatureSystemStatus::Write()
         _worldPacket << float(QuickJoinConfig.ThrottleRfIlvlScalingAbove);
         _worldPacket << float(QuickJoinConfig.ThrottleDfMaxItemLevel);
         _worldPacket << float(QuickJoinConfig.ThrottleDfBestPriority);
+        _worldPacket << Bits<1>(QuickJoinConfig.ToastsDisabled); // 5.5.4 reads this bit after the floats (0x1405A7690)
+        _worldPacket.FlushBits();
     }
 
     if (SessionAlert)

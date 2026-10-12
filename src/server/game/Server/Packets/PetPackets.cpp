@@ -79,7 +79,7 @@ WorldPacket const* WorldPackets::Pet::PetUnlearnedSpells::Write()
 
 WorldPacket const* WorldPackets::Pet::PetNameInvalid::Write()
 {
-    _worldPacket << uint8(Result);
+    _worldPacket << uint32(Result); // 5.5.4 reads u32
     _worldPacket << RenameData.PetGUID;
     _worldPacket << int32(RenameData.PetNumber);
 
@@ -182,8 +182,8 @@ WorldPacket const* WorldPackets::Pet::SetPetSpecialization::Write()
 
 WorldPacket const* WorldPackets::Pet::PetActionFeedback::Write()
 {
+    _worldPacket << uint32(Response); // 5.5.4: u32 Response first, then SpellID
     _worldPacket << int32(SpellID);
-    _worldPacket << uint8(Response);
 
     return &_worldPacket;
 }
@@ -207,7 +207,7 @@ WorldPacket const* WorldPackets::Pet::PetDismissSound::Write()
 
 WorldPacket const* WorldPackets::Pet::PetTameFailure::Write()
 {
-    _worldPacket << uint8(Result);
+    _worldPacket << uint32(Result); // 5.5.4 reads u32
 
     return &_worldPacket;
 }

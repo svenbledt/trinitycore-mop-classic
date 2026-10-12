@@ -384,7 +384,7 @@ WorldPacket const* WorldPackets::Battleground::PVPMatchSetState::Write()
 
 WorldPacket const* WorldPackets::Battleground::PVPMatchComplete::Write()
 {
-    _worldPacket << uint8(Winner);
+    _worldPacket << uint32(Winner); // 5.5.4 reads u32
     _worldPacket << Duration;
     _worldPacket.WriteBit(LogData.has_value());
     _worldPacket.WriteBits(SoloShuffleStatus, 2);

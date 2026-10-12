@@ -259,7 +259,7 @@ WorldPacket const* QuestUpdateAddCredit::Write()
     _worldPacket << int32(ObjectID);
     _worldPacket << uint16(Count);
     _worldPacket << uint16(Required);
-    _worldPacket << uint8(ObjectiveType);
+    _worldPacket << int32(ObjectiveType); // 5.5.4 reads u32 (dispatcher case 0x140640219)
 
     return &_worldPacket;
 }
@@ -268,7 +268,7 @@ WorldPacket const* QuestUpdateAddCreditSimple::Write()
 {
     _worldPacket << int32(QuestID);
     _worldPacket << int32(ObjectID);
-    _worldPacket << uint8(ObjectiveType);
+    _worldPacket << int32(ObjectiveType); // 5.5.4 reads u32 (dispatcher case 0x1406402FC)
 
     return &_worldPacket;
 }
@@ -620,6 +620,8 @@ WorldPacket const* QuestGiverQuestListMessage::Write()
 WorldPacket const* QuestUpdateComplete::Write()
 {
     _worldPacket << int32(QuestID);
+    _worldPacket.WriteBit(false); // 5.5.4 (case 0x1406400CD) reads one flag bit; TODO(verify): meaning
+    _worldPacket.FlushBits();
 
     return &_worldPacket;
 }
@@ -659,7 +661,7 @@ void QuestPushResult::Read()
 {
     _worldPacket >> SenderGUID;
     _worldPacket >> QuestID;
-    _worldPacket >> Result;
+    Result = _worldPacket.read<uint32>(); // 5.5.4 client writes u32
 }
 
 WorldPacket const* QuestGiverInvalidQuest::Write()

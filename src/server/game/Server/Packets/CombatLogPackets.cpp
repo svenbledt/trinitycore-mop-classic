@@ -155,10 +155,7 @@ WorldPacket const* SpellHealLog::Write()
     *this << int32(OriginalHeal);
     *this << int32(OverHeal);
     *this << int32(Absorbed);
-    *this << uint32(Supporters.size());
-
-    for (Spells::SpellSupportInfo const& supportInfo : Supporters)
-        *this << supportInfo;
+    // 5.5.4 (dispatcher case 0x14064F3E9) has no supporter list here
 
     WriteBit(Crit);
     WriteBit(CritRollMade.has_value());
@@ -283,6 +280,8 @@ WorldPacket const* SpellMissLog::Write()
     _worldPacket << int32(SpellID);
     _worldPacket << Caster;
     _worldPacket << uint32(Entries.size());
+    _worldPacket.WriteBit(false); // 5.5.4 (case 0x140651196) reads one flag bit here; TODO(verify): meaning
+    _worldPacket.FlushBits();
     for (SpellLogMissEntry const& missEntry : Entries)
         _worldPacket << missEntry;
 
@@ -464,6 +463,7 @@ WorldPacket const* SpellHealAbsorbLog::Write()
     _worldPacket << int32(AbsorbedSpellID);
     _worldPacket << int32(Absorbed);
     _worldPacket << int32(OriginalHeal);
+    _worldPacket.WriteBit(false); // 5.5.4 ctor 0x1406430C0: HasLogData (SpellCastLogData) before ContentTuning
     _worldPacket.WriteBit(ContentTuning.has_value());
     _worldPacket.FlushBits();
 

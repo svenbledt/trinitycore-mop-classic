@@ -50,9 +50,11 @@ void WorldPackets::Scenes::SceneTriggerEvent::Read()
 void WorldPackets::Scenes::ScenePlaybackComplete::Read()
 {
     _worldPacket >> SceneInstanceID;
+    _worldPacket.read_skip<uint32>(); // 5.5.4 sends a second u32; TODO(verify): meaning
 }
 
 void WorldPackets::Scenes::ScenePlaybackCanceled::Read()
 {
     _worldPacket >> SceneInstanceID;
+    _worldPacket.read_skip<uint32>(); // 5.5.4 sends a second u32; TODO(verify): meaning
 }

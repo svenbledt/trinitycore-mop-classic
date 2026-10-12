@@ -290,7 +290,7 @@ WorldPacket const* WorldPackets::Mail::MailQueryNextTimeResult::Write()
         _worldPacket << entry.SenderGuid;
         _worldPacket << float(entry.TimeLeft);
         _worldPacket << int32(entry.AltSenderID);
-        _worldPacket << int8(entry.AltSenderType);
+        _worldPacket << int32(entry.AltSenderType); // 5.5.4 reader 0x1405C2570 reads u32
         _worldPacket << int32(entry.StationeryID);
     }
 

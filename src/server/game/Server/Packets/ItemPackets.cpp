@@ -104,7 +104,7 @@ void WorldPackets::Item::ItemPurchaseRefund::Read()
 WorldPacket const* WorldPackets::Item::ItemPurchaseRefundResult::Write()
 {
     _worldPacket << ItemGUID;
-    _worldPacket << uint8(Result);
+    _worldPacket << uint32(Result); // 5.5.4 reads u32
     _worldPacket.WriteBit(Contents.has_value());
     _worldPacket.FlushBits();
     if (Contents)

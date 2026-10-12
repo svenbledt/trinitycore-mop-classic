@@ -563,20 +563,23 @@ void WorldSession::HandleReadyCheckResponseOpcode(WorldPackets::Party::ReadyChec
 
 void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPackets::Party::RequestPartyMemberStats& packet)
 {
-    WorldPackets::Party::PartyMemberFullState partyMemberStats;
-
-    Player* player = ObjectAccessor::FindConnectedPlayer(packet.TargetGUID);
-    if (!player || !GetPlayer()->IsInSameRaidWith(player))
+    for (ObjectGuid const& targetGuid : packet.Targets)
     {
-        partyMemberStats.MemberGuid = packet.TargetGUID;
-        partyMemberStats.MemberStats.Status = MEMBER_STATUS_OFFLINE;
-    }
-    else
-    {
-        partyMemberStats.Initialize(player);
-    }
+        WorldPackets::Party::PartyMemberFullState partyMemberStats;
 
-    SendPacket(partyMemberStats.Write());
+        Player* player = ObjectAccessor::FindConnectedPlayer(targetGuid);
+        if (!player || !GetPlayer()->IsInSameRaidWith(player))
+        {
+            partyMemberStats.MemberGuid = targetGuid;
+            partyMemberStats.MemberStats.Status = MEMBER_STATUS_OFFLINE;
+        }
+        else
+        {
+            partyMemberStats.Initialize(player);
+        }
+
+        SendPacket(partyMemberStats.Write());
+    }
 }
 
 void WorldSession::HandleRequestRaidInfoOpcode(WorldPackets::Party::RequestRaidInfo& /*packet*/)

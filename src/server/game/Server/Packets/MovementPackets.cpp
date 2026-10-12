@@ -32,6 +32,7 @@ ByteBuffer& operator<<(ByteBuffer& data, MovementInfo const& movementInfo)
     bool hasInertia = movementInfo.inertia.has_value();
     bool hasAdvFlying = movementInfo.advFlying.has_value();
     bool hasStandingOnGameObjectGUID = movementInfo.standingOnGameObjectGUID.has_value();
+    bool hasDriveStatus = movementInfo.driveStatus.has_value();
 
     data << movementInfo.guid;
     data << uint32(movementInfo.flags);
@@ -47,6 +48,7 @@ ByteBuffer& operator<<(ByteBuffer& data, MovementInfo const& movementInfo)
 
     uint32 moveIndex = 0;
     data << moveIndex;
+    data << float(movementInfo.gravityModifier);
 
     /*for (uint32 i = 0; i < removeMovementForcesCount; ++i)
     {
@@ -62,6 +64,7 @@ ByteBuffer& operator<<(ByteBuffer& data, MovementInfo const& movementInfo)
     data.WriteBit(false); // RemoteTimeValid
     data.WriteBit(hasInertia);
     data.WriteBit(hasAdvFlying);
+    data.WriteBit(hasDriveStatus);
 
     data.FlushBits();
 
@@ -99,6 +102,15 @@ ByteBuffer& operator<<(ByteBuffer& data, MovementInfo const& movementInfo)
         }
     }
 
+    if (hasDriveStatus)
+    {
+        data << float(movementInfo.driveStatus->speed);
+        data << float(movementInfo.driveStatus->movementAngle);
+        data.WriteBit(movementInfo.driveStatus->accelerating);
+        data.WriteBit(movementInfo.driveStatus->drifting);
+        data.FlushBits();
+    }
+
     return data;
 }
 
@@ -120,6 +132,7 @@ ByteBuffer& operator>>(ByteBuffer& data, MovementInfo& movementInfo)
 
     uint32 moveIndex;
     data >> moveIndex;
+    data >> movementInfo.gravityModifier;
 
     for (uint32 i = 0; i < removeMovementForcesCount; ++i)
     {
@@ -136,6 +149,7 @@ ByteBuffer& operator>>(ByteBuffer& data, MovementInfo& movementInfo)
     data.ReadBit(); // RemoteTimeValid
     bool hasInertia = data.ReadBit();
     bool hasAdvFlying = data.ReadBit();
+    bool hasDriveStatus = data.ReadBit();
 
     if (hasTransport)
         data >> movementInfo.transport;
@@ -174,6 +188,16 @@ ByteBuffer& operator>>(ByteBuffer& data, MovementInfo& movementInfo)
             data >> movementInfo.jump.cosAngle;
             data >> movementInfo.jump.xyspeed;
         }
+    }
+
+    if (hasDriveStatus)
+    {
+        movementInfo.driveStatus.emplace();
+
+        data >> movementInfo.driveStatus->speed;
+        data >> movementInfo.driveStatus->movementAngle;
+        movementInfo.driveStatus->accelerating = data.ReadBit();
+        movementInfo.driveStatus->drifting = data.ReadBit();
     }
 
     return data;
@@ -503,6 +527,8 @@ void WorldPackets::Movement::CommonMovement::WriteMovementForceWithDirection(Mov
     data << uint32(movementForce.TransportID);
     data << float(movementForce.Magnitude);
     data << int32(movementForce.Unused910);
+    for (std::size_t i = 0; i < 3; ++i)
+        data << uint32(0); // 5.5.4 (client 0x14066ED90): 3 more u32 here; WPP: DurationMs, EndTimestamp, Flags
     data.WriteBits(AsUnderlyingType(movementForce.Type), 2);
     data.FlushBits();
 }
@@ -726,6 +752,8 @@ ByteBuffer& operator>>(ByteBuffer& data, MovementForce& movementForce)
     data >> movementForce.TransportID;
     data >> movementForce.Magnitude;
     data >> movementForce.Unused910;
+    for (std::size_t i = 0; i < 3; ++i)
+        data.read_skip<uint32>(); // 5.5.4 client writer 0x14066ED90 sends 3 more u32
     movementForce.Type = MovementForceType(data.ReadBits(2));
 
     return data;

@@ -533,6 +533,7 @@ namespace WorldPackets
 
             ObjectGuid Guid;      ///< Guid of the player that is logging in
             float FarClip = 0.0f; ///< Visibility distance (for terrain)
+            bool UnkBit = false;  // TODO(verify): meaning unknown
         };
 
         class LoginVerifyWorld final : public ServerPacket

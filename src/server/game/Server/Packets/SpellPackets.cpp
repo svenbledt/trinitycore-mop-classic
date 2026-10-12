@@ -808,6 +808,7 @@ WorldPacket const* PlaySpellVisualKit::Write()
 WorldPacket const* SpellVisualLoadScreen::Write()
 {
     _worldPacket << int32(SpellVisualKitID);
+    _worldPacket << int32(0); // 5.5.4 reads 12 bytes, handler uses +0/+8; TODO(verify): middle field (WPP: duration)
     _worldPacket << int32(Delay);
 
     return &_worldPacket;

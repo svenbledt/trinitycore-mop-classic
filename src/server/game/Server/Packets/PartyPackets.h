@@ -127,9 +127,9 @@ namespace WorldPackets
         class GroupUninvite final : public ServerPacket
         {
         public:
-            GroupUninvite() : ServerPacket(SMSG_GROUP_UNINVITE, 0) { }
+            GroupUninvite() : ServerPacket(SMSG_GROUP_UNINVITE, 1) { }
 
-            WorldPacket const* Write() override { return &_worldPacket; }
+            WorldPacket const* Write() override;
         };
 
         class RequestPartyMemberStats final : public ClientPacket
@@ -140,7 +140,7 @@ namespace WorldPackets
             void Read() override;
 
             Optional<uint8> PartyIndex;
-            ObjectGuid TargetGUID;
+            Array<ObjectGuid, MAX_RAID_SIZE> Targets; // 5.5.4 requests several members at once
         };
 
         struct PartyMemberPhase

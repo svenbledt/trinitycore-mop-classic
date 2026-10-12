@@ -177,7 +177,8 @@ WorldPacket const* StartLootRoll::Write()
     _worldPacket << int32(MapID);
     _worldPacket << RollTime;
     _worldPacket << uint8(ValidRolls);
-    _worldPacket.append(LootRollIneligibleReason.data(), LootRollIneligibleReason.size());
+    for (std::size_t i = 0; i < 3; ++i) // 5.5.4 reader 0x1405AF960 reads 3 reasons
+        _worldPacket << uint32(LootRollIneligibleReason[i]);
     _worldPacket << uint8(Method);
     _worldPacket << int32(DungeonEncounterID);
     _worldPacket << Item;

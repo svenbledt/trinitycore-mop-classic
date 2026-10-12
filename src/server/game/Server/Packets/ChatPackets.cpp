@@ -220,6 +220,7 @@ WorldPacket const* WorldPackets::Chat::Chat::Write()
     _worldPacket.WriteBit(FakeSenderName);
     _worldPacket.WriteBit(Unused_801.has_value());
     _worldPacket.WriteBit(ChannelGUID.has_value());
+    _worldPacket.WriteBit(false); // 5.5.4 reader 0x140588730: optional trailing u32 (TODO(verify): meaning)
     _worldPacket.FlushBits();
 
     _worldPacket.WriteString(SenderName);

@@ -104,7 +104,7 @@ WorldPacket const* WorldPackets::Arena::ArenaTeamCommandResult::Write()
 
 WorldPacket const* WorldPackets::Arena::ArenaTeamEvent::Write()
 {
-    _worldPacket << uint8(Event);
+    _worldPacket << uint32(Event); // 5.5.4 reads u32
 
     for (std::string const& param : Params)
         _worldPacket << BitsSize<9>(param);

@@ -98,6 +98,19 @@ struct MovementInfo
 
     Optional<AdvFlying> advFlying;
 
+    // 5.5.4 MovementInfo trailer (client writer 0x14066D2D0, WPP V5_5_0 ReadDriveStatusData)
+    struct DriveStatus
+    {
+        float speed;
+        float movementAngle;
+        bool accelerating;
+        bool drifting;
+    };
+
+    Optional<DriveStatus> driveStatus;
+
+    float gravityModifier = 1.0f; // 5.5.4: sent after MoveIndex
+
     Optional<ObjectGuid> standingOnGameObjectGUID;
 
     uint32 GetMovementFlags() const { return flags; }

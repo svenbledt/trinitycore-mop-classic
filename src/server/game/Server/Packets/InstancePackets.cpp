@@ -35,7 +35,7 @@ WorldPacket const* WorldPackets::Instance::UpdateInstanceOwnership::Write()
 ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Instance::InstanceLock const& lockInfos)
 {
     data << uint32(lockInfos.MapID);
-    data << uint32(lockInfos.DifficultyID);
+    data << uint16(lockInfos.DifficultyID); // 5.5.4 reader 0x1405B1E00
     data << uint64(lockInfos.InstanceID);
     data << uint32(lockInfos.TimeRemaining);
     data << uint32(lockInfos.CompletedMask);
@@ -110,7 +110,7 @@ WorldPacket const* WorldPackets::Instance::RaidInstanceMessage::Write()
 {
     _worldPacket << int32(Type);
     _worldPacket << uint32(MapID);
-    _worldPacket << uint32(DifficultyID);
+    _worldPacket << uint16(DifficultyID); // 5.5.4 reads u16
     _worldPacket << int32(TimeLeft);
     _worldPacket << BitsSize<8>(WarningMessage);
     _worldPacket << Bits<1>(Locked);

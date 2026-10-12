@@ -209,7 +209,9 @@ void WorldPackets::Misc::TutorialSetFlag::Read()
 
 WorldPacket const* WorldPackets::Misc::WorldServerInfo::Write()
 {
-    _worldPacket << uint32(DifficultyID);
+    _worldPacket << uint16(DifficultyID); // 5.5.4 ctor 0x1405A4FB0: u16 + 4 packed GUIDs before the bits
+    for (ObjectGuid const& guid : UnkGuids)
+        _worldPacket << guid;
     _worldPacket.WriteBit(IsTournamentRealm);
     _worldPacket.WriteBit(XRealmPvpAlert);
     _worldPacket.WriteBit(RestrictedAccountMaxLevel.has_value());
@@ -232,25 +234,27 @@ WorldPacket const* WorldPackets::Misc::WorldServerInfo::Write()
 
 void WorldPackets::Misc::SetDungeonDifficulty::Read()
 {
-    _worldPacket >> DifficultyID;
+    DifficultyID = _worldPacket.read<uint16>(); // 5.5.4 writer 0x140595890
 }
 
 void WorldPackets::Misc::SetRaidDifficulty::Read()
 {
-    _worldPacket >> DifficultyID;
-    _worldPacket >> Legacy;
+    // 5.5.4 writer 0x140598BB0: u32 Legacy (index of the raid difficulty slot), u16 DifficultyID
+    Legacy = _worldPacket.read<uint32>();
+    DifficultyID = _worldPacket.read<uint16>();
 }
 
 WorldPacket const* WorldPackets::Misc::DungeonDifficultySet::Write()
 {
-    _worldPacket << int32(DifficultyID);
+    _worldPacket << uint16(DifficultyID); // 5.5.4 ctor 0x1405B90F0
     return &_worldPacket;
 }
 
 WorldPacket const* WorldPackets::Misc::RaidDifficultySet::Write()
 {
-    _worldPacket << int32(DifficultyID);
-    _worldPacket << uint8(Legacy);
+    // 5.5.4 ctor 0x1405C8550 / handler 0x141A98C30: u32 slot index (Legacy), u16 DifficultyID
+    _worldPacket << uint32(Legacy);
+    _worldPacket << uint16(DifficultyID);
     return &_worldPacket;
 }
 
@@ -795,6 +799,7 @@ WorldPacket const* WorldPackets::Misc::DisplayToast::Write()
     {
         case DisplayToastType::NewItem:
             _worldPacket.WriteBit(BonusRoll);
+            _worldPacket.WriteBit(false); // 5.5.4 ctor 0x1405B0340 reads one more bit; TODO(verify): meaning
             _worldPacket << Item;
             _worldPacket << int32(LootSpec);
             _worldPacket << int8(Gender);

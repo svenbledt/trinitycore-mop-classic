@@ -182,3 +182,29 @@ WPP V5_5_0_61735 layouts were wrong for 5.5.4 in each case below; all verified a
 - **Per-character record** (reader `sub_1405A1160`): VisualItem (23 bytes) = `u32 ?, u32 ?, u8 Subclass, u8 InvType, u32 DisplayID, u32 DisplayEnchantID, u32 ?, u8 ?` — traced through the glue copy `sub_1418001F0` (packet +248 → display +1284, stride 28) into model setup `sub_141808950` (+1293 InvType, +1296 DisplayID → ItemDisplayInfo, +1300 enchant); the three `?` u32s are ItemID/Transmog/SecondaryIMA in unknown order; `u64` after LastPlayedTime. Restrictions (`sub_1405A16A0`): 4 bits, u32 Flags4, u32 senders, u32 types, **u32 (new)**, types, 6-bit lengths, strings.
 - **ResponseCodes**: index into the client string table at `0x143209B70` (113 names). Inserted vs Cata: CHAR_CREATE_RACECLASS_ACHIEVEMENT 50, CHAR_DELETE_FAILED_NEIGHBORHOOD_OWNER 76, CHAR_DELETE_FAILED_HOUSE_OWNER 77. Sending the old 65 meant DELETE_IN_PROGRESS, so the client hung.
 - Unhandled but harmless: `0x2D0036` (empty, from Lua `SetInCharacterSelect`), `0x4401AE`; `0x44012E` is mis-mapped as CMSG_BATTLENET_REQUEST (client sends an empty body, `sub_14059A860`).
+
+## 5.5.4 packet layout fixes (2026-10-12)
+Found by the IDA verifiers (`tools/mop-re/verify/AGENT.md`), each re-checked against the client reader/writer before
+the change. Unnamed new fields are sent as zero/false and marked `TODO(verify)` in code.
+
+| Packet | Client code | Change |
+|---|---|---|
+| SMSG_WORLD_SERVER_INFO | ctor 0x1405A4FB0 | DifficultyID u16; 4 packed GUIDs before the bits |
+| SMSG_FEATURE_SYSTEM_STATUS | reader 0x1405A7960 | extra {u8,u32,u32} array count, 7 more u32, bit positions moved (Europa bit 6, SessionAlert bit 3 of byte 1, RaceClassExpansionLevels byte 5 bit 5), 10-bit string length, QuickJoin floats before its bit. Unmapped feature bits are sent false |
+| CMSG_PLAYER_LOGIN | writer 0x14058E730 | trailing flag bit |
+| CMSG/SMSG dungeon + raid difficulty | 0x140595890, 0x140598BB0, 0x1405B90F0, 0x1405C8550 | DifficultyID u16; raid: u32 Legacy (slot index, handler 0x141A98C30) first |
+| SMSG_INSTANCE_INFO, RAID_INSTANCE_MESSAGE, calendar lockouts | 0x1405B1E00, 0x1405B8680/8780/8850 | DifficultyID u16; lockout added/removed: InstanceID last |
+| SMSG_CONTACT_LIST, FRIEND_STATUS | 0x1405C66D0, 0x1405C68C0 | ClassID u8 |
+| MovementInfo (all CMSG_MOVE_*, SMSG_MOVE_UPDATE*) | writer 0x14066D2D0 | f32 GravityModifier after MoveIndex; HasDriveStatus bit + {f32,f32,2 bits} (WPP V5_5_0 ReadMovementStats) |
+| MovementForce | writer 0x14066ED90 | 3 more u32 after the first (WPP: DurationMs, EndTimestamp, Flags) |
+| SMSG_CHAT | reader 0x140588730 | 3rd optional bit (trailing u32) |
+| SMSG_QUEST_UPDATE_ADD_CREDIT(_SIMPLE), QUEST_UPDATE_COMPLETE | dispatcher cases 0x140640219/2FC/0CD | ObjectiveType u32; complete: one flag bit |
+| SMSG_SPELL_HEAL_LOG / HEAL_ABSORB_LOG / MISS_LOG | 0x14064F3E9, 0x1406430C0, 0x140651196 | no supporters list; HasLogData bit; one bit after the entry count |
+| CMSG_REQUEST_PARTY_MEMBER_STATS | writer 0x140593DB0 | counted GUID list (handler answers each) |
+| SMSG_START_LOOT_ROLL | 0x1405AF960 | 3 x u32 ineligibility reasons |
+| SMSG_DISPLAY_TOAST | 0x1405B0340 | one more bit after BonusRoll |
+| Width-only (u8 -> u32) | per verifier evidence | ARENA_TEAM_EVENT, CHARACTER_RENAME_RESULT, CHAR_CUSTOMIZE_FAILURE, CHAR_FACTION_CHANGE_RESULT, PET_TAME_FAILURE, PET_NAME_INVALID, ITEM_PURCHASE_REFUND_RESULT, PVP_MATCH_COMPLETE, MAIL_QUERY_NEXT_TIME_RESULT (AltSenderType), CMSG_QUEST_PUSH_RESULT; PET_ACTION_FEEDBACK: u32 Response before SpellID |
+| Misc | per verifier evidence | calendar invite Flags u16; SPELL_VISUAL_LOAD_SCREEN 12 bytes; SCENE_PLAYBACK_COMPLETE/CANCELED 2nd u32; GROUP_UNINVITE 1 byte |
+
+Not yet fixed (second pass): ping packets, PLAYER_CHOICE_CLEAR, GUILD_KNOWN_RECIPES size, CMSG_SET_PET_SPECIALIZATION
+(0x3E0015 is the player spec change), SMSG_ENABLE_BARBER_SHOP size, the full update-field layout for UPDATE_OBJECT.

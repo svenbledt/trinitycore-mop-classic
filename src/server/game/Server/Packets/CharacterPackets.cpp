@@ -475,7 +475,7 @@ void CharacterRenameRequest::Read()
 
 WorldPacket const* CharacterRenameResult::Write()
 {
-    _worldPacket << uint8(Result);
+    _worldPacket << uint32(Result); // 5.5.4 reads u32
     _worldPacket.WriteBit(Guid.has_value());
     _worldPacket.WriteBits(Name.length(), 6);
     _worldPacket.FlushBits();
@@ -524,7 +524,7 @@ void CharRaceOrFactionChange::Read()
 
 WorldPacket const* CharFactionChangeResult::Write()
 {
-    _worldPacket << uint8(Result);
+    _worldPacket << uint32(Result); // 5.5.4 reads u32
     _worldPacket << Guid;
     _worldPacket.WriteBit(Display.has_value());
     _worldPacket.FlushBits();
@@ -604,6 +604,7 @@ void PlayerLogin::Read()
 {
     _worldPacket >> Guid;
     _worldPacket >> FarClip;
+    _worldPacket >> Bits<1>(UnkBit); // 5.5.4 writer 0x14058E730 appends one flag bit
 }
 
 WorldPacket const* LoginVerifyWorld::Write()
@@ -802,7 +803,7 @@ WorldPacket const* CharCustomizeSuccess::Write()
 
 WorldPacket const* CharCustomizeFailure::Write()
 {
-    _worldPacket << uint8(Result);
+    _worldPacket << uint32(Result); // 5.5.4 reads u32
     _worldPacket << CharGUID;
 
     return &_worldPacket;

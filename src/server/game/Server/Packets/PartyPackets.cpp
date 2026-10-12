@@ -135,10 +135,19 @@ WorldPacket const* WorldPackets::Party::GroupDecline::Write()
 
 void WorldPackets::Party::RequestPartyMemberStats::Read()
 {
+    // 5.5.4 writer 0x140593DB0: bit HasPartyIndex, u32 count, [u8 PartyIndex], GUID[count]
     bool hasPartyIndex = _worldPacket.ReadBit();
-    _worldPacket >> TargetGUID;
+    Targets.resize(_worldPacket.read<uint32>());
     if (hasPartyIndex)
         _worldPacket >> PartyIndex.emplace();
+    for (ObjectGuid& target : Targets)
+        _worldPacket >> target;
+}
+
+WorldPacket const* WorldPackets::Party::GroupUninvite::Write()
+{
+    _worldPacket << uint8(0); // 5.5.4 client reads one byte; TODO(verify): meaning
+    return &_worldPacket;
 }
 
 ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Party::PartyMemberPhase const& phase)

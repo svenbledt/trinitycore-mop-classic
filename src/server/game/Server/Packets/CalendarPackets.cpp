@@ -325,7 +325,7 @@ WorldPacket const* WorldPackets::Calendar::CalendarInviteStatus::Write()
     _worldPacket << InviteGuid;
     _worldPacket << uint64(EventID);
     _worldPacket << Date;
-    _worldPacket << uint32(Flags);
+    _worldPacket << uint16(Flags); // 5.5.4 reads u16
     _worldPacket << uint8(Status);
     _worldPacket << ResponseTime;
 
@@ -339,7 +339,7 @@ WorldPacket const* WorldPackets::Calendar::CalendarInviteRemoved::Write()
 {
     _worldPacket << InviteGuid;
     _worldPacket << uint64(EventID);
-    _worldPacket << uint32(Flags);
+    _worldPacket << uint16(Flags); // 5.5.4 reads u16
 
     _worldPacket.WriteBit(ClearPending);
     _worldPacket.FlushBits();
@@ -363,7 +363,7 @@ WorldPacket const* WorldPackets::Calendar::CalendarInviteRemovedAlert::Write()
 {
     _worldPacket << uint64(EventID);
     _worldPacket << Date;
-    _worldPacket << uint32(Flags);
+    _worldPacket << uint16(Flags); // 5.5.4 reads u16
     _worldPacket << uint8(Status);
 
     return &_worldPacket;
@@ -423,20 +423,22 @@ WorldPacket const* WorldPackets::Calendar::CalendarCommandResult::Write()
 
 WorldPacket const* WorldPackets::Calendar::CalendarRaidLockoutAdded::Write()
 {
-    _worldPacket << uint64(InstanceID);
+    // 5.5.4 reader 0x1405B8680: InstanceID moved last, DifficultyID is u16
     _worldPacket << ServerTime;
     _worldPacket << int32(MapID);
-    _worldPacket << uint32(DifficultyID);
+    _worldPacket << uint16(DifficultyID);
     _worldPacket << int32(TimeRemaining);
+    _worldPacket << uint64(InstanceID);
 
     return &_worldPacket;
 }
 
 WorldPacket const* WorldPackets::Calendar::CalendarRaidLockoutRemoved::Write()
 {
-    _worldPacket << uint64(InstanceID);
+    // 5.5.4 reader 0x1405B8780: MapID, u16 DifficultyID, InstanceID
     _worldPacket << int32(MapID);
-    _worldPacket << uint32(DifficultyID);
+    _worldPacket << uint16(DifficultyID);
+    _worldPacket << uint64(InstanceID);
 
     return &_worldPacket;
 }
@@ -445,7 +447,7 @@ WorldPacket const* WorldPackets::Calendar::CalendarRaidLockoutUpdated::Write()
 {
     _worldPacket << ServerTime;
     _worldPacket << int32(MapID);
-    _worldPacket << uint32(DifficultyID);
+    _worldPacket << uint16(DifficultyID); // 5.5.4 reads u16
     _worldPacket << int32(OldTimeRemaining);
     _worldPacket << int32(NewTimeRemaining);
 
@@ -468,7 +470,7 @@ WorldPacket const* WorldPackets::Calendar::CalendarInviteStatusAlert::Write()
 {
     _worldPacket << uint64(EventID);
     _worldPacket << Date;
-    _worldPacket << uint32(Flags);
+    _worldPacket << uint16(Flags); // 5.5.4 reads u16
     _worldPacket << uint8(Status);
 
     return &_worldPacket;

@@ -48,7 +48,7 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Social::ContactInfo const
     data << uint8(contact.Status);
     data << uint32(contact.AreaID);
     data << uint32(contact.Level);
-    data << uint32(contact.ClassID);
+    data << uint8(contact.ClassID); // 5.5.4 reader 0x1405C66D0
     data.WriteBits(contact.Notes.length(), 10);
     data.FlushBits();
     data.WriteString(contact.Notes);
@@ -90,7 +90,7 @@ WorldPacket const* WorldPackets::Social::FriendStatus::Write()
     _worldPacket << uint8(Status);
     _worldPacket << uint32(AreaID);
     _worldPacket << uint32(Level);
-    _worldPacket << uint32(ClassID);
+    _worldPacket << uint8(ClassID); // 5.5.4 reader 0x1405C68C0
     _worldPacket.WriteBits(Notes.length(), 10);
     _worldPacket.FlushBits();
     _worldPacket.WriteString(Notes);
