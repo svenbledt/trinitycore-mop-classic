@@ -286,55 +286,75 @@ void WorldPackets::Auth::ConnectTo::ShutdownEncryption()
     ConnectToRSA.reset();
 }
 
-WorldPackets::Auth::ConnectTo::ConnectTo() : ServerPacket(SMSG_CONNECT_TO, 256 + 1 + 16 + 2 + 4 + 1 + 8)
+WorldPackets::Auth::ConnectTo::ConnectTo() : ServerPacket(SMSG_CONNECT_TO, 4 + 4 + 1 + 8 + 4 + 4 + 1 + 16 + 2 + 1 + 3 + 1 + 8)
 {
 }
 
-WorldPacket const* WorldPackets::Auth::ConnectTo::Write()
+namespace WorldPackets::Auth
 {
-    ByteBuffer whereBuffer;
-    whereBuffer << uint8(Payload.Where.Type);
-    switch (Payload.Where.Type)
+// 5.5.4 client: SMSG_CONNECT_TO case 0x4D0008 in sub_140616FF0, token reader sub_1406E0190 (same as TC master)
+ByteBuffer& operator<<(ByteBuffer& data, ConnectTo::BleepToken const& bleepToken)
+{
+    data << SizedString::BitsSize<5>(bleepToken.Token);
+    data << SizedCString::BitsSize<24>(bleepToken.ProxyId);
+    data << SizedString::BitsSize<6>(bleepToken.Address);
+    data << uint64(bleepToken.TokenLifespan);
+    data << SizedString::Data(bleepToken.Token);
+    data << SizedCString::Data(bleepToken.ProxyId);
+    data << SizedString::Data(bleepToken.Address);
+
+    return data;
+}
+
+ByteBuffer& operator<<(ByteBuffer& data, ConnectTo::ConnectPayload const& payload)
+{
+    data << uint8(payload.Where.Type);
+    switch (payload.Where.Type)
     {
-        case IPv4:
-            whereBuffer.append(Payload.Where.Address.V4.data(), Payload.Where.Address.V4.size());
+        case ConnectTo::IPv4:
+            data.append(payload.Where.Address.V4.data(), payload.Where.Address.V4.size());
             break;
-        case IPv6:
-            whereBuffer.append(Payload.Where.Address.V6.data(), Payload.Where.Address.V6.size());
+        case ConnectTo::IPv6:
+            data.append(payload.Where.Address.V6.data(), payload.Where.Address.V6.size());
             break;
-        case NamedSocket:
-            whereBuffer << Payload.Where.Address.Name.data();
+        case ConnectTo::NamedSocket:
+            data << payload.Where.Address.Name.data();
             break;
         default:
             break;
     }
 
-    ByteBuffer signBuffer;
-    signBuffer.append(whereBuffer);
-    signBuffer << uint32(Payload.Where.Type);
-    signBuffer << uint16(Payload.Port);
+    data << uint16(payload.Port);
+    data << payload.Token;
 
-    Trinity::Crypto::RsaSignature rsa(*ConnectToRSA);
-    Trinity::Crypto::RsaSignature::SHA256 digestGenerator;
-    std::vector<uint8> signature;
-    rsa.Sign(signBuffer.data(), signBuffer.size(), digestGenerator, signature);
+    return data;
+}
+}
 
-    _worldPacket.append(signature.data(), signature.size());
-    _worldPacket.append(whereBuffer);
-    _worldPacket << uint16(Payload.Port);
+WorldPacket const* WorldPackets::Auth::ConnectTo::Write()
+{
+    _worldPacket << Size<uint32>(Payload);
     _worldPacket << uint32(Serial);
     _worldPacket << uint8(Con);
     _worldPacket << uint64(Key);
+    _worldPacket << uint32(NativeRealmAddress);
+    _worldPacket << uint32(Key3);
+
+    for (ConnectPayload const& payload : Payload)
+        _worldPacket << payload;
 
     return &_worldPacket;
 }
 
 void WorldPackets::Auth::AuthContinuedSession::Read()
 {
+    // 5.5.4 serializer 0x14059E320 (= TC master order)
     _worldPacket >> DosResponse;
-    _worldPacket >> Key;
     _worldPacket.read(LocalChallenge.data(), LocalChallenge.size());
     _worldPacket.read(Digest.data(), Digest.size());
+    _worldPacket >> Key;
+    _worldPacket >> NativeRealmAddress;
+    _worldPacket >> Key3;
 }
 
 void WorldPackets::Auth::ConnectToFailed::Read()

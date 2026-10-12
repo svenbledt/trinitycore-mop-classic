@@ -247,11 +247,20 @@ namespace WorldPackets
                 } Address = { };
             };
 
+            // 5.5.4 layout = TC master (12.x): payload list + bleep token, no RSA signature (client sub_1406E0190)
+            struct BleepToken
+            {
+                std::string_view Token;
+                std::string_view ProxyId;
+                std::string_view Address;
+                uint64 TokenLifespan = 0;
+            };
+
             struct ConnectPayload
             {
                 SocketAddress Where;
                 uint16 Port = 0;
-                std::array<uint8, 256> Signature = { };
+                BleepToken Token;
             };
 
             ConnectTo();
@@ -259,8 +268,10 @@ namespace WorldPackets
             WorldPacket const* Write() override;
 
             uint64 Key = 0;
+            uint32 NativeRealmAddress = 0;
+            uint32 Key3 = 0;
             ConnectToSerial Serial = ConnectToSerial::None;
-            ConnectPayload Payload;
+            std::vector<ConnectPayload> Payload;
             uint8 Con = 0;
         };
 
@@ -277,6 +288,8 @@ namespace WorldPackets
 
             uint64 DosResponse = 0;
             uint64 Key = 0;
+            uint32 NativeRealmAddress = 0;
+            uint32 Key3 = 0;
             std::array<uint8, 32> LocalChallenge;
             std::array<uint8, DigestLength> Digest;
 

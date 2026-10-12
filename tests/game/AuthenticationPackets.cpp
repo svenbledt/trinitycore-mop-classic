@@ -57,3 +57,32 @@ TEST_CASE("SMSG_UPDATE_GAME_TIME_STATE writes the GameTimeInfo block", "[Packets
     REQUIRE(unknown == 0);
     REQUIRE(bits == 0xE0);
 }
+
+// Client 5.5.4 reader (case 0x4D0008 in sub_140616FF0): payload list, no RSA signature; a misread crashed the client
+TEST_CASE("SMSG_CONNECT_TO writes the 5.5.4 payload-list layout", "[Packets]")
+{
+    WorldPackets::Auth::ConnectTo packet;
+    packet.Key = 0x1122334455667788;
+    packet.NativeRealmAddress = 0x01000001;
+    packet.Serial = WorldPackets::Auth::ConnectToSerial::WorldAttempt1;
+    packet.Con = 1;
+    WorldPackets::Auth::ConnectTo::ConnectPayload& payload = packet.Payload.emplace_back();
+    payload.Where.Type = WorldPackets::Auth::ConnectTo::IPv4;
+    payload.Where.Address.V4 = { 127, 0, 0, 1 };
+    payload.Port = 8085;
+    WorldPacket copy(*packet.Write());
+
+    REQUIRE(copy.read<uint32>() == 1);
+    REQUIRE(copy.read<uint32>() == 17);
+    REQUIRE(copy.read<uint8>() == 1);
+    REQUIRE(copy.read<uint64>() == 0x1122334455667788);
+    REQUIRE(copy.read<uint32>() == 0x01000001);
+    REQUIRE(copy.read<uint32>() == 0);
+    REQUIRE(copy.read<uint8>() == 1);
+    REQUIRE(copy.read<uint8>() == 127);
+    copy.read_skip(3);
+    REQUIRE(copy.read<uint16>() == 8085);
+    copy.read_skip(5);                  // 5 + 24 + 6 bits of empty bleep-token lengths
+    REQUIRE(copy.read<uint64>() == 0);  // TokenLifespan
+    REQUIRE(copy.rpos() == copy.size());
+}
