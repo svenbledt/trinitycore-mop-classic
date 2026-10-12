@@ -84,6 +84,14 @@ void WorldSession::SendAuthWaitQueue(uint32 position)
         SendPacket(WorldPackets::Auth::WaitQueueFinish().Write());
 }
 
+void WorldSession::SendGameTimeState()
+{
+    // BillingPlan 1 = unlimited subscription; 4/5 are veteran/full trial (docs/mop-port/game-time-state.md)
+    WorldPackets::Auth::UpdateGameTimeState gameTimeState;
+    gameTimeState.GameTimeInfo.BillingPlan = 1;
+    SendPacket(gameTimeState.Write());
+}
+
 void WorldSession::SendClientCacheVersion(uint32 version)
 {
     WorldPackets::ClientConfig::ClientCacheVersion cache;

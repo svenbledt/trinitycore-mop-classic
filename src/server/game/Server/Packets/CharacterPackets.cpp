@@ -81,19 +81,7 @@ EnumCharacters::EnumCharacters(WorldPacket&& packet) : ClientPacket(std::move(pa
 
 EnumCharactersResult::CharacterInfoBasic::CharacterInfoBasic(Field const* fields)
 {
-    //         0                1                2                3                 4                  5
-    // "SELECT characters.guid, characters.name, characters.race, characters.class, characters.gender, characters.level, "
-    //  6                7               8                      9                      10
-    // "characters.zone, characters.map, characters.position_x, characters.position_y, characters.position_z, "
-    //  11                    12                      13                   14                   15                     16                   17
-    // "guild_member.guildid, characters.playerFlags, characters.at_login, character_pet.entry, character_pet.modelid, character_pet.level, characters.equipmentCache, "
-    //  18                     19               20                      21                            22
-    // "character_banned.guid, characters.slot, characters.logout_time, characters.activeTalentGroup, characters.lastLoginBuild, "
-    //  23                                    24                                    25                                    26                                    27
-    // "characters.personalTabardEmblemStyle, characters.personalTabardEmblemColor, characters.personalTabardBorderStyle, characters.personalTabardBorderColor, characters.personalTabardBackgroundColor "
-    //  28
-    // "character_declinedname.genitive"
-
+    // fields[N] column legend: see docs/mop-port/enum-characters-columns.md
     Guid              = ObjectGuid::Create<HighGuid::Player>(fields[0].GetUInt64());
     VirtualRealmAddress = GetVirtualRealmAddress();
     GuildClubMemberID = ::Battlenet::Services::Clubs::CreateClubMemberId(Guid);
@@ -198,13 +186,16 @@ EnumCharactersResult::CharacterInfoBasic::CharacterInfoBasic(Field const* fields
 
 ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterInfoBasic::VisualItemInfo const& visualItem)
 {
+    // 5.5.4 reader sub_1405A1160 reads u32 u32 u8 u8 u32 u32 u32 u8 (23 bytes)
+    // TODO(verify): field-to-slot mapping is by size only; trailing u8 meaning unknown
     data << uint32(visualItem.DisplayID);
-    data << uint8(visualItem.InvType);
     data << uint32(visualItem.DisplayEnchantID);
+    data << uint8(visualItem.InvType);
     data << uint8(visualItem.Subclass);
     data << int32(visualItem.SecondaryItemModifiedAppearanceID);
     data << uint32(visualItem.ItemID);
     data << uint32(visualItem.TransmogrifiedItemID);
+    data << uint8(0);
 
     return data;
 }
@@ -213,7 +204,7 @@ ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterInfoBasi
 {
     data << charInfo.Guid;
     data << uint32(charInfo.VirtualRealmAddress);
-    data << uint8(charInfo.ListPosition);
+    data << uint16(charInfo.ListPosition);
     data << uint8(charInfo.RaceID);
     data << uint8(charInfo.SexID);
     data << uint8(charInfo.ClassID);
@@ -228,6 +219,7 @@ ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterInfoBasi
     data << uint32(charInfo.Flags);
     data << uint32(charInfo.Flags2);
     data << uint32(charInfo.Flags3);
+    data << uint32(charInfo.Flags4);
     data << uint8(charInfo.unkWod61x);
 
     data << uint32(charInfo.PetCreatureDisplayID);
@@ -239,6 +231,7 @@ ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterInfoBasi
 
     data << int32(charInfo.Unknown703);
     data << charInfo.LastPlayedTime;
+    data << uint64(0); // TODO(verify): 5.5.4 second u64 (sub_1405A1160 +200), meaning unknown
     data << int32(charInfo.LastLoginVersion);
     data << charInfo.PersonalTabard;
 
@@ -247,12 +240,15 @@ ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterInfoBasi
 
     data << int32(charInfo.TimerunningSeasonID);
     data << uint32(charInfo.OverrideSelectScreenFileDataID);
+    data << uint32(0); // Unused1110_1 (WPP V5_5_0 ReadBasicCharacterListEntry)
 
     for (ChrCustomizationChoice const& customization : charInfo.Customizations)
         data << customization;
 
     data << BitsSize<6>(charInfo.Name);
     data << Bits<1>(charInfo.FirstLogin);
+    data << Bits<1>(charInfo.Unused1110_2);
+    data << Bits<1>(charInfo.Unused1110_3);
 
     data.FlushBits();
 
@@ -266,13 +262,14 @@ ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterRestrict
     ASSERT(restrictionsAndMails.MailSenders.size() == restrictionsAndMails.MailSenderTypes.size());
 
     data << Bits<1>(restrictionsAndMails.BoostInProgress);
-    data << Bits<1>(restrictionsAndMails.RpeResetAvailable);
-    data << Bits<1>(restrictionsAndMails.RpeResetQuestClearAvailable);
+    data << Bits<2>(restrictionsAndMails.EraChoiceState);
+    data << Bits<1>(restrictionsAndMails.RpeResetAvailable); // 5.5.4 reads 4 bits here (sub_1405A16A0)
     data.FlushBits();
 
     data << uint32(restrictionsAndMails.Flags4);
     data << uint32(restrictionsAndMails.MailSenders.size());
     data << uint32(restrictionsAndMails.MailSenderTypes.size());
+    data << uint32(0); // TODO(verify): 5.5.4 u32 after the counts (sub_1405A16A0 +64), meaning unknown
 
     if (!restrictionsAndMails.MailSenderTypes.empty())
         data.append(restrictionsAndMails.MailSenderTypes.data(), restrictionsAndMails.MailSenderTypes.size());
@@ -283,8 +280,7 @@ ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::CharacterRestrict
     data.FlushBits();
 
     for (std::string const& str : restrictionsAndMails.MailSenders)
-        if (!str.empty())
-            data << str;
+        data << str; // length is sent as size + 1, so the NUL is always needed
 
     return data;
 }
@@ -311,7 +307,9 @@ ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::RegionwideCharact
 
 ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::RaceUnlock const& raceUnlock)
 {
-    data << int32(raceUnlock.RaceID);
+    // 5.5.4 reader sub_1405A2280: u8 RaceID, u32 count of (u8, u32, bit) class unlocks, then the bits
+    data << uint8(raceUnlock.RaceID);
+    data << uint32(0); // TODO(verify): JamClassUnlock entries, meaning unknown; sent empty
     data << Bits<1>(raceUnlock.HasExpansion);
     data << Bits<1>(raceUnlock.HasAchievement);
     data << Bits<1>(raceUnlock.HasHeritageArmor);
@@ -380,6 +378,7 @@ WorldPacket const* EnumCharactersResult::Write()
     _worldPacket << Bits<1>(IsNewPlayerRestricted);
     _worldPacket << Bits<1>(IsNewPlayer);
     _worldPacket << Bits<1>(IsTrialAccountRestricted);
+    _worldPacket << Bits<1>(false); // TODO(verify): 5.5.4 8th header bit (sub_1405A2280 +100), meaning unknown
     _worldPacket << OptionalInit(DisabledClassesMask);
     _worldPacket << Bits<1>(DontCreateCharacterDisplays);
     _worldPacket << uint32(Characters.size());
@@ -399,9 +398,6 @@ WorldPacket const* EnumCharactersResult::Write()
     for (RaceLimitDisableInfo const& raceLimitDisableInfo : RaceLimitDisables)
         _worldPacket << raceLimitDisableInfo;
 
-    for (WarbandGroup const& warbandGroup : WarbandGroups)
-        _worldPacket << warbandGroup;
-
     for (CharacterInfo const& charInfo : Characters)
         _worldPacket << charInfo;
 
@@ -410,6 +406,10 @@ WorldPacket const* EnumCharactersResult::Write()
 
     for (RaceUnlock const& raceUnlock : RaceUnlockData)
         _worldPacket << raceUnlock;
+
+    // WarbandGroups come last in 5.5.x (WPP V5_5_0 HandleEnumCharactersResult).
+    for (WarbandGroup const& warbandGroup : WarbandGroups)
+        _worldPacket << warbandGroup;
 
     return &_worldPacket;
 }
@@ -448,7 +448,8 @@ void CreateCharacter::Read()
 
 WorldPacket const* CreateChar::Write()
 {
-    _worldPacket << uint8(Code);
+    // 5.5.4 client reads the result code as a uint32 (dump: SMSG_CREATE_CHAR reader), then a packed GUID.
+    _worldPacket << uint32(Code);
     _worldPacket << Guid;
     return &_worldPacket;
 }
@@ -460,7 +461,8 @@ void CharDelete::Read()
 
 WorldPacket const* DeleteChar::Write()
 {
-    _worldPacket << uint8(Code);
+    // 5.5.4 client reads the result code as a uint32 (dump: SMSG_DELETE_CHAR reader).
+    _worldPacket << uint32(Code);
     return &_worldPacket;
 }
 

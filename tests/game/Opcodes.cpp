@@ -55,9 +55,44 @@ TEST_CASE("Login path opcodes match client build 5.5.4.70032", "[Opcodes]")
     REQUIRE(SMSG_AUTH_RESPONSE == 0x460001);
     REQUIRE(SMSG_ENUM_CHARACTERS_RESULT == 0x460018);
     REQUIRE(SMSG_ENTER_ENCRYPTED_MODE == 0x4D0004);
-    REQUIRE(SMSG_SOCIAL_CONTRACT_REQUEST_RESPONSE == 0x460320);
+    REQUIRE(SMSG_SOCIAL_CONTRACT_REQUEST_RESPONSE == 0x460331);
     for (OpcodeClient op : { CMSG_AUTH_SESSION, CMSG_ENUM_CHARACTERS, CMSG_PING })
         REQUIRE(GetOpcodeArrayIndex(op) >= 0);
     for (OpcodeServer op : { SMSG_AUTH_CHALLENGE, SMSG_AUTH_RESPONSE, SMSG_ENUM_CHARACTERS_RESULT })
+        REQUIRE(GetOpcodeArrayIndex(op) >= 0);
+}
+
+TEST_CASE("Login-flow SMSGs match client build 5.5.4.70032", "[Opcodes]")
+{
+    // Each value tied to its client ctor/handler layout, see docs/mop-port/opcode-harvest.md
+    REQUIRE(SMSG_UPDATE_GAME_TIME_STATE == 0x4602DB);
+    REQUIRE(SMSG_TUTORIAL_FLAGS == 0x460272);
+    REQUIRE(SMSG_BATTLE_NET_CONNECTION_STATUS == 0x4602BB);
+    REQUIRE(SMSG_UNDELETE_COOLDOWN_STATUS_RESPONSE == 0x460280);
+    REQUIRE(SMSG_NPC_INTERACTION_OPEN_RESULT == 0x460326);
+    REQUIRE(SMSG_SET_TIME_ZONE_INFORMATION == 0x460124);
+    REQUIRE(SMSG_ACCOUNT_DATA_TIMES == 0x4601B9);
+    REQUIRE(SMSG_HOTFIX_CONNECT == 0x4A0003);
+    REQUIRE(SMSG_CACHE_VERSION == 0x4A000E);
+    REQUIRE(SMSG_SUSPEND_COMMS == 0x4D0005);
+    REQUIRE(SMSG_PONG == 0x4D0009);
+    REQUIRE(SMSG_MULTIPLE_PACKETS == 0x4D000D);
+    REQUIRE(SMSG_NEW_WORLD == 0x46002D);
+    for (OpcodeServer op : { SMSG_UPDATE_GAME_TIME_STATE, SMSG_TUTORIAL_FLAGS, SMSG_PONG, SMSG_MULTIPLE_PACKETS })
+        REQUIRE(GetOpcodeArrayIndex(op) >= 0);
+}
+
+TEST_CASE("Character create/delete opcodes match client build 5.5.4.70032", "[Opcodes]")
+{
+    // Harvested from the client dump (packet-class getters + (de)serializers), see docs/mop-port/re-notes.md.
+    REQUIRE(CMSG_CREATE_CHARACTER == 0x440070);
+    REQUIRE(CMSG_CHAR_DELETE == 0x4400CD);
+    REQUIRE(SMSG_CREATE_CHAR == 0x4601AF);
+    REQUIRE(SMSG_DELETE_CHAR == 0x4601B0);
+    // 0x4400CC is the no-arg SERVER_TIME_OFFSET_REQUEST (sent at the char screen), not char-delete.
+    REQUIRE(CMSG_SERVER_TIME_OFFSET_REQUEST == 0x4400CC);
+    for (OpcodeClient op : { CMSG_CREATE_CHARACTER, CMSG_CHAR_DELETE })
+        REQUIRE(GetOpcodeArrayIndex(op) >= 0);
+    for (OpcodeServer op : { SMSG_CREATE_CHAR, SMSG_DELETE_CHAR })
         REQUIRE(GetOpcodeArrayIndex(op) >= 0);
 }

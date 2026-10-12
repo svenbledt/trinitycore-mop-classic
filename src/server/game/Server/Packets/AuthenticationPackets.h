@@ -200,6 +200,17 @@ namespace WorldPackets
             WorldPacket const* Write() override { return &_worldPacket; }
         };
 
+        // Client stores this at NetClient+0x7F4; trial/veteran/billing Lua reads it (docs/mop-port/game-time-state.md)
+        class UpdateGameTimeState final : public ServerPacket
+        {
+        public:
+            UpdateGameTimeState() : ServerPacket(SMSG_UPDATE_GAME_TIME_STATE, 4 + 4 + 4 + 1) { }
+
+            WorldPacket const* Write() override;
+
+            AuthResponse::AuthSuccessInfo::GameTime GameTimeInfo;
+        };
+
         enum class ConnectToSerial : uint32
         {
             None            = 0,

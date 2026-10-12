@@ -4,6 +4,9 @@ Dump: `WowClassic_dump.exe` FileVersion 5.5.4.70032. Addresses are IDA EAs in th
 
 ## Opcode tables
 
+> 2026-10-10: superseded as the source of `Opcodes.h` by the getter harvest + structural audit in
+> `opcode-harvest.md`. Several "confirmed" values below were wrong (e.g. SOCIAL_CONTRACT 0x460320, NPC_INTERACTION 0x460315).
+
 Opcode = `(group << 16) | index`, sent as a 32-bit value on the wire (as in TrinityCore's `IncomingPacketHeader::EncryptedOpcode`).
 
 - **Receive path:** `NetClient` HandleData `0x1413DF250`.
@@ -136,3 +139,46 @@ Method for future low-confidence SMSG in group 0x46: scope `search_text "<idx>"`
 ### Phase 1 review follow-ups (2026-10-09)
 - Added `tools/mop-re/test/opcodes_unique.test.ts`: fails if two opcode names share a value (the 0x460320 collision class). `gen_opcodes.ts` already rejects dupes at generation; this guards the committed header against hand-edits.
 - `EnumUtils<Powers>::Count()` returns 29 while FromIndex/ToIndex span 31 — pre-existing TC pattern (Count == MAX_POWERS-1), not a regression; confirmed nothing sizes an array by it. Deferred.
+
+## Phase 2a (2026-10-09): character create/delete opcode harvest
+
+Harvested from the client dump (IDA db 23ceab28, imagebase 0x140000000) by reading each packet class's getter + (de)serializer. All four repo values were already correct; the SMSG pair is now client-verified (TODO markers dropped).
+
+- **SMSG_CREATE_CHAR = `0x4601AF`.** Getter `sub_1405BDE00`; ctor `sub_1405BDE10` reads `{uint32 Code @+32, ObjectGuid Guid @+40}` (code via `sub_142E4CB60` = 4-byte read; GUID via `sub_142E9E600`). Matches `{Code, Guid}`. (The index-stable candidates are other packets: `0x4601A4` reads one string, `0x4601A5` reads `{Guid,u32}`.)
+- **SMSG_DELETE_CHAR = `0x4601B0`.** Getter `sub_1405BDE90`; ctor `sub_1405BDEA0` reads `{uint32 Code @+32}` only, no GUID. Matches `{Code}`.
+- Both drifted **+0xB** from WPP 5.5.3 (`0x3A01A4`/`0x3A01A5`), bracketed by verified anchors ACCOUNT_DATA_TIMES (`0x3A01AE→0x4601B9`) and SERVER_TIME_OFFSET (`0x3A01B8→0x4601C3`). Game-time moved to `0x4601BA`/`0x4601BB`, so `0x4601AF`/`0x4601B0` are create/delete, not game-time.
+- **CMSG_CREATE_CHARACTER = `0x440070`.** Getter `sub_140591860`; header writer `sub_140591820` emits `0x440070`; body writer `sub_14066AD50` serializes name-length bits, 4 flag bits, race/class/sex bytes, customizations count, season id, name string, optional TemplateSet, then N×`{u32 optionId, u32 choiceId}`.
+- **CMSG_CHAR_DELETE = `0x4400CD`.** Getter `sub_140596C30`; body writer `sub_140586660` writes one GUID (`sub_142E9E630`). CMSG neighborhood drifted **+1** (WPP CHAR_DELETE `0xCC→0xCD`).
+- **`0x4400CC` resolved: = CMSG_SERVER_TIME_OFFSET_REQUEST** (empty body `sub_1401EF480`; WPP SERVER_TIME_OFFSET_REQUEST `0xCB→0xCC`, +1). This is the no-arg packet the client sends at the char screen — not char-delete; already mapped correctly in the repo.
+- **Task 2/4 carry-forward:** client reads the SMSG create/delete `Code` as **uint32** (`sub_142E4CB60`, 4-byte). Repo `CreateChar`/`DeleteChar::Write` emit `uint8 Code` — widen in Phase 2a Task 2/4.
+- **Tooling note (deferred):** `src/match.ts` assumes a single monotone index offset per group, but 5.5.4 drift is piecewise non-monotone, so hand-verified high-index opcodes (SOCIAL_CONTRACT, NPC_INTERACTION, now CREATE/DELETE) can't be fed into `names` without collapsing the group alignment. They're kept as top-level provenance keys (ignored by the matcher) and carried directly in the committed `Opcodes.h`. A non-collapsing override overlay in `match.ts` would restore a clean `match.ts`+`gen_opcodes` reproduction.
+
+## Phase 2a (2026-10-09): SMSG_ENUM_CHARACTERS_RESULT per-character record
+
+Diffed the repo's `EnumCharactersResult` writers against WPP V5_5_0_61735 `HandleEnumCharactersResult` / `ReadBasicCharacterListEntry` / `ReadCharacterRestrictionAndMailData` (the record Phase 1's empty-list test never exercised). Fixes applied to `CharacterPackets.cpp`:
+
+- Per-character record (`CharacterInfoBasic`):
+  - `ListPosition` widened uint8 -> **uint16**.
+  - Inserted **Flags4 (uint32)** between Flags3 and the CantLoginReason byte (`unkWod61x`).
+  - Inserted **Unused1110_1 (uint32)** after OverrideSelectScreenFileDataID, before the customizations array.
+  - Added **two unused bits** after the FirstLogin bit (Unused1110_2/3) in the trailing bit block.
+- `CharacterRestrictionAndMailData`: inserted the **EraChoiceState (2 bits)** between BoostInProgress and RpeResetAvailable.
+- Top-level `EnumCharactersResult::Write`: moved the **WarbandGroups loop last** (after RaceUnlockData); WPP V5_5_0 orders it after RegionwideCharacters/RaceUnlock. Harmless while empty (Phase 1), wrong once populated.
+- VisualItems (fixed array of 19), the VisualItemInfo field order, PersonalTabard (5x int32), and the create/delete read paths already matched WPP; unchanged.
+- Verified by `tests/game/CharacterPackets.cpp` "Enum character record..." round-trip (RED on the uint8 ListPosition, GREEN after). Live-client render of a real character is the Task 5 e2e gate. 5.5.4-specific deltas vs WPP 5.5.3 to re-confirm there: none observed, but the record was not re-derived field-by-field from the 5.5.4 binary (WPP V5_5_0 is the cited layout authority per CLAUDE.md; check against the client at e2e).
+
+## Phase 2a (2026-10-09): character delete path verified
+
+- `CMSG_CHAR_DELETE` (`CharDelete::Read` = `>> Guid`) matches WPP V5_5_0 `HandleClientCharDelete` (one packed GUID) and the client sender `sub_140586660` (writes one GUID). No change.
+- `SMSG_DELETE_CHAR` (`DeleteChar::Write`) result code is uint32 for 5.5.4 — fixed and unit-tested in Task 2 (shared finding with SMSG_CREATE_CHAR).
+- `WorldSession::HandleCharDeleteOpcode` (`CharacterHandler.cpp:863`) already rejects a GUID the account does not own (`accountId != initAccountId` -> `OnPlayerFailedDelete`, return) and guards guild-leader / arena-captain / loaded-character cases. Upstream validation intact; the stack is not relaxed.
+
+## Phase 2a live fixes (2026-10-12)
+
+WPP V5_5_0_61735 layouts were wrong for 5.5.4 in each case below; all verified against the client reader.
+
+- **SMSG_FEATURE_SYSTEM_STATUS_GLUE_SCREEN 0x460064** (reader `sub_1405A8450`, handler `sub_1417F3CF0`): after the 11-bit RealmHiddenAlert length come 6 bits; the 2nd lands at packet+365 = `byte_143D796BF`, returned by Lua `IsWowTokenLimitedModeEnabled()`, which disables the Create button. Writer: RealmlessCharSelect (TODO verify), WowTokenLimitedMode, 4 unknown bits. RealmHiddenAlert length is sent as size+1 (NUL always written).
+- **SMSG_ENUM_CHARACTERS_RESULT 0x460018** (reader `sub_1405A2280`): 10 header bits; RaceUnlock = `u8 RaceID, u32 ClassUnlockCount, 5 bits (HasExpansion, HasAchievement, HasHeritageArmor, IsLocked, Unused)`, then per class `{u8, u32, 1 bit}`. Race list built in `sub_1417FC9D0` from `qword_145E84AB0`.
+- **Per-character record** (reader `sub_1405A1160`): VisualItem = `u32 DisplayID, u32 DisplayEnchantID, u8 InvType, u8 Subclass, u32, u32, u32, u8` (23 bytes; field mapping by size, TODO verify); `u64` after LastPlayedTime. Restrictions (`sub_1405A16A0`): 4 bits, u32 Flags4, u32 senders, u32 types, **u32 (new)**, types, 6-bit lengths, strings.
+- **ResponseCodes**: index into the client string table at `0x143209B70` (113 names). Inserted vs Cata: CHAR_CREATE_RACECLASS_ACHIEVEMENT 50, CHAR_DELETE_FAILED_NEIGHBORHOOD_OWNER 76, CHAR_DELETE_FAILED_HOUSE_OWNER 77. Sending the old 65 meant DELETE_IN_PROGRESS, so the client hung.
+- Unhandled but harmless: `0x2D0036` (empty, from Lua `SetInCharacterSelect`), `0x4401AE`; `0x44012E` is mis-mapped as CMSG_BATTLENET_REQUEST (client sends an empty body, `sub_14059A860`).

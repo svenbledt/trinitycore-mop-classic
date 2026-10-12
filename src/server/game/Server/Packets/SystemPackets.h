@@ -239,9 +239,8 @@ namespace WorldPackets
             bool Unused1000                                       = false;
             bool AccountSaveDataExportEnabled                     = false;
             bool AccountLockedByExport                            = false;
-            bool BNSendWhisperUseV2Services                       = true;  ///< BNSendWhisper will send to v2.WhisperService instead of v1.NotificationService
-            bool BNSendGameDataUseV2Services                      = true;  ///< BNSendGameData will send to v2.NotificationService instead of v1.NotificationService
-            bool CharacterSelectListModeRealmless                 = false;
+            bool CharacterSelectListModeRealmless                 = false; // TODO(verify): placed by WPP order only
+            bool WowTokenLimitedMode                              = false; ///< IsWowTokenLimitedModeEnabled(): true disables character create
             Optional<EuropaTicketConfig> EuropaTicketSystemStatus;
             std::vector<int32> LiveRegionCharacterCopySourceRegions;
             uint32 TokenPollTimeSeconds                           = 0;
@@ -258,7 +257,7 @@ namespace WorldPackets
             int32 ActiveTimerunningSeasonID                       = 0;
             int32 RemainingTimerunningSeasonSeconds               = 0;
             // TODO(verify): 5.5.4 additions (IDA 0x1405A8450), meaning unknown; sent empty/zero
-            std::array<bool, 3> Unk554Bits                        = { };
+            std::array<bool, 4> Unk554Bits                        = { };
             std::array<int32, 2> Unk554Ints                       = { };
             int16 MaxPlayerGuidLookupsPerRequest                  = 50;
             int16 NameLookupTelemetryInterval                     = 600;
