@@ -6,13 +6,16 @@ Last updated: 2026-10-18
 |---|---|
 | Base | TrinityCore `cata_classic` @ `0614c9fd941` (4.4.2.60895) |
 | Target | MoP Classic **5.5.4.70449** (dump `d:\WoW\World of Warcraft\_classic_\WowClassic_orion.exe`; 70032 dump kept as `WowClassic_dump.exe`) |
-| Current phase | **2b — enter world; full opcode verification PAUSED (2026-10-12, to save session usage)** |
-| Next | Resume opcode verification (s22, s23), then fix server packet layouts, then Enter World test (branch `mop/phase2b`) |
+| Current phase | **2b — enter world; opcode verification round 3 complete (2026-10-18)** |
+| Next | Fix the s22/s23 layout diffs (below), auth rows for 70449, then Enter World test (branch `mop/phase2b`) |
 
 ## Re-baseline to 5.5.4.70449 (2026-10-18)
 - Opcodes: every name keeps its 70032 value, proven by a build-to-build diff of all 2482 packets (`opcode-harvest.md` "70032 → 70449"). `Opcodes.h` banner only.
 - **Still open for 70449:** `build_info`/`build_auth_key`/`realmlist.gamebuild` rows (auth key must be captured again), update-field layout and DB2 layout hashes not re-checked yet.
-- REA's IDA provider cannot attach to the existing `.i64` files: `open_binary` on the exe starts a fresh full auto-analysis in `%TEMP%` (stopped). Verification still uses the user's IDA GUI database.
+- Round 3 finished on 70449 with REA (`verify/AGENT.rea.md`, chunks re-addressed by `pe/rebase_chunks.py`): s22 31 proven / 9 ambiguous, s23 36 / 1. +67 anchors, no value moved (leave-one-out 2705 reproduced, 0 contradicted). Three quest proofs that lacked handler evidence were checked by hand (game errors, Lua `QUEST_ACCEPT_CONFIRM`).
+- **Server layout diffs found (not fixed yet):** AURA_POINTS_DEPLETED slot u16, QUEST_PUSH_RESULT result u32, QUEST_GIVER_REQUEST_ITEMS +2 u32, GOSSIP_QUEST_UPDATE +1 u32, LEARNED_SPELLS +1 u32, PET_SPELLS_MESSAGE / SPELL_NON_MELEE_DAMAGE_LOG +2 u32, SPELL_INTERRUPT_LOG trailing bit, SPELL_GO tail order. Table: `tools/mop-re/out/70449/verify/layout-diffs.md` (gitignored; copied into `re-notes.md` when fixed).
+- Remaining ambiguous: 4 MOVE_SET_ADV_FLYING_* slots (handler global never written, client ignores them), INVALIDATE_PLAYER (0x630007 vs 0x630008), PLAYER_SKINNED, PLAYER_IS_ADVENTURE_MAP_POI_VALID, 2 PLAYER_AZERITE_*, OPEN_CONTAINER. 300 SMSGs still `TODO(verify)` and blocked by the send guard.
+- REA's IDA provider cannot attach to the existing `.i64` files: `open_binary` on the exe starts a fresh full auto-analysis in `%TEMP%` (stopped). A fresh REA analysis of 70449 now exists (temp DB, ~25 min to build); its session degraded to `unreadable_output` after two parallel verifiers, and `read_bytes`/`search_bytes` are unsupported with the IDA provider, so byte/string lookups go through the static `pe/` scripts.
 
 ## Phase 2b opcode verification — PAUSED (2026-10-12)
 Every packet name is being proven from client code in IDA (method: `opcode-harvest.md`, steps 1–7; verifier brief `tools/mop-re/verify/AGENT.md`).
