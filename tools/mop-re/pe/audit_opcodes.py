@@ -6,13 +6,10 @@ from pathlib import Path
 import pefile
 from capstone import Cs, CS_ARCH_X86, CS_MODE_64
 
-# 70032 CDataStore primitives (re-locate per build, see the doc)
-SMSG_PRIM = {0x142E4CAC0: "B", 0x142E4CB10: "H", 0x142E4CB60: "I", 0x142E4CBB0: "Q", 0x142E4D0D0: "S",
-             0x142E4D120: "S", 0x142E9E600: "G"}
-CMSG_PRIM = {0x142E4D5B0: "I", 0x142E4D470: "B", 0x142E9E630: "G", 0x140583600: "B", 0x142E4DC70: "S",
-             0x142E4D7B0: "Q", 0x142E4D650: "I", 0x142E4D510: "H", 0x140583540: "B", 0x140583480: "B",
-             0x140583240: "B", 0x140583180: "B", 0x140583300: "B", 0x1405833C0: "B"}
-NOISE = {0x142E027A0, 0x142DE2EA0, 0x142DE2D80, 0x142FC00E0, 0x142FC0780, 0x1401D0C60}
+from prims import P
+
+# CDataStore primitives of the selected build (pe/prims.py)
+SMSG_PRIM, CMSG_PRIM, NOISE = P["smsg"], P["cmsg"], P["noise"]
 CMSG_MAX_GROUP = 0x45
 MAX_TOKENS = 40
 # WoW Forever beta 1.60.69876: same opcode groups as 70032, small piecewise index shifts (5.5.3 used other group ids)

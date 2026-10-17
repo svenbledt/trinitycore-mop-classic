@@ -4,7 +4,9 @@ import json, re, struct, sys
 import pefile
 from capstone import Cs, CS_ARCH_X86, CS_MODE_64
 
-SIZED = {0x142E4D0D0, 0x142E4D120}  # 70032 read-bytes(n) / read-string(n): keep the size immediate
+from prims import P
+
+SIZED = P["sized"]  # read-bytes(n) / read-string(n): keep the size immediate
 
 def main(path, gpath, out):
     pe = pefile.PE(path, fast_load=True)

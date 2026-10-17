@@ -1,13 +1,18 @@
 # MoP Classic port — status
 
-Last updated: 2026-10-12
+Last updated: 2026-10-18
 
 | | |
 |---|---|
 | Base | TrinityCore `cata_classic` @ `0614c9fd941` (4.4.2.60895) |
-| Target | MoP Classic 5.5.4.70032 (dump at `d:\WoW\World of Warcraft\_classic_\WowClassic_dump.exe`) |
+| Target | MoP Classic **5.5.4.70449** (dump `d:\WoW\World of Warcraft\_classic_\WowClassic_orion.exe`; 70032 dump kept as `WowClassic_dump.exe`) |
 | Current phase | **2b — enter world; full opcode verification PAUSED (2026-10-12, to save session usage)** |
 | Next | Resume opcode verification (s22, s23), then fix server packet layouts, then Enter World test (branch `mop/phase2b`) |
+
+## Re-baseline to 5.5.4.70449 (2026-10-18)
+- Opcodes: every name keeps its 70032 value, proven by a build-to-build diff of all 2482 packets (`opcode-harvest.md` "70032 → 70449"). `Opcodes.h` banner only.
+- **Still open for 70449:** `build_info`/`build_auth_key`/`realmlist.gamebuild` rows (auth key must be captured again), update-field layout and DB2 layout hashes not re-checked yet.
+- REA's IDA provider cannot attach to the existing `.i64` files: `open_binary` on the exe starts a fresh full auto-analysis in `%TEMP%` (stopped). Verification still uses the user's IDA GUI database.
 
 ## Phase 2b opcode verification — PAUSED (2026-10-12)
 Every packet name is being proven from client code in IDA (method: `opcode-harvest.md`, steps 1–7; verifier brief `tools/mop-re/verify/AGENT.md`).

@@ -34,7 +34,7 @@ enum ConnectionType : int8
 
 constexpr uint32 UNKNOWN_OPCODE = 0xBADD;   // special marker value for uninitialized WorldPackets
 
-// Values generated for client build 70032 by tools/mop-re; see docs/mop-port/re-notes.md
+// Values generated for client build 70449 by tools/mop-re; see docs/mop-port/re-notes.md
 enum OpcodeClient : uint32
 {
     CMSG_ACCEPT_GUILD_INVITE                           = 0x440029,
