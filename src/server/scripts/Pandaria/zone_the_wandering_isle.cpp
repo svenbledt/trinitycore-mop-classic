@@ -31,10 +31,13 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
+#include "SpellAuraEffects.h"
 #include "SpellScript.h"
 #include "TaskScheduler.h"
 #include "TemporarySummon.h"
-#include "TerrainMgr.h"
+#include "Vehicle.h"
+#include "WaypointDefines.h"
 
 namespace Scripts::Pandaria::TheWanderingIsle
 {
@@ -70,6 +73,11 @@ namespace Quests
     static constexpr uint32 TheSourceOfLivelihood = 29680;
     static constexpr uint32 TheSpiritAndBodyOfShenzinsu = 29775;
     static constexpr uint32 NewAllies = 29800;
+}
+
+namespace Menus
+{
+    static constexpr uint32 LiFeiBraziers = 13050;
 }
 
 namespace Creatures
@@ -1364,10 +1372,15 @@ struct npc_li_fei : public ScriptedAI
 {
     npc_li_fei(Creature* creature) : ScriptedAI(creature) {}
 
-    void OnQuestAccept(Player* player, Quest const* quest) override
+    // Retail casts Fire Crash Cover from gossip option 0 of menu 13050, not on quest accept (sniff m2 #4301)
+    bool OnGossipSelect(Player* player, uint32 menuId, uint32 gossipListId) override
     {
-        if (quest->GetQuestId() == Quests::OnlyTheWorthyShallPass)
-            player->CastSpell(player, Spells::FireCrashCover);
+        if (menuId != Menus::LiFeiBraziers || gossipListId != 0)
+            return false;
+
+        CloseGossipMenuFor(player);
+        player->CastSpell(player, Spells::FireCrashCover, true);
+        return true;
     }
 };
 
@@ -1638,18 +1651,511 @@ private:
     CartData _data;
 };
 
-// Quest 31450 - A New Fate (faction choice), see docs/mop-port/phase3-4-plan.md step 4
+// Quests 29422-29800 (second half of the island), retail sniff m2 (5.5.4.70449).
+// Timed dialogue and summon chains are SmartAI data; see docs/mop-port/wandering-isle-second-half.md
+namespace SecondHalf
+{
+namespace Spells
+{
+    static constexpr uint32 HuoOfferingStart = 109090;
+    static constexpr uint32 HuoOfferingPulseA = 109095;
+    static constexpr uint32 HuoOfferingPulseB = 109105;
+    static constexpr uint32 HuoOfferingCredit = 109107;
+    static constexpr uint32 HuoOfferingFinish = 109109;
+
+    static constexpr uint32 SummonWaterSpout = 116810;
+    static constexpr uint32 ShuSpoutCue = 117063;
+    static constexpr uint32 WaterSpoutWarning = 116695;
+    static constexpr uint32 WaterSpoutBurst = 117057;
+    static constexpr uint32 WaterSpoutKnockUp = 116696;
+
+    static constexpr uint32 ShuWakeWugou = 104017;
+
+    static constexpr uint32 ZhaoRenLightning = 126006;
+    static constexpr uint32 ZhaoRenStunned = 125992;
+    static constexpr uint32 ZhaoRenShockwave = 125990;
+    static constexpr uint32 ZhaoRenDefeated = 128808;
+    static constexpr uint32 FireworkHit = 104855;
+    static constexpr uint32 FireworkLaunch = 125970;
+    static constexpr uint32 FireworkLauncherUsed = 125964;
+
+    static constexpr uint32 RideVehicleHardcoded = 46598;
+    static constexpr uint32 BalloonCreditStart = 105895;
+    static constexpr uint32 BalloonCreditAirship = 105010;
+    static constexpr uint32 Parachute = 45472;
+    static constexpr uint32 EjectAllPassengers = 68576;
+    static constexpr uint32 UpliftingDraftLaunch = 104490;
+
+    static constexpr uint32 InjuredSailorVehicleKit = 105520;
+
+    static constexpr uint32 HealingShenZinSuCredit = 108898;
+}
+
+namespace Creatures
+{
+    static constexpr uint32 BalloonAysa = 56661;
+    static constexpr uint32 InjuredSailor = 55999;
+    static constexpr uint32 RescuedSailor = 56236;
+}
+
+namespace Quests
+{
+    static constexpr uint32 HuoTheSpiritOfFire = 29422;
+    static constexpr uint32 BattleForTheSkies = 29786;
+    static constexpr uint32 NoneLeftBehind = 29794;
+}
+
+namespace Menus
+{
+    static constexpr uint32 ShuWakeWugou = 13140;
+}
+
+// 102522 - Huo's Offerings (quest 29422): 109090 on use, alternating pulses, 109109 + credit 109107 when the 12 s aura ends
+class spell_huo_offering : public AuraScript
+{
+    void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        GetTarget()->CastSpell(GetTarget(), Spells::HuoOfferingStart, true);
+    }
+
+    void HandlePeriodic(AuraEffect const* aurEff)
+    {
+        // TODO(verify): retail pulses alternate 109095/109105, the exact order per tick is not clear from m2
+        GetTarget()->CastSpell(GetTarget(), aurEff->GetTickNumber() % 2 ? Spells::HuoOfferingPulseA : Spells::HuoOfferingPulseB, true);
+    }
+
+    void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
+            return;
+
+        Player* player = GetTarget()->ToPlayer();
+        if (!player || player->GetQuestStatus(Quests::HuoTheSpiritOfFire) != QUEST_STATUS_INCOMPLETE)
+            return;
+
+        player->CastSpell(player, Spells::HuoOfferingFinish, true);
+        player->CastSpell(player, Spells::HuoOfferingCredit, true);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(spell_huo_offering::HandleApply, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_huo_offering::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
+        AfterEffectRemove += AuraEffectRemoveFn(spell_huo_offering::HandleRemove, EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+// Water spout spots of quest 29679 "A New Friend" (60488 spawn points, sniff m2 18:54:39-18:55:56)
+Position const WaterSpoutSpots[] =
+{
+    { 1105.2310f, 2847.7656f, 92.22351f },
+    { 1118.2205f, 2875.4270f, 92.22351f },
+    { 1126.3577f, 2881.0051f, 92.22351f },
+    { 1105.9202f, 2853.4324f, 92.22351f },
+    { 1132.9115f, 2864.3810f, 92.22351f },
+    { 1131.8560f, 2852.7805f, 92.22351f },
+    { 1118.7656f, 2890.4192f, 92.22351f },
+};
+
+// 65493 - Shu (pool of quest 29679): summons a water spout every 9.7-12.9 s as in the sniff
+struct npc_shu_water_spouts : public ScriptedAI
+{
+    using ScriptedAI::ScriptedAI;
+
+    void JustAppeared() override
+    {
+        _scheduler.CancelAll();
+        _scheduler.Schedule(10s, [this](TaskContext& task)
+        {
+            Position const& spot = Trinity::Containers::SelectRandomContainerElement(WaterSpoutSpots);
+            me->CastSpell(spot, Spells::SummonWaterSpout, true);
+            task.Schedule(4s, [this](TaskContext const& /*task*/)
+            {
+                DoCastSelf(Spells::ShuSpoutCue, true);
+            });
+            task.Repeat(9700ms, 12900ms);
+        });
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        _scheduler.Update(diff);
+    }
+
+private:
+    TaskScheduler _scheduler;
+};
+
+// 60488 - Water Spout Bunny: warning visual, burst 4.4 s later (116696 knocks up and credits 55212)
+struct npc_water_spout_bunny : public ScriptedAI
+{
+    using ScriptedAI::ScriptedAI;
+
+    void JustAppeared() override
+    {
+        me->SetReactState(REACT_PASSIVE);
+        DoCastSelf(Spells::WaterSpoutWarning, true);
+        _scheduler.Schedule(4400ms, [this](TaskContext const& /*task*/)
+        {
+            DoCastSelf(Spells::WaterSpoutBurst, true);
+            DoCastSelf(Spells::WaterSpoutKnockUp, true);
+            me->DespawnOrUnsummon(3s);
+        });
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        _scheduler.Update(diff);
+    }
+
+private:
+    TaskScheduler _scheduler;
+};
+
+// 55556 - Shu (quest 29774): gossip option 0 of menu 13140 casts 104017, which summons Wugou and gives the first credit
+struct npc_shu_wake_wugou : public ScriptedAI
+{
+    using ScriptedAI::ScriptedAI;
+
+    bool OnGossipSelect(Player* player, uint32 menuId, uint32 gossipListId) override
+    {
+        if (menuId != Menus::ShuWakeWugou || gossipListId != 0)
+            return false;
+
+        CloseGossipMenuFor(player);
+        player->CastSpell(player, Spells::ShuWakeWugou, true);
+        return true;
+    }
+};
+
+// Zhao-Ren circle and landing spot (spline of 55786, sniff m2 #49867 and #50307)
+Position const ZhaoRenCircle[] =
+{
+    { 688.20f, 4186.41f, 214.87f }, { 682.38f, 4176.08f, 214.52f }, { 682.06f, 4157.68f, 214.09f }, { 691.18f, 4145.19f, 214.62f },
+    { 709.08f, 4137.22f, 216.30f }, { 734.30f, 4134.32f, 220.85f }, { 750.48f, 4142.90f, 222.95f }, { 760.12f, 4158.66f, 223.89f },
+    { 752.17f, 4179.30f, 222.46f }, { 736.62f, 4189.58f, 220.09f }, { 720.89f, 4193.51f, 216.79f }, { 704.30f, 4195.27f, 215.21f },
+};
+Position const ZhaoRenLandingSpot = { 723.16f, 4163.80f, 205.00f };
+
+// 55786 - Zhao-Ren (quest 29786): circles, lands after 5 firework hits, recovers 18.7 s later
+struct boss_zhao_ren : public ScriptedAI
+{
+    static constexpr uint32 PointLanding = 1;
+    static constexpr uint8 HitsToLand = 5;
+
+    boss_zhao_ren(Creature* creature) : ScriptedAI(creature), _hits(0), _grounded(false) { }
+
+    void Reset() override
+    {
+        _hits = 0;
+        _grounded = false;
+        _scheduler.CancelAll();
+        me->SetDisableGravity(true);
+        StartCircling();
+        _scheduler.Schedule(5s, [this](TaskContext& task)
+        {
+            if (!_grounded)
+                if (Player* player = me->SelectNearestPlayer(80.0f))
+                    if (player->GetQuestStatus(Quests::BattleForTheSkies) == QUEST_STATUS_INCOMPLETE)
+                        DoCast(player, Spells::ZhaoRenLightning);
+            task.Repeat(5s);
+        });
+    }
+
+    void StartCircling()
+    {
+        std::vector<WaypointNode> nodes;
+        for (Position const& pos : ZhaoRenCircle)
+            nodes.emplace_back(uint32(nodes.size()), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+
+        WaypointPath path(0, std::move(nodes), WaypointMoveType::Run, WaypointPathFlags::FlyingPath);
+        path.BuildSegments();
+        me->GetMotionMaster()->MovePath(path, true, {}, 9.0f);
+    }
+
+    void SpellHit(WorldObject* /*caster*/, SpellInfo const* spellInfo) override
+    {
+        if (spellInfo->Id != Spells::FireworkHit || _grounded || ++_hits < HitsToLand)
+            return;
+
+        _grounded = true;
+        _hits = 0;
+        me->GetMotionMaster()->Clear();
+        me->GetMotionMaster()->MovePoint(PointLanding, ZhaoRenLandingSpot, false, {}, 11.11f);
+    }
+
+    void MovementInform(uint32 type, uint32 id) override
+    {
+        if (type != POINT_MOTION_TYPE || id != PointLanding)
+            return;
+
+        DoCastSelf(Spells::ZhaoRenStunned, true);
+        _scheduler.Schedule(15500ms, [this](TaskContext const& /*task*/)
+        {
+            DoCastSelf(Spells::ZhaoRenShockwave);
+        });
+        _scheduler.Schedule(18700ms, [this](TaskContext const& /*task*/)
+        {
+            _grounded = false;
+            StartCircling();
+        });
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        DoCastSelf(Spells::ZhaoRenDefeated, true);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        _scheduler.Update(diff);
+
+        if (!UpdateVictim())
+            return;
+    }
+
+private:
+    TaskScheduler _scheduler;
+    uint8 _hits;
+    bool _grounded;
+};
+
+// 125961 - Firework Launcher click (quest 29786): the launcher makes the clicker fire 104855 at Zhao-Ren
+class spell_firework_launcher_click : public SpellScript
+{
+    void HandleDummy(SpellEffIndex /*effIndex*/)
+    {
+        Unit* launcher = GetHitUnit();
+        Unit* caster = GetCaster();
+        if (!launcher || !caster || launcher->HasAura(Spells::FireworkLauncherUsed))
+            return;
+
+        launcher->CastSpell(caster, Spells::FireworkLaunch, true);
+        launcher->CastSpell(launcher, Spells::FireworkLauncherUsed, true);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_firework_launcher_click::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
+    }
+};
+
+struct FlightLeg
+{
+    std::vector<Position> Points;
+    float Speed;
+};
+
+// 55649 - Shang Xi's Hot Air Balloon (quest 29791): four legs as in the sniff splines (#57292, #57474, #57721, #57864)
+struct npc_shang_xi_hot_air_balloon : public ScriptedAI
+{
+    npc_shang_xi_hot_air_balloon(Creature* creature) : ScriptedAI(creature), _leg(0) { }
+
+    static std::vector<FlightLeg> const& Legs()
+    {
+        static std::vector<FlightLeg> const legs =
+        {
+            { { { 934.24f, 4571.04f, 233.65f }, { 1015.72f, 4604.33f, 216.55f }, { 1056.45f, 4658.65f, 187.74f }, { 1081.42f, 4796.38f, 157.66f } }, 7.35f },
+            { { { 1091.85f, 4926.62f, 137.93f }, { 1026.33f, 5137.10f, 138.06f }, { 818.29f, 5216.31f, 134.64f }, { 621.72f, 5132.56f, 142.15f } }, 8.0f },
+            { { { 547.26f, 5035.91f, 130.49f }, { 440.75f, 4867.26f, 117.58f }, { 403.52f, 4650.16f, 81.14f }, { 341.30f, 4475.94f, 75.50f },
+                { 222.56f, 4369.27f, 93.21f }, { 164.76f, 4297.13f, 112.24f }, { 131.75f, 4156.71f, 124.64f } }, 26.71f },
+            { { { 123.95f, 4109.05f, 124.64f }, { 112.05f, 3931.90f, 128.34f }, { 218.50f, 3824.77f, 137.58f }, { 388.92f, 3765.61f, 159.47f },
+                { 596.57f, 3689.25f, 183.04f }, { 745.19f, 3664.53f, 194.05f } }, 32.0f },
+        };
+        return legs;
+    }
+
+    void IsSummonedBy(WorldObject* summoner) override
+    {
+        Player* player = summoner->ToPlayer();
+        if (!player)
+            return;
+
+        _playerGuid = player->GetGUID();
+        me->SetDisableGravity(true);
+        player->CastSpell(me, Spells::RideVehicleHardcoded, true);
+
+        _scheduler.Schedule(600ms, [this](TaskContext const& /*task*/)
+        {
+            // 106636 (triggered by 105002 after this summon) brings Aysa; she takes seat 1 (sniff m2 TransportEnter)
+            if (Creature* aysa = me->FindNearestCreatureWithOptions(20.0f, { .CreatureId = Creatures::BalloonAysa, .IgnoreNotOwnedPrivateObjects = false, .PrivateObjectOwnerGuid = _playerGuid }))
+                aysa->EnterVehicle(me, 1);
+            DoCastSelf(Spells::BalloonCreditStart, true);
+        });
+        _scheduler.Schedule(4s, [this](TaskContext const& /*task*/)
+        {
+            FlyLeg();
+        });
+    }
+
+    void FlyLeg()
+    {
+        FlightLeg const& leg = Legs()[_leg];
+        std::vector<WaypointNode> nodes;
+        for (Position const& pos : leg.Points)
+            nodes.emplace_back(uint32(nodes.size()), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ());
+
+        WaypointPath path(_leg, std::move(nodes), WaypointMoveType::Run, WaypointPathFlags::FlyingPath);
+        path.BuildSegments();
+        me->GetMotionMaster()->MovePath(path, false, {}, leg.Speed);
+
+        if (_leg == Legs().size() - 1)
+            DoCastSelf(Spells::BalloonCreditAirship, true);
+    }
+
+    void WaypointPathEnded(uint32 /*nodeId*/, uint32 /*pathId*/) override
+    {
+        if (++_leg < Legs().size())
+        {
+            FlyLeg();
+            return;
+        }
+
+        _scheduler.Schedule(1600ms, [this](TaskContext const& /*task*/)
+        {
+            Player* player = ObjectAccessor::GetPlayer(*me, _playerGuid);
+            if (player && player->GetVehicleBase() == me)
+            {
+                Position const exitPos = { 746.39276f, 3665.7275f, 194.19475f, 0.6864777f };
+                player->ExitVehicle(&exitPos);
+                DoCast(player, Spells::Parachute, true);
+            }
+            me->DespawnOrUnsummon(1s);
+        });
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        _scheduler.Update(diff);
+    }
+
+private:
+    TaskScheduler _scheduler;
+    ObjectGuid _playerGuid;
+    std::size_t _leg;
+};
+
+// 55685 - Uplifting Draft (quest 29776): lifts the rider to the upper ledge, ejects it 20.8 s after boarding
+struct npc_uplifting_draft : public ScriptedAI
+{
+    using ScriptedAI::ScriptedAI;
+
+    void PassengerBoarded(Unit* passenger, int8 /*seatId*/, bool apply) override
+    {
+        if (!apply || !passenger->IsPlayer())
+            return;
+
+        ObjectGuid passengerGuid = passenger->GetGUID();
+        me->SetDisableGravity(true);
+        _scheduler.Schedule(4600ms, [this](TaskContext const& /*task*/)
+        {
+            // TODO(verify): retail moves the draft up instantly (spline t=0, m2 #30906); flown here in 1.2 s
+            me->GetMotionMaster()->MovePoint(0, { 920.45f, 3604.77f, 253.17f }, false, {}, 48.0f);
+        });
+        _scheduler.Schedule(20800ms, [this, passengerGuid](TaskContext const& /*task*/)
+        {
+            Player* player = ObjectAccessor::GetPlayer(*me, passengerGuid);
+            DoCastSelf(Spells::EjectAllPassengers, true);
+            if (player)
+            {
+                player->NearTeleportTo({ 920.44965f, 3604.7708f, 255.17317f, 2.7885048f });
+                DoCast(player, Spells::UpliftingDraftLaunch, true);
+            }
+            me->DespawnOrUnsummon(2s);
+        });
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        _scheduler.Update(diff);
+    }
+
+private:
+    TaskScheduler _scheduler;
+};
+
+// 55999 - Injured Sailor (quest 29794): the clicker becomes a vehicle (105520, kit 1845) and carries 56236
+struct npc_injured_sailor : public ScriptedAI
+{
+    using ScriptedAI::ScriptedAI;
+
+    void OnSpellClick(Unit* clicker, bool /*spellClickHandled*/) override
+    {
+        Player* player = clicker->ToPlayer();
+        if (!player || player->GetQuestStatus(Quests::NoneLeftBehind) != QUEST_STATUS_INCOMPLETE || !player->GetVehicleKit())
+            return;
+
+        if (Creature* sailor = me->SummonCreature(Creatures::RescuedSailor, me->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 3min, 0, 0, player->GetGUID()))
+            sailor->EnterVehicle(player, 0);
+        me->DespawnOrUnsummon(0s, 30s);
+    }
+};
+
+// 7087 - shore of quest 29794: a carried sailor is dropped, thanks the player and counts as rescued
+class at_none_left_behind : public AreaTriggerScript
+{
+public:
+    at_none_left_behind() : AreaTriggerScript("at_none_left_behind") { }
+
+    bool OnTrigger(Player* player, AreaTriggerEntry const* /*areaTrigger*/) override
+    {
+        Vehicle* kit = player->GetVehicleKit();
+        Unit* passenger = kit ? kit->GetPassenger(0) : nullptr;
+        Creature* sailor = passenger ? passenger->ToCreature() : nullptr;
+        if (!sailor || sailor->GetEntry() != Creatures::RescuedSailor)
+            return false;
+
+        player->KilledMonsterCredit(Creatures::InjuredSailor);
+        sailor->ExitVehicle();
+        sailor->AI()->Talk(0, player);
+        sailor->DespawnOrUnsummon(5s);
+        player->RemoveAurasDueToSpell(Spells::InjuredSailorVehicleKit);
+        return true;
+    }
+};
+
+// 117783 - Healing of Shen-zin Su progress bar (alt power 158, max 700); retail fills it in ~246 s
+class spell_healing_shen_zin_su_bar : public AuraScript
+{
+    void HandlePeriodic(AuraEffect const* aurEff)
+    {
+        Unit* target = GetTarget();
+        // TODO(verify): retail adds 2-3 per second (m2 POWER_UPDATE), probably per living healer
+        target->ModifyPower(POWER_ALTERNATE_POWER, aurEff->GetTickNumber() % 5 < 3 ? 3 : 2);
+        if (target->GetPowerPct(POWER_ALTERNATE_POWER) < 100.0f)
+            return;
+
+        target->CastSpell(target, Spells::HealingShenZinSuCredit, true);
+        Remove();
+    }
+
+    void Register() override
+    {
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_healing_shen_zin_su_bar::HandlePeriodic, EFFECT_1, SPELL_AURA_PERIODIC_DUMMY);
+    }
+};
+}
+
+// Quest 31450 - A New Fate (faction choice), retail sniff m2 (5.5.4.70449); see docs/mop-port/phase3-4-plan.md step 4
 namespace NewFate
 {
     static constexpr uint32 QuestANewFate = 31450;
-    static constexpr uint32 QuestJoiningTheAlliance = 30987;
-    static constexpr uint32 QuestJoiningTheHorde = 31012;
-    static constexpr uint32 NpcAysaCloudsinger = 60566;
-    static constexpr uint32 NpcJiFirepaw = 60570;
+    static constexpr uint32 NpcSpiritOfMasterShangXi = 56013;
+    static constexpr uint32 MenuSpiritOfMasterShangXi = 13726;
 
-    // TODO(verify): arrival points from SkyFire 5.4.8 HandleSelectFactionOpcode; no retail sniff of the departure yet
-    WorldLocation const StormwindArrival = { 0, -8960.02f, 516.10f, 96.36f, 0.67f };
-    WorldLocation const OrgrimmarArrival = { 1, 1357.62f, -4373.55f, 26.13f, 0.13f };
+    static constexpr uint32 SpellPandarenFactionChoice = 108897;
+    static constexpr uint32 SpellBalloonExitMovieTimerHorde = 132211;
+    static constexpr uint32 SpellBalloonExitMovieAlliance = 130420;
+    static constexpr uint32 SpellBalloonExitMovieHorde = 132212;
+    static constexpr uint32 SpellPandarenAllianceTeleport = 116957;
+    static constexpr uint32 SpellPandarenHordeTeleport = 116962;
+
+    static constexpr uint32 MovieBalloonExitAlliance = 116;
+    static constexpr uint32 MovieBalloonExitHorde = 123;
+
+    static constexpr uint32 TalkAccomplished = 0;
+    static constexpr uint32 TalkJourneysNotDone = 1;
+    static constexpr uint32 ActionFactionChosen = 1;
 }
 
 // 56013 - Spirit of Master Shang Xi
@@ -1657,53 +2163,117 @@ struct npc_spirit_of_master_shang_xi : public ScriptedAI
 {
     using ScriptedAI::ScriptedAI;
 
-    static void ShowFactionSelect(Player* player)
-    {
-        if (player->GetRace() == RACE_PANDAREN_NEUTRAL && player->GetQuestStatus(NewFate::QuestANewFate) == QUEST_STATUS_INCOMPLETE)
-            player->SendDirectMessage(WorldPackets::Character::ShowNeutralPlayerFactionSelectUI().Write());
-    }
-
     void OnQuestAccept(Player* player, Quest const* quest) override
     {
         if (quest->GetQuestId() == NewFate::QuestANewFate)
-            ShowFactionSelect(player);
+            Talk(NewFate::TalkAccomplished, player);
     }
 
-    bool OnGossipHello(Player* player) override
+    bool OnGossipSelect(Player* player, uint32 menuId, uint32 /*gossipListId*/) override
     {
-        ShowFactionSelect(player);
+        if (menuId != NewFate::MenuSpiritOfMasterShangXi)
+            return false;
 
-        // TODO(verify): neither TC master nor SkyFire spawns the 31450 enders, so the chosen side's one is summoned here
-        if (player->GetQuestStatus(NewFate::QuestANewFate) == QUEST_STATUS_COMPLETE)
+        CloseGossipMenuFor(player);
+        player->CastSpell(player, NewFate::SpellPandarenFactionChoice, true);
+        return true;
+    }
+
+    void SetGUID(ObjectGuid const& guid, int32 action) override
+    {
+        if (action != NewFate::ActionFactionChosen)
+            return;
+
+        // Retail: the line comes 6.4 s after the choice, while the exit movie plays (m2 #103953 -> #104186)
+        _scheduler.Schedule(6s, [this, guid](TaskContext const& /*task*/)
         {
-            uint32 entry = player->GetTeam() == ALLIANCE ? NewFate::NpcAysaCloudsinger : NewFate::NpcJiFirepaw;
-            if (!me->FindNearestCreatureWithOptions(20.0f, { .CreatureId = entry, .PrivateObjectOwnerGuid = player->GetGUID() }))
-                me->SummonCreature(entry, me->GetNearPosition(3.0f, float(M_PI) / 2), TEMPSUMMON_TIMED_DESPAWN, 2min, 0, 0, player->GetGUID());
-        }
-        return false;
+            if (Player* player = ObjectAccessor::GetPlayer(*me, guid))
+                Talk(NewFate::TalkJourneysNotDone, player);
+        });
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        _scheduler.Update(diff);
+    }
+
+private:
+    TaskScheduler _scheduler;
+};
+
+// 108897 - Pandaren Faction Choice
+class spell_pandaren_faction_choice : public SpellScript
+{
+    void HandleScript(SpellEffIndex /*effIndex*/) const
+    {
+        Player* player = GetHitUnit()->ToPlayer();
+        if (player && player->GetRace() == RACE_PANDAREN_NEUTRAL && player->GetQuestStatus(NewFate::QuestANewFate) == QUEST_STATUS_INCOMPLETE)
+            player->SendDirectMessage(WorldPackets::Character::ShowNeutralPlayerFactionSelectUI().Write());
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_pandaren_faction_choice::HandleScript, EFFECT_0, SPELL_EFFECT_SCRIPT_EFFECT);
     }
 };
 
-// 60566 - Aysa Cloudsinger
-// 60570 - Ji Firepaw
-struct npc_new_fate_companion : public ScriptedAI
+// 31336, 31337 - sent by 113244/113245 Faction Choice Trigger Spell (Alliance/Horde)
+class event_pandaren_faction_chosen : public EventScript
 {
-    using ScriptedAI::ScriptedAI;
+public:
+    event_pandaren_faction_chosen() : EventScript("event_pandaren_faction_chosen") { }
 
-    void OnQuestAccept(Player* player, Quest const* quest) override
+    void OnTrigger(WorldObject* object, WorldObject* /*invoker*/, uint32 /*eventId*/) override
     {
-        WorldLocation const* dest = nullptr;
-        if (quest->GetQuestId() == NewFate::QuestJoiningTheAlliance)
-            dest = &NewFate::StormwindArrival;
-        else if (quest->GetQuestId() == NewFate::QuestJoiningTheHorde)
-            dest = &NewFate::OrgrimmarArrival;
-
-        if (!dest)
+        Player* player = object->ToPlayer();
+        if (!player)
             return;
 
-        // The neutral homebind (world_safe_locs 3295) would send a hearthstone back to the island
-        player->SetHomebind(*dest, sTerrainMgr.GetAreaId(PhasingHandler::GetEmptyPhaseShift(), *dest));
-        player->TeleportTo(*dest);
+        if (Creature* spirit = player->FindNearestCreature(NewFate::NpcSpiritOfMasterShangXi, 50.0f))
+            spirit->AI()->SetGUID(player->GetGUID(), NewFate::ActionFactionChosen);
+    }
+};
+
+// 130422, 132211 - Pandaren Balloon Exit Movie Timer Aura
+class spell_pandaren_balloon_exit_movie_timer : public AuraScript
+{
+    void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/) const
+    {
+        if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
+            return;
+
+        // Retail roots the player for the movie (MOVE_ROOT with TRIGGER_MOVIE, m2 #104031)
+        Unit* target = GetTarget();
+        target->SetControlled(true, UNIT_STATE_ROOT);
+        target->CastSpell(target, GetId() == NewFate::SpellBalloonExitMovieTimerHorde
+            ? NewFate::SpellBalloonExitMovieHorde : NewFate::SpellBalloonExitMovieAlliance, true);
+    }
+
+    void Register() override
+    {
+        AfterEffectRemove += AuraEffectRemoveFn(spell_pandaren_balloon_exit_movie_timer::AfterRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+// Retail sends the bind and the teleport only after CMSG_COMPLETE_MOVIE (m2 #104192)
+class player_pandaren_balloon_exit_movie : public PlayerScript
+{
+public:
+    player_pandaren_balloon_exit_movie() : PlayerScript("player_pandaren_balloon_exit_movie") { }
+
+    void OnMovieComplete(Player* player, uint32 movieId) override
+    {
+        uint32 teleport = 0;
+        if (movieId == NewFate::MovieBalloonExitAlliance)
+            teleport = NewFate::SpellPandarenAllianceTeleport;
+        else if (movieId == NewFate::MovieBalloonExitHorde)
+            teleport = NewFate::SpellPandarenHordeTeleport;
+
+        if (!teleport)
+            return;
+
+        player->SetControlled(false, UNIT_STATE_ROOT);
+        player->CastSpell(player, teleport, true);
     }
 };
 }
@@ -1748,6 +2318,24 @@ void AddSC_zone_the_wandering_isle()
 
     RegisterCreatureAI(npc_delivery_cart);
 
+    {
+        using namespace SecondHalf;
+        RegisterSpellScript(spell_huo_offering);
+        RegisterCreatureAI(npc_shu_water_spouts);
+        RegisterCreatureAI(npc_water_spout_bunny);
+        RegisterCreatureAI(npc_shu_wake_wugou);
+        RegisterCreatureAI(boss_zhao_ren);
+        RegisterSpellScript(spell_firework_launcher_click);
+        RegisterCreatureAI(npc_shang_xi_hot_air_balloon);
+        RegisterCreatureAI(npc_uplifting_draft);
+        RegisterCreatureAI(npc_injured_sailor);
+        new at_none_left_behind();
+        RegisterSpellScript(spell_healing_shen_zin_su_bar);
+    }
+
     RegisterCreatureAI(npc_spirit_of_master_shang_xi);
-    RegisterCreatureAI(npc_new_fate_companion);
+    RegisterSpellScript(spell_pandaren_faction_choice);
+    RegisterSpellScript(spell_pandaren_balloon_exit_movie_timer);
+    new event_pandaren_faction_chosen();
+    new player_pandaren_balloon_exit_movie();
 }

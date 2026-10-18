@@ -2830,7 +2830,7 @@ void WorldSession::HandleNeutralPlayerSelectFaction(WorldPackets::Character::Neu
     if (player->GetRace() != RACE_PANDAREN_NEUTRAL)
         return;
 
-    // TODO(verify): 0 = Horde, 1 = Alliance per SkyFire 5.4.8 and the client's faction group index; no sniff of the choice yet
+    // 1 = Alliance: retail sniff m2 (70449) sends 01 for Alliance and gets race 25 back; 0 = Horde as SkyFire 5.4.8
     uint8 newRace;
     switch (selectFaction.Faction)
     {
@@ -2854,14 +2854,13 @@ void WorldSession::HandleNeutralPlayerSelectFaction(WorldPackets::Character::Neu
 
     sCharacterCache->UpdateCharacterData(player->GetGUID(), player->GetName(), {}, newRace);
 
-    // Objective of quest 31450 "A New Fate" (Faction Chosen Credit), credited here as SkyFire 5.4.8 does
-    static constexpr uint32 QUEST_A_NEW_FATE = 31450;
-    static constexpr uint32 NPC_FACTION_CHOSEN_CREDIT = 64594;
-    if (player->GetQuestStatus(QUEST_A_NEW_FATE) == QUEST_STATUS_INCOMPLETE)
-        player->KilledMonsterCredit(NPC_FACTION_CHOSEN_CREDIT);
-
     WorldPackets::Character::NeutralPlayerFactionSelectResult result;
     result.Success = true;
     result.NewRaceID = newRace;
     SendPacket(result.Write());
+
+    // Retail casts Faction Choice Trigger Spell right after the result (31450 credit, exit movie, teleport chain)
+    static constexpr uint32 SPELL_FACTION_CHOICE_TRIGGER_ALLIANCE = 113244;
+    static constexpr uint32 SPELL_FACTION_CHOICE_TRIGGER_HORDE = 113245;
+    player->CastSpell(player, newRace == RACE_PANDAREN_ALLIANCE ? SPELL_FACTION_CHOICE_TRIGGER_ALLIANCE : SPELL_FACTION_CHOICE_TRIGGER_HORDE, true);
 }

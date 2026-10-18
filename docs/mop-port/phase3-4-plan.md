@@ -17,11 +17,12 @@ with its NPCs and first quests, and play Monk basics. Decided with the user: con
 - MySQL schema `ref_sfdb`: SFDB 26, plus SkyFire core `sql/updates/world` and `pending_updates/world` applied (78 files, 2026-10-18).
   SkyFire is GPL-3.0, so we use it for behaviour only; ask before copying code verbatim.
 
-## Source rule (per item, highest first)
-1. The 5.5.4.70449 client: DB2s (Spell*, ChrRaces, ChrClasses, CharBaseInfo, ChrSpecialization, SkillLine*), and sniffs.
-2. SkyFire 5.4.8 for MoP *behaviour*: Monk spell scripts, Chi rules, start-zone scripts as they were in MoP.
-3. TC `master` for *structure and data*: the script API we already use, spawns, quests, gossip and SmartAI (the IDs match the modern client).
-Every imported row and script has to be reproducible from a script in `tools/mop-content/`; record its source in the SQL comment.
+## Source rule (per item, highest first; user decision 2026-10-18)
+1. **Retail sniffs** (5.5.4.70449) and the client's DB2s: ground truth for data, order, flow and packets.
+2. **SkyFire 5.4.8** for MoP behaviour and data the sniffs don't show. Port its functionality as code rewritten in TC style
+   (optimized, not copied verbatim); it beats master wherever master's retail-era version differs from MoP.
+3. **TC master** for structure/API and as data fallback (IDs match the modern client).
+Every imported row and script stays reproducible from `tools/mop-content/`, with the source cited in a comment.
 
 ## Steps
 0. **References:** clone SkyFire 5.4.8 (core + world DB) read-only under `tools/mop-re/refs/skyfire` (gitignored), check its license,
@@ -95,20 +96,34 @@ Every imported row and script has to be reproducible from a script in `tools/mop
   are dropped or cleared (log of the generator); quest 40236 (retail) skipped; spell_target_position kept only where the client spell has a DB destination.
 - **Kept from world:** creature templates 6491, 29611, 40789, 41200; the 13 gossip menus the cata TDB already has (13037, 13038, 13060, ...).
 - **Scripts:** `src/server/scripts/Pandaria/zone_the_wandering_isle.cpp` = master's file (trainees, Jaomin Ro, Min Dimwind, Cave of
-  Meditation, Singing Pools curses, Li Fei fight, delivery carts) plus the faction finale: Spirit of Master Shang Xi (56013) shows
-  SMSG_SHOW_NEUTRAL_PLAYER_FACTION_SELECT_UI on accepting 31450 or on gossip while it is incomplete; the faction handler credits 64594
-  (SkyFire behaviour); afterwards the spirit summons Aysa (60566) or Ji (60570), the 31450 enders that no source spawns, and accepting
-  30987/31012 from them teleports to Stormwind/Orgrimmar (SkyFire's arrival points) and moves the homebind. Docker builds scripts
-  `minimal-static` + `-DSCRIPTS_PANDARIA=static` (`contrib/mop-dev/scripts/build.sh`).
-- **First quest:** retail (sniff `m1.pkt`, 70449) offers "Much to Learn" (30039 Monk) from the player on first login; the file adds
-  playercreateinfo_cast_spell rows for "Launch Starting Quest, <class>" (107915-107922, QUEST_START effect). Retail resends the offer every ~5 s; we send it once.
-- **Sniff check (m1, 14 quests):** quest order and givers match the data (30039, 30027, 29406, 29524, 29408, 29409, 29410, 29424/29419,
-  29414, 29522, 29417, 29418/29523); every creature/gameobject entry seen on map 860 is imported except Huo 54958 (summoned later,
-  template present); all SMSG_CHAT senders have creature_text; phases 598/629/630/838 match phase_area.
-- **Open:** gossip and creature-text BroadcastTexts: the 5.5.4 BroadcastText.db2 has 1523 rows and `hotfixes.broadcast_text` is
-  empty, so npc_text rows are skipped and gossip shows no text (retail answers DB_QUERY_BULK: 707 DB_REPLY in m1). Needs a hotfix
-  import (e.g. from the master hotfixes TDB) — project-wide, not done here. Master's unit_flags/unit_flags3 values the cata core strips
-  (50 warnings), 9 spellclick flags without spells, 4 SpellFocus 5705760 GOs, health scaling expansion 4 clamped to 0.
+  Meditation, Singing Pools curses, Li Fei fight, delivery carts), the second-half events (see "Second half" below) and the finale.
+  Docker builds scripts `minimal-static` + `-DSCRIPTS_PANDARIA=static` (`contrib/mop-dev/scripts/build.sh`).
+- **Finale (31450 A New Fate), as retail does it (sniff `m2.pkt` #103842-#104811):** accepting 31450 makes the Spirit of Master
+  Shang Xi (56013) say his line; his gossip menu 13726 offers option 126168 "I'm ready to decide." while 31450 is open; selecting it
+  casts 108897 Pandaren Faction Choice, whose script effect sends SHOW_NEUTRAL_PLAYER_FACTION_SELECT_UI. The client answers with
+  faction 1 = Alliance (race 25; 0 = Horde, race 26). The handler changes race/faction, sends the result and casts 113244/113245
+  Faction Choice Trigger Spell: fade aura, SEND_EVENT 31336/31337 (spirit's second line 6 s later), tracking quest 30454/30455,
+  kill credit 64594, and the 2 s timer 130422/132211. When the timer expires the player is rooted and 130420/132212 plays movie
+  116/123. On CMSG_COMPLETE_MOVIE the player is unrooted and casts 116957/116962 (BIND + TELEPORT_UNITS to spell_target_position).
+  Alliance lands at Stormwind (0, -9066.33, 433.165, 93.06, o 0.663; TRANSFER_PENDING/NEW_WORLD) where Aysa (60566, phase 1231,
+  shown while 31450 is complete/rewarded and 30987 not taken) takes the turn-in and gives 30987. Horde arrival and Ji's spot are
+  `TODO(verify)` (SkyFire point, Ji placed with Aysa's offset).
+- **Weapon racks:** each class has its own ten racks in its class phase (592 Warrior ... 598 Monk, `phase_area` 5834 with class
+  conditions that use SourceEntry 0). Those conditions were missing (the generator only took area-keyed ones), so every class saw
+  every rack. Loot is SkyFire's MoP-era table (master's warrior rack held the shaman axe + shield; Monk 210005 had none, retail
+  m1 #16583 gives the Monk 73209 Trainee's Staff from 210005).
+- **Sniff data** (`tools/mop-content/sniff_wandering_isle.ts` → `tools/mop-content/data/wandering_isle_sniff.json`, from the WPP
+  text of m1/m2): QUERY_QUEST_INFO fields up to RewardSpell, QUEST_DETAILS Flags/FlagsEx, starters/enders, gossip menus/options
+  (real GossipOptionIDs, OptionNpc, SpellID, menu BroadcastText), the 116957 destination and every entry seen on map 860
+  (templates imported for all of them). The generator applies them over master/SkyFire (91 quest values; 4 menu texts, 6 options).
+- **BroadcastText:** `sql/updates/hotfixes/mop_classic/2026_10_18_01_hotfixes.sql` (`tools/mop-content/gen_hotfixes_broadcast_text.ts`):
+  108 rows from the sniffs' DB_REPLY, 36,006 from the master hotfixes TDB for every ID the world DB references; the server answers
+  the client's DB_QUERY_BULK from the store.
+- **Source priority** (user, 2026-10-18): sniff > SkyFire > TC master.
+- **Second half** (29422-29800): `wandering-isle-second-half.md`. **Per-quest sniff diff:** `wandering-isle-sniff-diff.md`.
+- **Open:** Horde finale points; the Stormwind follow-up (30987 escort summons 61792/61793) is not scripted; master's
+  unit_flags/unit_flags3 values the cata core strips (50 warnings), 9 spellclick flags without spells, 4 SpellFocus 5705760 GOs,
+  menus 13036/14617/14670/14671 without text (not in the sniffs), health scaling expansion 4 clamped to 0.
 
 ## Not in M1
 The MoP talent/spec system (6 tiers, spec choice at 10) for all classes, other classes' MoP changes, Pandaria zones beyond the island,
