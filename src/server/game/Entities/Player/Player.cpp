@@ -17255,6 +17255,9 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder const& hol
     _LoadTalents(holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_TALENT_GROUPS), holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_TALENTS));
     _LoadGlyphs(holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_GLYPHS));
     SetActiveTalentGroup(HasTalentGroupUnlocked(fields.activeTalentGroup) ? fields.activeTalentGroup : 0, false, true);
+    // TODO(verify): class default spec (OrderIndex 4) until the MoP talent rework stores chosen specs
+    if (ChrSpecializationEntry const* defaultSpec = sDB2Manager.GetDefaultChrSpecializationForClass(GetClass()))
+        SetPrimarySpecialization(defaultSpec->ID);
 
     _LoadSpells(holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_SPELLS), holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_SPELL_FAVORITES));
     GetSession()->GetCollectionMgr()->LoadToys();
@@ -26072,11 +26075,14 @@ void Player::SendTalentsInfoData()
     packet.Info.IsPetTalents = false;
     packet.Info.UnspentTalentPoints = m_activePlayerData->CharacterPoints;
     packet.Info.ActiveGroup = GetActiveTalentGroup();
+    // Client needs a ChrSpecialization ID here (not a TalentTab ID) or C_EditMode.SetActiveLayout fails.
+    // TODO(verify): per-group chosen specs come with the MoP talent rework; every group uses CurrentSpecID for now.
+    packet.PrimarySpecialization = GetPrimarySpecialization();
 
     for (TalentGroupInfo const& talentGroup : _talentGroups)
     {
         WorldPackets::Talent::TalentGroupInfo& talentGroupInfo = packet.Info.TalentGroups.emplace_back();
-        talentGroupInfo.PrimarySpecialization = talentGroup.PrimaryTalentTabID;
+        talentGroupInfo.PrimarySpecialization = GetPrimarySpecialization();
         if (_talentGroups.size() > 1)
             talentGroupInfo.SpecID = _talentGroups.size();
 

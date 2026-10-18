@@ -285,6 +285,14 @@ void HotfixDatabaseConnection::DoPrepareStatements()
         "LoreNameFemale_lang, LoreNameLower_lang, LoreNameLowerFemale_lang, LoreDescription_lang, ShortName_lang, ShortNameFemale_lang, ShortNameLower_lang, "
         "ShortNameLowerFemale_lang FROM chr_races_locale WHERE (`VerifiedBuild` > 0) = ? AND locale = ?", CONNECTION_SYNCH);
 
+    // ChrSpecialization.db2
+    PrepareStatement(HOTFIX_SEL_CHR_SPECIALIZATION, "SELECT Name, FemaleName, Description, ID, ClassID, OrderIndex, PetTalentType, Role, Flags, "
+        "SpellIconFileID, PrimaryStatPriority, AnimReplacements, MasterySpellID1, MasterySpellID2 FROM chr_specialization"
+        " WHERE (`VerifiedBuild` > 0) = ?", CONNECTION_SYNCH);
+    PREPARE_MAX_ID_STMT(HOTFIX_SEL_CHR_SPECIALIZATION, "SELECT MAX(ID) + 1 FROM chr_specialization", CONNECTION_SYNCH);
+    PREPARE_LOCALE_STMT(HOTFIX_SEL_CHR_SPECIALIZATION, "SELECT ID, Name_lang, FemaleName_lang, Description_lang FROM chr_specialization_locale"
+        " WHERE (`VerifiedBuild` > 0) = ? AND locale = ?", CONNECTION_SYNCH);
+
     // CinematicCamera.db2
     PrepareStatement(HOTFIX_SEL_CINEMATIC_CAMERA, "SELECT ID, OriginX, OriginY, OriginZ, SoundID, OriginFacing, FileDataID FROM cinematic_camera"
         " WHERE (`VerifiedBuild` > 0) = ?", CONNECTION_SYNCH);

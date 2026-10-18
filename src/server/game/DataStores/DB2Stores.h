@@ -61,6 +61,7 @@ TC_GAME_API extern DB2Storage<ChrClassesEntry>                      sChrClassesS
 TC_GAME_API extern DB2Storage<ChrCustomizationReqEntry>             sChrCustomizationReqStore;
 TC_GAME_API extern DB2Storage<ChrCustomizationOptionEntry>          sChrCustomizationOptionStore;
 TC_GAME_API extern DB2Storage<ChrRacesEntry>                        sChrRacesStore;
+TC_GAME_API extern DB2Storage<ChrSpecializationEntry>               sChrSpecializationStore;
 TC_GAME_API extern DB2Storage<CinematicCameraEntry>                 sCinematicCameraStore;
 TC_GAME_API extern DB2Storage<CinematicSequencesEntry>              sCinematicSequencesStore;
 TC_GAME_API extern DB2Storage<ConditionalChrModelEntry>             sConditionalChrModelStore;
@@ -382,6 +383,8 @@ public:
     ChrModelEntry const* GetChrModel(uint8 race, uint8 gender) const;
     static ConditionalChrModelEntry const* GetConditionalChrModel(int32 chrModelId);
     static char const* GetChrRaceName(uint8 race, LocaleConstant locale = DEFAULT_LOCALE);
+    ChrSpecializationEntry const* GetChrSpecializationByIndex(uint32 class_, uint32 index) const;
+    ChrSpecializationEntry const* GetDefaultChrSpecializationForClass(uint32 class_) const;
     uint32 GetRedirectedContentTuningId(uint32 contentTuningId, uint32 redirectFlag) const;
     Optional<ContentTuningLevels> GetContentTuningData(uint32 contentTuningId, uint32 redirectFlag, bool forItem = false) const;
     bool HasContentTuningLabel(uint32 contentTuningId, int32 label) const;

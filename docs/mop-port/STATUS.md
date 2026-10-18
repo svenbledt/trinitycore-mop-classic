@@ -9,6 +9,9 @@ Last updated: 2026-10-18
 | Current phase | **2b done: a character enters the world on 5.5.4.70449 (2026-10-18)** |
 | Next | Phase 3/4: DB2 layout hashes, gameplay baseline; keep checking new sniffs with `tools/mop-re/sniffcheck` |
 
+## Edit Mode layout save fix (2026-10-18)
+- ChrSpecialization.db2 store ported from TC master (layout DAB4CA4B, 48 rows). SMSG_UPDATE_TALENT_DATA and PlayerData::CurrentSpecID now carry the class's initial spec (OrderIndex 4, e.g. Hunter 1448); without a ChrSpecialization ID, C_EditMode.SetActiveLayout (0x141C43830) refuses to save. Chosen specs come with the MoP talent rework.
+
 ## Pandaren + Monk character create (2026-10-18)
 - Phase 3/4 step 2 code and data done (not committed, not yet client-tested): see `phase3-4-plan.md` "Step 2 status".
 

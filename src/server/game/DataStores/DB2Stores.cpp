@@ -77,6 +77,7 @@ DB2Storage<ChrCustomizationReqChoiceEntry>      sChrCustomizationReqChoiceStore(
 DB2Storage<ChrModelEntry>                       sChrModelStore("ChrModel.db2", &ChrModelLoadInfo::Instance);
 DB2Storage<ChrRaceXChrModelEntry>               sChrRaceXChrModelStore("ChrRaceXChrModel.db2", &ChrRaceXChrModelLoadInfo::Instance);
 DB2Storage<ChrRacesEntry>                       sChrRacesStore("ChrRaces.db2", &ChrRacesLoadInfo::Instance);
+DB2Storage<ChrSpecializationEntry>              sChrSpecializationStore("ChrSpecialization.db2", &ChrSpecializationLoadInfo::Instance);
 DB2Storage<CinematicCameraEntry>                sCinematicCameraStore("CinematicCamera.db2", &CinematicCameraLoadInfo::Instance);
 DB2Storage<CinematicSequencesEntry>             sCinematicSequencesStore("CinematicSequences.db2", &CinematicSequencesLoadInfo::Instance);
 DB2Storage<ConditionalChrModelEntry>            sConditionalChrModelStore("ConditionalChrModel.db2", &ConditionalChrModelLoadInfo::Instance);
@@ -314,6 +315,7 @@ DEFINE_DB2_SET_COMPARATOR(ChrClassesXPowerTypesEntry)
 
 typedef std::map<uint32 /*hash*/, DB2StorageBase*> StorageMap;
 typedef std::unordered_map<uint32 /*areaGroupId*/, std::vector<uint32/*areaId*/>> AreaGroupMemberContainer;
+typedef ChrSpecializationEntry const* ChrSpecializationByIndexContainer[MAX_CLASSES + 1][MAX_SPECIALIZATIONS];
 typedef std::unordered_map<uint32 /*curveID*/, std::vector<DBCPosition2D>> CurvePointsContainer;
 typedef std::map<std::tuple<uint32, uint8, uint8, uint8>, EmotesTextSoundEntry const*> EmotesTextSoundContainer;
 typedef std::unordered_map<uint32, std::vector<uint32>> FactionTeamContainer;
@@ -368,6 +370,7 @@ namespace
     std::map<std::tuple<uint8 /*race*/, uint8/*gender*/, uint8/*shapeshift*/>, ShapeshiftFormModelData> _chrCustomizationChoicesForShapeshifts;
     std::unordered_map<std::pair<uint8 /*race*/, uint8/*gender*/>, std::vector<ChrCustomizationOptionEntry const*>> _chrCustomizationOptionsByRaceAndGender;
     std::unordered_map<uint32 /*chrCustomizationReqId*/, std::vector<std::pair<uint32 /*chrCustomizationOptionId*/, std::vector<uint32>>>> _chrCustomizationRequiredChoices;
+    ChrSpecializationByIndexContainer _chrSpecializationsByIndex;
     std::unordered_map<int32, ConditionalChrModelEntry const*> _conditionalChrModelsByChrModelId;
     std::unordered_multimap<uint32, ConditionalContentTuningEntry const*> _conditionalContentTuning;
     std::unordered_multimap<uint32, CurrencyContainerEntry const*> _currencyContainers;
@@ -584,6 +587,7 @@ uint32 DB2Manager::LoadStores(std::string const& dataPath, LocaleConstant defaul
     LOAD_DB2(sChrModelStore);
     LOAD_DB2(sChrRaceXChrModelStore);
     LOAD_DB2(sChrRacesStore);
+    LOAD_DB2(sChrSpecializationStore);
     LOAD_DB2(sCinematicCameraStore);
     LOAD_DB2(sCinematicSequencesStore);
     LOAD_DB2(sConditionalChrModelStore);
@@ -968,6 +972,22 @@ void DB2Manager::IndexLoadedStores()
                 }
             }
         }
+    }
+
+    memset(_chrSpecializationsByIndex, 0, sizeof(_chrSpecializationsByIndex));
+    for (ChrSpecializationEntry const* chrSpec : sChrSpecializationStore)
+    {
+        ASSERT(chrSpec->ClassID < MAX_CLASSES);
+        ASSERT(chrSpec->OrderIndex < MAX_SPECIALIZATIONS);
+
+        uint32 storageIndex = chrSpec->ClassID;
+        if (chrSpec->GetFlags().HasFlag(ChrSpecializationFlag::PetOverrideSpec))
+        {
+            ASSERT(!chrSpec->ClassID);
+            storageIndex = PET_SPEC_OVERRIDE_CLASS_INDEX;
+        }
+
+        _chrSpecializationsByIndex[storageIndex][chrSpec->OrderIndex] = chrSpec;
     }
 
     for (ConditionalChrModelEntry const* conditionalChrModel : sConditionalChrModelStore)
@@ -1749,6 +1769,16 @@ std::vector<std::pair<uint32, std::vector<uint32>>> const* DB2Manager::GetRequir
 ChrModelEntry const* DB2Manager::GetChrModel(uint8 race, uint8 gender) const
 {
     return Trinity::Containers::MapGetValuePtr(_chrModelsByRaceAndGender, { race, gender });
+}
+
+ChrSpecializationEntry const* DB2Manager::GetChrSpecializationByIndex(uint32 class_, uint32 index) const
+{
+    return _chrSpecializationsByIndex[class_][index];
+}
+
+ChrSpecializationEntry const* DB2Manager::GetDefaultChrSpecializationForClass(uint32 class_) const
+{
+    return GetChrSpecializationByIndex(class_, INITIAL_SPECIALIZATION_INDEX);
 }
 
 ConditionalChrModelEntry const* DB2Manager::GetConditionalChrModel(int32 chrModelId)

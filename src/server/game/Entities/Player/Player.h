@@ -1868,6 +1868,8 @@ class TC_GAME_API Player final : public Unit, public GridObject<Player>
         void SetTalentGroupCount(uint8 count);
         void SetActiveTalentGroup(uint8 group, bool withUpdate = true, bool loading = false);
         void SetPrimaryTalentTree(uint32 talentTabId, bool withUpdate = false);
+        uint32 GetPrimarySpecialization() const { return *m_playerData->CurrentSpecID; }
+        void SetPrimarySpecialization(uint32 spec) { SetUpdateFieldValue(m_values.ModifyValue(&Player::m_playerData).ModifyValue(&UF::PlayerData::CurrentSpecID), spec); }
         uint32 GetPrimaryTalentTree() const;
         bool LearnTalent(uint32 talentId, uint8 rank);
         void UpdateAvailableTalentPoints();

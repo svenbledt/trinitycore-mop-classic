@@ -41,9 +41,8 @@ struct DBCPosition3D
 
 enum LevelLimit
 {
-    // Client expected level limitation, like as used in DBC item max levels for "until max player level"
-    // use as default max player level, must be fit max level for used client
-    // also see MAX_LEVEL and STRONG_MAX_LEVEL define
+    // Client-expected level limit (DBC item max levels "until max player level"); default max player level,
+    // must fit the client's max level. See also MAX_LEVEL and STRONG_MAX_LEVEL.
     DEFAULT_MAX_LEVEL = 85,
 
     // client supported max level for player/pets/etc. Avoid overflow or client stability affected.
@@ -330,6 +329,18 @@ enum class ChrRacesFlag : int32
 
 DEFINE_ENUM_FLAG(ChrRacesFlag);
 
+enum class ChrSpecializationFlag : uint32
+{
+    Caster              = 0x01,
+    Ranged              = 0x02,
+    Melee               = 0x04,
+    DualWieldTwoHanded  = 0x10,     // used for CUnitDisplay::SetSheatheInvertedForDualWield
+    PetOverrideSpec     = 0x20,
+    Recommended         = 0x40,
+};
+
+DEFINE_ENUM_FLAG(ChrSpecializationFlag);
+
 enum class ContentTuningCalcType : int32
 {
     Base                        = 0,
@@ -532,9 +543,7 @@ enum class CriteriaType : int16
     ReleasedSpirit                                 = 95,  /*NYI*/ // Released Spirit
     AccountKnownPet                                = 96,  /*NYI*/ // Account knows pet "{Creature}" (Backtracked)
     DefeatDungeonEncounterWhileElegibleForLoot     = 97,  // Defeat Encounter "{DungeonEncounter}" While Eligible For Loot
-    // UNUSED 18{}                                 = 98,  // Unused
-    // UNUSED 19{}                                 = 99,  // Unused
-    // UNUSED 20{}                                 = 100, // Unused
+    // UNUSED 18{}..UNUSED 20{}                    = 98..100, // Unused
     HighestDamageDone                              = 101, // Highest damage done in 1 single ability
     HighestDamageTaken                             = 102, // Most damage taken in 1 single hit
     TotalDamageTaken                               = 103, // Total damage taken

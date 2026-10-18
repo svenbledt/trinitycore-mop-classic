@@ -787,6 +787,29 @@ struct ChrRacesLoadInfo
     static constexpr DB2LoadInfo Instance{ Fields, 68, &ChrRacesMeta::Instance, HOTFIX_SEL_CHR_RACES };
 };
 
+struct ChrSpecializationLoadInfo
+{
+    static constexpr DB2FieldMeta Fields[14] =
+    {
+        { false, FT_STRING, "Name" },
+        { false, FT_STRING, "FemaleName" },
+        { false, FT_STRING, "Description" },
+        { false, FT_INT, "ID" },
+        { false, FT_BYTE, "ClassID" },
+        { true, FT_BYTE, "OrderIndex" },
+        { true, FT_BYTE, "PetTalentType" },
+        { true, FT_BYTE, "Role" },
+        { true, FT_INT, "Flags" },
+        { true, FT_INT, "SpellIconFileID" },
+        { true, FT_BYTE, "PrimaryStatPriority" },
+        { true, FT_INT, "AnimReplacements" },
+        { true, FT_INT, "MasterySpellID1" },
+        { true, FT_INT, "MasterySpellID2" },
+    };
+
+    static constexpr DB2LoadInfo Instance{ Fields, 14, &ChrSpecializationMeta::Instance, HOTFIX_SEL_CHR_SPECIALIZATION };
+};
+
 struct CinematicCameraLoadInfo
 {
     static constexpr DB2FieldMeta Fields[7] =

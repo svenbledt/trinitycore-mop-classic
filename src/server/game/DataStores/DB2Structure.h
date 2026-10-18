@@ -640,6 +640,31 @@ struct ChrRacesEntry
     EnumFlag<ChrRacesFlag> GetFlags() const { return static_cast<ChrRacesFlag>(Flags); }
 };
 
+// structure for ChrSpecialization.db2
+struct ChrSpecializationEntry
+{
+    LocalizedString Name;
+    LocalizedString FemaleName;
+    LocalizedString Description;
+    uint32 ID;
+    uint8 ClassID;
+    int8 OrderIndex;
+    int8 PetTalentType;
+    int8 Role;
+    int32 Flags;
+    int32 SpellIconFileID;
+    int8 PrimaryStatPriority;
+    int32 AnimReplacements;
+    std::array<int32, 2> MasterySpellID;
+
+    EnumFlag<ChrSpecializationFlag> GetFlags() const { return static_cast<ChrSpecializationFlag>(Flags); }
+
+    bool IsPetSpecialization() const
+    {
+        return ClassID == 0;
+    }
+};
+
 // structure for CinematicCamera.db2
 struct CinematicCameraEntry
 {
@@ -727,17 +752,8 @@ struct ConversationLineEntry
     uint8 EndAnimation;
 };
 
-//struct CreatureDifficultyEntry
-//{
-//    uint32 ID;
-//    int8 ExpansionID;
-//    int8 MinLevel;
-//    int8 MaxLevel;
-//    uint16 FactionID;
-//    int32 ContentTuningID;
-//    int32 Flags[8];
-//    uint32 CreatureID;
-//};
+// Unused CreatureDifficultyEntry: ID, ExpansionID (int8), MinLevel (int8), MaxLevel (int8), FactionID (uint16),
+// ContentTuningID, Flags[8] (int32), CreatureID
 
 // structure for CreatureDisplayInfo.db2
 struct CreatureDisplayInfoEntry
@@ -860,45 +876,28 @@ struct CriteriaEntry
     union AssetNameAlias
     {
         int32 ID;
-        // CriteriaType::KillCreature                               = 0
-        // CriteriaType::KilledByCreature                           = 20
-        // CriteriaType::AccountKnownPet                            = 96
-        // CriteriaType::KillCreatureScenario                       = 208
+        // CriteriaType:: KillCreature = 0, KilledByCreature = 20, AccountKnownPet = 96, KillCreatureScenario = 208
         int32 CreatureID;
 
-        // CriteriaType::WinBattleground                            = 1
-        // CriteriaType::ParticipateInBattleground                  = 15
-        // CriteriaType::DieOnMap                                   = 16
-        // CriteriaType::WinArena                                   = 32
-        // CriteriaType::ParticipateInArena                         = 33
-        // CriteriaType::CompleteChallengeMode                      = 71
+        // CriteriaType:: WinBattleground = 1, ParticipateInBattleground = 15, DieOnMap = 16, WinArena = 32, ParticipateInArena = 33, CompleteChallengeMode = 71
         int32 MapID;
 
         // CriteriaType::CompleteResearchProject                    = 2
         int32 ResearchProjectID;
 
-        // CriteriaType::FindResearchObject                         = 4
-        // CriteriaType::UseGameobject                              = 68
-        // CriteriaType::CatchFishInFishingHole                     = 72
+        // CriteriaType:: FindResearchObject = 4, UseGameobject = 68, CatchFishInFishingHole = 72
         int32 GameObjectID;
 
-        // CriteriaType::SkillRaised                                = 7
-        // CriteriaType::AchieveSkillStep                           = 40
-        // CriteriaType::LearnSpellFromSkillLine                    = 75
-        // CriteriaType::LearnTradeskillSkillLine                   = 112
+        // CriteriaType:: SkillRaised = 7, AchieveSkillStep = 40, LearnSpellFromSkillLine = 75, LearnTradeskillSkillLine = 112
         int32 SkillID;
 
         // CriteriaType::EarnAchievement                            = 8
         int32 AchievementID;
 
-        // CriteriaType::CompleteQuestsInZone                       = 11
-        // CriteriaType::EnterTopLevelArea                          = 225
-        // CriteriaType::LeaveTopLevelArea                          = 226
+        // CriteriaType:: CompleteQuestsInZone = 11, EnterTopLevelArea = 225, LeaveTopLevelArea = 226
         int32 ZoneID;
 
-        // CriteriaType::CurrencyGained                             = 12
-        // CriteriaType::ObtainAnyItemWithCurrencyValue             = 229
-        // CriteriaType::ReachRenownLevel                           = 261
+        // CriteriaType:: CurrencyGained = 12, ObtainAnyItemWithCurrencyValue = 229, ReachRenownLevel = 261
         int32 CurrencyID;
 
         // CriteriaType::DieInInstance                              = 18
@@ -914,28 +913,16 @@ struct CriteriaEntry
         // CriteriaType::CompleteQuest                              = 27
         int32 QuestID;
 
-        // CriteriaType::BeSpellTarget                              = 28
-        // CriteriaType::CastSpell                                  = 29
-        // CriteriaType::LearnOrKnowSpell                           = 34
-        // CriteriaType::GainAura                                   = 69
-        // CriteriaType::LandTargetedSpellOnTarget                  = 110
-        // CriteriaType::MemorizeSpell                              = 222
+        // CriteriaType:: BeSpellTarget = 28, CastSpell = 29, LearnOrKnowSpell = 34, GainAura = 69, LandTargetedSpellOnTarget = 110, MemorizeSpell = 222
         int32 SpellID;
 
         // CriteriaType::TrackedWorldStateUIModified                = 30
         int32 WorldStateUIID;
 
-        // CriteriaType::PVPKillInArea                              = 31
-        // CriteriaType::EnterArea                                  = 163
-        // CriteriaType::LeaveArea                                  = 164
+        // CriteriaType:: PVPKillInArea = 31, EnterArea = 163, LeaveArea = 164
         int32 AreaID;
 
-        // CriteriaType::AcquireItem                                = 36
-        // CriteriaType::UseItem                                    = 41
-        // CriteriaType::LootItem                                   = 42
-        // CriteriaType::EquipItem                                  = 57
-        // CriteriaType::LearnToy                                   = 185
-        // CriteriaType::LearnHeirloom                              = 188
+        // CriteriaType:: AcquireItem = 36, UseItem = 41, LootItem = 42, EquipItem = 57, LearnToy = 185, LearnHeirloom = 188
         int32 ItemID;
 
         // CriteriaType::EarnTeamArenaRating                        = 38
@@ -953,9 +940,7 @@ struct CriteriaEntry
         // CriteriaType::LearnAnyTransmogInSlot                     = 199
         int32 EquipmentSlot;
 
-        // CriteriaType::RollNeed                                   = 50
-        // CriteriaType::RollGreed                                  = 51
-        // CriteriaType::RollDisenchant                             = 116
+        // CriteriaType:: RollNeed = 50, RollGreed = 51, RollDisenchant = 116
         int32 RollValue;
 
         // CriteriaType::DeliverKillingBlowToClass                  = 52
@@ -998,9 +983,7 @@ struct CriteriaEntry
         // CriteriaType::ActivelyEarnPetLevel                       = 162
         int32 PetLevel;
 
-        // CriteriaType::PlaceGarrisonBuilding                      = 167
-        // CriteriaType::ActivateGarrisonBuilding                   = 169
-        // CriteriaType::LearnGarrisonBlueprint                     = 179
+        // CriteriaType:: PlaceGarrisonBuilding = 167, ActivateGarrisonBuilding = 169, LearnGarrisonBlueprint = 179
         int32 GarrBuildingID;
 
         // CriteriaType::UpgradeGarrison                            = 170
@@ -1029,9 +1012,7 @@ struct CriteriaEntry
         // CriteriaType::ActivelyReachLevel                         = 196
         int32 PlayerLevel;
 
-        // CriteriaType::CompleteResearchGarrisonTalent             = 198
-        // CriteriaType::StartResearchGarrisonTalent                = 202
-        // CriteriaType::SocketGarrisonTalent                       = 227
+        // CriteriaType:: CompleteResearchGarrisonTalent = 198, StartResearchGarrisonTalent = 202, SocketGarrisonTalent = 227
         int32 GarrTalentID;
 
         // CriteriaType::EarnLicense                                = 204
