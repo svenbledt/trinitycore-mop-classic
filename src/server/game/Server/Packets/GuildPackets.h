@@ -115,6 +115,7 @@ namespace WorldPackets
             uint8 Gender = 0;
             uint64 GuildClubMemberID = 0;
             uint8 RaceID = 0;
+            uint32 Unk404 = 0; // TODO(verify): meaning unknown; client 0x1406C4520 reads u32 after RaceID
             bool Authenticated = false;
             GuildRosterProfessionData Profession[2];
             MythicPlus::DungeonScoreSummary DungeonScore;

@@ -88,8 +88,8 @@ void WorldPackets::Guild::GuildUpdateMotdText::Read()
 
 WorldPacket const* WorldPackets::Guild::GuildCommandResult::Write()
 {
-    _worldPacket << int32(Result);
-    _worldPacket << int32(Command);
+    _worldPacket << uint8(Result);
+    _worldPacket << uint8(Command);
 
     _worldPacket.WriteBits(Name.length(), 8);
     _worldPacket.FlushBits();
@@ -181,6 +181,7 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Guild::GuildRosterMemberD
     data << uint8(rosterMemberData.Gender);
     data << uint64(rosterMemberData.GuildClubMemberID);
     data << uint8(rosterMemberData.RaceID);
+    data << uint32(rosterMemberData.Unk404);
 
     data.WriteBits(rosterMemberData.Name.length(), 6);
     data.WriteBits(rosterMemberData.Note.length(), 8);
@@ -514,12 +515,11 @@ void WorldPackets::Guild::RequestGuildPartyState::Read()
 
 WorldPacket const* WorldPackets::Guild::GuildPartyState::Write()
 {
-    _worldPacket.WriteBit(InGuildParty);
-    _worldPacket.FlushBits();
-
     _worldPacket << int32(NumMembers);
     _worldPacket << int32(NumRequired);
     _worldPacket << float(GuildXPEarnedMult);
+    _worldPacket.WriteBit(InGuildParty);
+    _worldPacket.FlushBits();
 
     return &_worldPacket;
 }
@@ -871,7 +871,7 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Guild::GuildNewsEvent con
 {
     data << int32(newsEvent.Id);
     data << newsEvent.CompletedDate;
-    data << int32(newsEvent.Type);
+    data << uint8(newsEvent.Type);
     data << int32(newsEvent.Flags);
 
     for (std::size_t i = 0; i < newsEvent.Data.size(); ++i)

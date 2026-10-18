@@ -41,7 +41,7 @@ ByteBuffer& operator<<(ByteBuffer& data, PetitionInfo const& petitionInfo)
     data << int32(petitionInfo.AllowedMinLevel);
     data << int32(petitionInfo.AllowedMaxLevel);
     data << int32(petitionInfo.NumChoices);
-    data << int32(petitionInfo.StaticType);
+    data << uint8(petitionInfo.StaticType);
     data << uint32(petitionInfo.Muid);
 
     data << SizedString::BitsSize<8>(petitionInfo.Title);
@@ -163,6 +163,11 @@ void DeclinePetition::Read()
 void TurnInPetition::Read()
 {
     _worldPacket >> Item;
+    _worldPacket >> BgColorRGB;
+    _worldPacket >> IconStyle;
+    _worldPacket >> IconColorRGB;
+    _worldPacket >> BorderStyle;
+    _worldPacket >> BorderColorRGB;
 }
 
 WorldPacket const* TurnInPetitionResult::Write()
@@ -175,6 +180,7 @@ WorldPacket const* TurnInPetitionResult::Write()
 
 void OfferPetition::Read()
 {
+    _worldPacket >> Unk440;
     _worldPacket >> ItemGUID;
     _worldPacket >> TargetPlayer;
 }

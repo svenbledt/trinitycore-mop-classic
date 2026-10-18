@@ -179,6 +179,15 @@ namespace WorldPackets
             int32 ExpireTime = 0;
         };
 
+        struct CalendarSendCalendarRaidResetInfo
+        {
+            int32 MapID = 0;
+            uint32 Unk340_1 = 0; // TODO(verify): meaning unknown (WPP name)
+            int32 IntervalSeconds = 0;
+            int32 OffsetSeconds = 0;
+            uint16 DifficultyID = 0;
+        };
+
         struct CalendarSendCalendarEventInfo
         {
             uint64 EventID = 0;
@@ -201,6 +210,7 @@ namespace WorldPackets
             WowTime ServerTime;
             std::vector<CalendarSendCalendarInviteInfo> Invites;
             std::vector<CalendarSendCalendarRaidLockoutInfo> RaidLockouts;
+            std::vector<CalendarSendCalendarRaidResetInfo> RaidResets;
             std::vector<CalendarSendCalendarEventInfo> Events;
         };
 

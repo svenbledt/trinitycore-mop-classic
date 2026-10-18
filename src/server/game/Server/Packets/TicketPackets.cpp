@@ -267,6 +267,20 @@ ByteBuffer& operator>>(ByteBuffer& data, Optional<WorldPackets::Ticket::SupportT
     return data;
 }
 
+ByteBuffer& operator>>(ByteBuffer& data, Optional<WorldPackets::Ticket::SupportTicketUnk14512>& unk)
+{
+    unk.emplace();
+
+    uint32 textLength = data.ReadBits(8);
+    data >> unk->Guid1;
+    data >> unk->Guid2;
+    data >> unk->Guid3;
+    data >> unk->Unk;
+    unk->Text = data.ReadString(textLength);
+
+    return data;
+}
+
 void WorldPackets::Ticket::SupportTicketSubmitComplaint::Read()
 {
     _worldPacket >> Header;
@@ -286,6 +300,7 @@ void WorldPackets::Ticket::SupportTicketSubmitComplaint::Read()
     bool hasClubMessage = _worldPacket.ReadBit();
     bool hasClubFinderResult = _worldPacket.ReadBit();
     bool hasUnk910 = _worldPacket.ReadBit();
+    bool hasUnk14512 = _worldPacket.ReadBit();
 
     _worldPacket.ResetBitPos();
 
@@ -323,6 +338,9 @@ void WorldPackets::Ticket::SupportTicketSubmitComplaint::Read()
 
     if (hasUnk910)
         _worldPacket >> Unused910;
+
+    if (hasUnk14512)
+        _worldPacket >> Unk14512;
 }
 
 ByteBuffer& operator>>(ByteBuffer& data, WorldPackets::Ticket::Complaint::ComplaintOffender& complaintOffender)

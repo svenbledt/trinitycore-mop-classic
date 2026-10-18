@@ -65,20 +65,20 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Battleground::PVPMatchSta
 {
     data << playerData.PlayerGUID;
     data << uint32(playerData.Kills);
+    data << int32(playerData.Faction);
     data << uint32(playerData.DamageDone);
     data << uint32(playerData.HealingDone);
     data << uint32(playerData.Stats.size());
     data << int32(playerData.PrimaryTalentTree);
     data << int8(playerData.Sex);
-    data << int32(playerData.Race);
-    data << int32(playerData.Class);
+    data << uint8(playerData.Race);
+    data << uint8(playerData.Class);
     data << int32(playerData.CreatureID);
     data << int32(playerData.HonorLevel);
     data << int32(playerData.Role);
     for (WorldPackets::Battleground::PVPMatchStatistics::PVPMatchPlayerPVPStat const& pvpStat : playerData.Stats)
         data << pvpStat;
 
-    data.WriteBit(playerData.Faction != 0);
     data.WriteBit(playerData.IsInWorld);
     data.WriteBit(playerData.Honor.has_value());
     data.WriteBit(playerData.PreMatchRating.has_value());
@@ -149,6 +149,7 @@ void WorldPackets::Battleground::BattlemasterJoin::Read()
 
 void WorldPackets::Battleground::BattlemasterJoinArena::Read()
 {
+    _worldPacket >> BattlemasterGuid;
     _worldPacket >> TeamSizeIndex;
     _worldPacket >> Roles;
 }
@@ -333,7 +334,7 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Battleground::RatedPvpInf
     data << int32(bracketInfo.PvpTierID);
     data << int32(bracketInfo.Unused3);
     data << int32(bracketInfo.Unused4);
-    data << int32(bracketInfo.Rank);
+    data << uint8(bracketInfo.Rank);
     data.WriteBit(bracketInfo.Disqualified);
     data.FlushBits();
 

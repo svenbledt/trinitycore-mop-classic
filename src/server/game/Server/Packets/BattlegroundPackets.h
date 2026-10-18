@@ -247,6 +247,7 @@ namespace WorldPackets
 
             void Read() override;
 
+            ObjectGuid BattlemasterGuid;
             uint8 TeamSizeIndex = 0;
             uint8 Roles = 0;
         };

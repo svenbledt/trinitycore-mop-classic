@@ -129,7 +129,7 @@ namespace WorldPackets
             struct SenderRealm
             {
                 uint32 VirtualRealmAddress;
-                uint16 field_4;
+                uint32 field_4; // TODO(verify): meaning unknown; client 0x140651680 writes u32 here
                 uint8 field_6;
             };
 
@@ -213,6 +213,16 @@ namespace WorldPackets
             ObjectGuid field_104;
         };
 
+        // TODO(verify): meaning unknown; layout from client writer 0x1405907A0 (10th optional)
+        struct SupportTicketUnk14512
+        {
+            std::string Text;
+            ObjectGuid Guid1;
+            ObjectGuid Guid2;
+            ObjectGuid Guid3;
+            uint8 Unk = 0;
+        };
+
         class SupportTicketSubmitComplaint final : public ClientPacket
         {
         public:
@@ -237,6 +247,7 @@ namespace WorldPackets
             Optional<SupportTicketCommunityMessage> CommunityMessage;
             Optional<SupportTicketClubFinderResult> ClubFinderResult;
             Optional<SupportTicketUnused910> Unused910;
+            Optional<SupportTicketUnk14512> Unk14512;
         };
 
         class Complaint final : public ClientPacket

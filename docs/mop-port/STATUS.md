@@ -6,8 +6,13 @@ Last updated: 2026-10-18
 |---|---|
 | Base | TrinityCore `cata_classic` @ `0614c9fd941` (4.4.2.60895) |
 | Target | MoP Classic **5.5.4.70449** (dump `d:\WoW\World of Warcraft\_classic_\WowClassic_orion.exe`; 70032 dump kept as `WowClassic_dump.exe`) |
-| Current phase | **2b — enter world; opcode verification round 3 complete (2026-10-18)** |
-| Next | Fix the s22/s23 layout diffs (below), auth rows for 70449, then Enter World test (branch `mop/phase2b`) |
+| Current phase | **2b — enter world; opcode round 4 + packet layout pass (2026-10-18)** |
+| Next | Finish layout batch L5, auth rows for 70449, update-field layout for UPDATE_OBJECT, then Enter World test (branch `mop/phase2b`) |
+
+## Opcode round 4 + layout pass (2026-10-18)
+- REA now runs **attached** to the user's IDA GUI database (no re-analysis); see `tools/mop-re/verify/AGENT.rea.md`.
+- Opcodes: only names MoP uses are verified; retail-only families (garrison, housing, delves...) stay `TODO(verify)` behind the send guard. Round 4: p00 (26 server-used names) and q00 (41 MoP-era names) → +9 anchors, nothing moved; the rest are order-only (handler globals never written).
+- Layouts: `tools/mop-re/pe/tc_layouts.py` compares every server Write()/Read() with the client; fixers L1-L4 fixed ~45 packets/structs from client code (`re-notes.md` "5.5.4.70449 layout pass"). L5 (auction, guild, PvP, LFG, calendar, tickets) in progress.
 
 ## Re-baseline to 5.5.4.70449 (2026-10-18)
 - Opcodes: every name keeps its 70032 value, proven by a build-to-build diff of all 2482 packets (`opcode-harvest.md` "70032 → 70449"). `Opcodes.h` banner only.

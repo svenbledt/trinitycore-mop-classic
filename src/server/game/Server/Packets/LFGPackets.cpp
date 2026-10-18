@@ -146,7 +146,7 @@ WorldPacket const* LFGUpdateStatus::Write()
 {
     _worldPacket << Ticket;
     _worldPacket << uint8(SubType);
-    _worldPacket << uint8(Reason);
+    _worldPacket << uint32(Reason);
     _worldPacket << uint32(Slots.size());
     _worldPacket << uint8(RequestedRoles);
     _worldPacket << uint32(SuspendedPlayers.size());
@@ -218,7 +218,7 @@ WorldPacket const* LFGRoleCheckUpdate::Write()
 WorldPacket const* LFGJoinResult::Write()
 {
     _worldPacket << Ticket;
-    _worldPacket << uint8(Result);
+    _worldPacket << uint32(Result);
     _worldPacket << uint8(ResultDetail);
     _worldPacket << uint32(BlackList.size());
     _worldPacket << uint32(BlackListNames.size());

@@ -36,10 +36,22 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Calendar::CalendarSendCal
 
 ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Calendar::CalendarSendCalendarRaidLockoutInfo const& lockoutInfo)
 {
-    data << uint64(lockoutInfo.InstanceID);
+    // TODO(verify): field meaning inferred from widths/WPP names, client 0x1405B5390 reads u32, u16, u32, u64
     data << int32(lockoutInfo.MapID);
-    data << uint32(lockoutInfo.DifficultyID);
+    data << uint16(lockoutInfo.DifficultyID);
     data << int32(lockoutInfo.ExpireTime);
+    data << uint64(lockoutInfo.InstanceID);
+
+    return data;
+}
+
+ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Calendar::CalendarSendCalendarRaidResetInfo const& resetInfo)
+{
+    data << int32(resetInfo.MapID);
+    data << uint32(resetInfo.Unk340_1);
+    data << int32(resetInfo.IntervalSeconds);
+    data << int32(resetInfo.OffsetSeconds);
+    data << uint16(resetInfo.DifficultyID);
 
     return data;
 }
@@ -121,7 +133,7 @@ ByteBuffer& operator>>(ByteBuffer& buffer, WorldPackets::Calendar::CalendarAddEv
     buffer >> addEventInfo.EventType;
     buffer >> addEventInfo.TextureID;
     buffer >> addEventInfo.Time;
-    buffer >> addEventInfo.Flags;
+    buffer >> WorldPackets::As<uint16>(addEventInfo.Flags);
     addEventInfo.Invites.resize(buffer.read<uint32>());
 
     uint8 titleLength = buffer.ReadBits(8);
@@ -258,9 +270,13 @@ WorldPacket const* WorldPackets::Calendar::CalendarSendCalendar::Write()
     _worldPacket << uint32(Invites.size());
     _worldPacket << uint32(Events.size());
     _worldPacket << uint32(RaidLockouts.size());
+    _worldPacket << uint32(RaidResets.size());
 
     for (CalendarSendCalendarRaidLockoutInfo const& lockout : RaidLockouts)
         _worldPacket << lockout;
+
+    for (CalendarSendCalendarRaidResetInfo const& reset : RaidResets)
+        _worldPacket << reset;
 
     for (CalendarSendCalendarInviteInfo const& invite : Invites)
         _worldPacket << invite;

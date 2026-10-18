@@ -193,6 +193,11 @@ namespace WorldPackets
             void Read() override;
 
             ObjectGuid Item;
+            int32 BgColorRGB = 0;
+            int32 IconStyle = 0;
+            int32 IconColorRGB = 0;
+            int32 BorderStyle = 0;
+            int32 BorderColorRGB = 0;
         };
 
         class TurnInPetitionResult final : public ServerPacket
@@ -212,6 +217,7 @@ namespace WorldPackets
 
             void Read() override;
 
+            uint32 Unk440 = 0; // TODO(verify): meaning unknown (WPP name), client writer 0x1406570D0
             ObjectGuid TargetPlayer;
             ObjectGuid ItemGUID;
         };

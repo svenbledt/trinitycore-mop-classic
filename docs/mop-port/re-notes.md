@@ -246,3 +246,11 @@ Open: `UpdateTalentData::PrimarySpecialization` is not filled by Player (sent 0,
 | INSPECT_RESULT | glyph + talent u16 arrays before PvP talents |
 | Small | ADDON_MESSAGE_TARGETED 9/8-bit lengths; SET_PARTY_ASSIGNMENT u32; WHO FactionGroup u8; TRAINER_LIST type u8; PET_STABLE_RESULT u32; PVP_CREDIT u8 + bit; COLLECTION_ITEM_SET_FAVORITE u8; DISPLAY_PLAYER_CHOICE 7 flag bits, no MawPower block |
 MovementInfo (both directions) was checked and matches.
+
+### Batch L5 (2026-10-18)
+GUILD_COMMAND_RESULT/GUILD_NEWS/QUERY_PETITION_RESPONSE/RATED_PVP_INFO u8 widths; LFG_JOIN_RESULT/LFG_UPDATE_STATUS u32;
+SCENARIO_STATE DifficultyID u16; GUILD_PARTY_STATE bit after the ints; GUILD_ROSTER +u32 after RaceID;
+CALENDAR_SEND_CALENDAR RaidResets array + lockout u32/u16/u32/u64; PVPMatchPlayerStatistics Faction int32 after Kills,
+Race/Class u8; CMSGs: BATTLEMASTER_JOIN_ARENA leading GUID, OFFER_PETITION +u32, TURN_IN_PETITION 5 emblem u32,
+CALENDAR_ADD_EVENT Flags u16, SUPPORT_TICKET_SUBMIT_COMPLAINT 10th presence bit + block. Retail-only Mythic+
+DungeonScoreMapSummary diff left as is.
