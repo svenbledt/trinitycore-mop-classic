@@ -21,6 +21,30 @@ gameobject entries have templates, except 196534, 211012 and GO 570926, which no
 
 Credit trigger = the last two player or NPC spell/gossip/use events before the first credit of each objective.
 
+## Audit (2026-10-19): sniff replayed against the live world DB
+
+`sniff_wandering_isle_audit.ts` → `data/wandering_isle_audit.json` (per-creature state, patrols, loot) → `gen_wandering_isle_audit.ts`
+→ `2026_10_19_10_world.sql` + `2026_10_19_10_hotfixes.sql`. Found and fixed:
+- **Credit/blocking:** creature loot was missing for 21 looted island mobs (master has none), so 29777 Tools of the Enemy (74615 from
+  Fe-Feng Wiseman 55601) could not complete; SkyFire loot imported, drop rates from the sniff where looted ≥ 10 times. 6 master spell
+  conditions were never exported (106205 cart driver, 106299/109062 Living Air → 29523, 108967 Jab target, 114728 Summon Aysa, 122484 Edict);
+  Generic Bunny guid SAI (106299 → 102207 Summon Living Air) was skipped because 41200 is a world-kept template (AIName set as master).
+  114710 force-casts only on players (sniff: the player casts both 114698).
+- **Health:** sniff HealthModifier had 4 decimals; 96 of 1086 entries were a few HP off (e.g. 55123 30945 vs 30951). Now 8 digits:
+  every island creature matches retail MaxHealth/Level (3 non-island 500M+ HP bosses stay off by float precision).
+- **Movement:** 56 sniffed patrol loops (periodic ON_MONSTER_MOVE destinations) → `waypoint_path` (guid × 10), median wait per node,
+  walk/run from the median speed. 73 templates get the sniffed walk/run speeds (e.g. hozen 0.889/0.99206).
+- **Spawn state:** 183 spawns get retail emote/stand/sheath/anim tier; wounded sailors 55999 spawn at 25 % as retail; npcflag of
+  7 NPCs; Temple of Five Dawns brazier bunnies 54900-54902 spawned.
+- **Area triggers:** 7750, 8287, 7258 (greetings with the dummy timer aura) and 7106 (balloon: 106604 → 106603, Aysa's line) answered
+  as retail; the other client-entered ATs only get SMSG_AREA_TRIGGER_MESSAGE (MessageID 6) or dummy self-casts (7116 106683, 7714 115491,
+  8628 133381, 7273 109090) whose conditions are unknown; not ported.
+
+**Not done:** formations (lockstep pairs patrol on their own paths), summon-only NPCs (59637 troublemakers, 60685 healing-event waves,
+64258), opcodes retail sends that we never do (ATTACK_SWING_LANDED_LOG, AREA_TRIGGER_MESSAGE, GOSSIP_QUEST_UPDATE: cosmetic,
+layouts not RE'd), 64 entry-targeted island spell effects without conditions in any source (TC picks the nearest target; the WPP
+5.5.3 SPELL_GO reader drops 5.5.4 hit targets, so the sniff can't name them yet).
+
 | # | Quest | Sniff giver → ender | DB giver → ender | DB prev/next/excl | Objectives (DB) | Credit trigger in the sniff |
 |---|---|---|---|---|---|---|
 | 1 | 30039 | player → 53566 | - (player push) → 53566 (53566 ✓) | 0/0/0 | - |  |

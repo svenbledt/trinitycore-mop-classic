@@ -55,7 +55,8 @@ for (const [entry, obs] of [...seen].sort((a, b) => a[0] - b[0])) {
   const [lv, mh] = best[0].split(":").map(Number);
   const b = base.get(`${lv}:${cls}`);
   if (!b) continue;
-  const mod = Math.round((mh / b) * 10000) / 10000;
+  // 4 decimals were off by a few HP above ~20k (e.g. 55123: 30945 vs 30951); 8 digits survive the FLOAT column.
+  const mod = Number((mh / b).toPrecision(8));
   lines.push(`UPDATE \`creature_template_difficulty\` SET \`MinLevel\` = ${Math.min(...levels)}, \`MaxLevel\` = ${Math.max(...levels)}, \`HealthScalingExpansion\` = 4, \`HealthModifier\` = ${mod} WHERE \`Entry\` = ${entry} AND \`DifficultyID\` = 0; -- retail ${mh} HP at ${lv}`);
   ++count;
 }
