@@ -16,6 +16,8 @@ CMSG_LFG_LIST_GET_STATUS 0x440039, CMSG_DF_GET_JOIN_STATUS 0x440042, CMSG_BATTLE
 Own 70449 sniff (2026-10-18, 4 logins, 29750 packets) adds CMSG_MOVE_SET_VEHICLE_REC_ID_ACK 0x420032 and
 CMSG_BATTLE_PET_REQUEST_JOURNAL_LOCK 0x44004D. SMSG_PLAY_TIME_WARNING (ours 0x4601AB) did not occur.
 Friend 70449 sniff (216k packets) adds SMSG_MOVE_UPDATE_KNOCK_BACK 0x5E0010, SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA 0x460194.
+Duel/death sniffs (u4, u5): SMSG_CLEAR_RESURRECT 0x460013 seen; duel, corpse, reforge, transmog-outfit and role packets seen
+with our values. No unnamed packet appears during the duels.
 
 ## Next sniff: please
 - **Build 5.5.4.70449** (current live), so nothing has to be mapped across builds.
@@ -56,13 +58,13 @@ Friend 70449 sniff (216k packets) adds SMSG_MOVE_UPDATE_KNOCK_BACK 0x5E0010, SMS
 | SMSG_CHAIN_MISSILE_BOUNCE | 0x46006C | Chain Lightning / bouncing spell |
 | SMSG_TOTEM_DURATION_CHANGED | 0x460177 | shaman totem extended |
 | SMSG_RESTART_GLOBAL_COOLDOWN | 0x660052 | GCD reset effect |
-| SMSG_UNIT_DIMINISHING_RETURN_START | 0x460374 | CC a player in PvP twice |
+| SMSG_UNIT_DIMINISHING_RETURN_START | 0x460374 | not sent during duels (2 duels with CC sniffed); try arena/BG |
 | SMSG_SET_FLAT_SPELL_PVP_MODIFIER | 0x660027 | enter BG/arena with PvP-modified spells |
 | SMSG_SET_PCT_SPELL_PVP_MODIFIER | 0x660028 | same |
 | SMSG_REMOVE_SPELL_FROM_ACTION_BAR | 0x660043 | unlearn/spec change removing a spell |
 | SMSG_SPEC_INVOLUNTARILY_CHANGED | 0x4601C7 | spec reset by server |
 | SMSG_FORCE_ANIM | 0x4601FE | scripted NPC/emote animation |
-| SMSG_CLEAR_RESURRECT | 0x460013 | decline/expire a resurrect |
+| ~~SMSG_CLEAR_RESURRECT~~ | 0x460013 | seen in sniff |
 | SMSG_PLAYER_SKINNED | 0x63000F | get skinned (insignia) in a BG |
 
 ## Group / PvP / instances

@@ -32,6 +32,8 @@ struct PerksVendorItem
     int32 Field_14 = 0;
     int32 Field_18 = 0;
     int32 Price = 0;
+    int32 OriginalPrice = 0;
+    int32 WarbandSceneID = 0;
     Timestamp<> AvailableUntil;
     bool Disabled = false;
     bool Field_41 = false;

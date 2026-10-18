@@ -47,7 +47,7 @@ void WorldPackets::Chat::ChatMessageWhisper::Read()
     _worldPacket >> TargetGUID;
     _worldPacket >> TargetVirtualRealmAddress;
 
-    uint32 targetLen = _worldPacket.ReadBits(7);
+    uint32 targetLen = _worldPacket.ReadBits(9); // 5.5.4 sniff; TODO(verify): one instance only
     uint32 textLen = _worldPacket.ReadBits(11);
 
     if (targetLen > 1)

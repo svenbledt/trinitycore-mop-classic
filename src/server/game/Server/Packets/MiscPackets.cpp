@@ -124,6 +124,7 @@ WorldPacket const* WorldPackets::Misc::SetupCurrency::Write()
     {
         _worldPacket << int32(data.Type);
         _worldPacket << int32(data.Quantity);
+        _worldPacket << uint8(data.Flags); // 5.5.4: full byte before the has-bits (16/16 SETUP_CURRENCY in 70449 sniffs)
 
         _worldPacket.WriteBit(data.WeeklyQuantity.has_value());
         _worldPacket.WriteBit(data.MaxWeeklyQuantity.has_value());
@@ -132,7 +133,6 @@ WorldPacket const* WorldPackets::Misc::SetupCurrency::Write()
         _worldPacket.WriteBit(data.TotalEarned.has_value());
         _worldPacket.WriteBit(data.NextRechargeTime.has_value());
         _worldPacket.WriteBit(data.RechargeCycleStartTime.has_value());
-        _worldPacket.WriteBits(uint8(data.Flags), 5);
         _worldPacket.FlushBits();
 
         if (data.WeeklyQuantity)

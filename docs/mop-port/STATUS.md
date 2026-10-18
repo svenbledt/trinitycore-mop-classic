@@ -6,11 +6,17 @@ Last updated: 2026-10-18
 |---|---|
 | Base | TrinityCore `cata_classic` @ `0614c9fd941` (4.4.2.60895) |
 | Target | MoP Classic **5.5.4.70449** (dump `d:\WoW\World of Warcraft\_classic_\WowClassic_orion.exe`; 70032 dump kept as `WowClassic_dump.exe`) |
-| Current phase | **2b — enter world; opcode round 4 + packet layout pass (2026-10-18)** |
-| Next | Finish layout batch L5, auth rows for 70449, update-field layout for UPDATE_OBJECT, then Enter World test (branch `mop/phase2b`) |
+| Current phase | **2b done: a character enters the world on 5.5.4.70449 (2026-10-18)** |
+| Next | Phase 3/4: DB2 layout hashes, gameplay baseline; keep checking new sniffs with `tools/mop-re/sniffcheck` |
+
+## Enter world reached (2026-10-18)
+- Client 70449 logs in, enters Northshire, moves, teleports; all 302 UPDATE_OBJECTs of the session parse with the WPP 554 reader, every other packet type matches `sniffcheck`.
+- Sources: 16 real 5.5.4 sniffs (ymir; 68077, 70268, 70449), list in `sniff-wishlist.md`. Update fields: `uf554-deltas.md`. Packet layouts: `tools/mop-re/sniffcheck` (244 opcodes, 239 matched, 5 fixed).
+- Last fixes found from our own packet log: create-block `ThisIsYou` bit position (5.5.1+), `HasDriveStatus` bit, 64-bit action buttons in player create data, PerksVendorItem 5.5 layout, empty anim state 1858 (was Cata 1798 → client crash in AnimationData lookup), SETUP_CURRENCY Flags byte; plus NON_MELEE_DAMAGE_LOG, ABSORB_LOG, glue game rules, whisper target length.
+- Unknown server opcodes 0x46022E/0x460059/0x460052: client handler slot never set, so the client ignores them (no need to send).
 
 ## Update fields 5.5.4 (2026-10-18)
-- UPDATE_OBJECT update fields ported to the sniff-derived 5.5.4 layout (uf_check: 0 diffs vs WPP 554 v3); see `update-fields-plan.md` "5.5.4 deltas ported". Not yet tested against a live client.
+- UPDATE_OBJECT update fields ported to the sniff-derived 5.5.4 layout (uf_check: 0 diffs vs WPP 554 v3); see `update-fields-plan.md` "5.5.4 deltas ported".
 
 ## Opcode round 4 + layout pass (2026-10-18)
 - REA now runs **attached** to the user's IDA GUI database (no re-analysis); see `tools/mop-re/verify/AGENT.rea.md`.

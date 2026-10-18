@@ -1639,7 +1639,7 @@ std::vector<DB2Manager::HotfixOptionalData> const* DB2Manager::GetHotfixOptional
 uint32 DB2Manager::GetEmptyAnimStateID() const
 {
     //return sAnimationDataStore.GetNumRows();
-    return 1798;
+    return 1858; // 5.5.4: every object in 70449 sniffs; client treats IDs > 0x741 as "no AnimationData row"
 }
 
 void DB2Manager::InsertNewHotfix(uint32 tableHash, uint32 recordId)

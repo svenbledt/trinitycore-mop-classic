@@ -295,6 +295,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, CreateObjectBits flags, Playe
     data->WriteBit(flags.NoBirthAnim);
     data->WriteBit(flags.EnablePortals);
     data->WriteBit(flags.PlayHoverAnim);
+    data->WriteBit(flags.ThisIsYou); // moved here in 5.5.1 (WPP UpdateHandler; matches 5.5.4 sniffs)
     data->WriteBit(flags.MovementUpdate);
     data->WriteBit(flags.MovementTransport);
     data->WriteBit(flags.Stationary);
@@ -306,7 +307,6 @@ void Object::BuildMovementUpdate(ByteBuffer* data, CreateObjectBits flags, Playe
     data->WriteBit(flags.AreaTrigger);
     data->WriteBit(flags.GameObject);
     data->WriteBit(flags.SmoothPhasing);
-    data->WriteBit(flags.ThisIsYou);
     data->WriteBit(flags.SceneObject);
     data->WriteBit(flags.ActivePlayer);
     data->WriteBit(flags.Conversation);
@@ -352,6 +352,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, CreateObjectBits flags, Playe
         data->WriteBit(false);                                          // RemoteTimeValid
         data->WriteBit(HasInertia);                                     // HasInertia
         data->WriteBit(HasAdvFlying);                                   // HasAdvFlying
+        data->WriteBit(false);                                          // HasDriveStatus (WPP 5.5.x; parses all 5.5.4 sniffs)
 
         if (!unit->m_movementInfo.transport.guid.IsEmpty())
             *data << unit->m_movementInfo.transport;
@@ -721,10 +722,11 @@ void Object::BuildMovementUpdate(ByteBuffer* data, CreateObjectBits flags, Playe
             for (uint8 i = 0; i < MAX_ACTION_BUTTONS; ++i)
             {
                 auto const& itr = actionButtonList.find(i);
+                // 5.5.x: 64-bit, type in the top byte (as SMSG_UPDATE_ACTION_BUTTONS; matches 5.5.4 sniffs)
                 if (itr != actionButtonList.end() && itr->second.uState != ACTIONBUTTON_DELETED)
-                    *data << uint32(itr->second.packedData);
+                    *data << uint64(uint64(itr->second.GetAction()) | (uint64(itr->second.GetType()) << 56));
                 else
-                    *data << uint32(0);
+                    *data << uint64(0);
             }
         }
     }

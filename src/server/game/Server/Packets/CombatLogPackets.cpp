@@ -50,9 +50,10 @@ WorldPacket const* SpellNonMeleeDamageLog::Write()
     *this << int32(Absorbed);
     *this << int32(Resisted);
     *this << int32(ShieldBlock);
+    *this << int32(0); // TODO(verify): new in 5.5.4, always 0 in sniffs; order vs Resisted unconfirmed
+    *this << int32(Flags); // 5.5.4: full int32 (sniff values 0x04..0x27)
 
     WriteBit(Periodic);
-    WriteBits(Flags, 7);
     WriteBit(false); // Debug info
     WriteLogDataBit();
     WriteBit(ContentTuning.has_value());
@@ -443,10 +444,7 @@ WorldPacket const* SpellAbsorbLog::Write()
     *this << Caster;
     *this << int32(Absorbed);
     *this << int32(OriginalDamage);
-    *this << uint32(Supporters.size());
-
-    for (Spells::SpellSupportInfo const& supportInfo : Supporters)
-        *this << supportInfo;
+    // 5.5.4: no supporter list (246/246 sniffed SPELL_ABSORB_LOG)
 
     WriteBit(Crit);
     WriteLogDataBit();

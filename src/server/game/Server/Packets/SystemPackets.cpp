@@ -237,8 +237,8 @@ WorldPacket const* FeatureSystemStatusGlueScreen::Write()
     _worldPacket << int32(MinimumExpansionLevel);
     _worldPacket << int32(MaximumExpansionLevel);
     _worldPacket << int32(ContentSetID);
-    _worldPacket << uint32(GameRuleValues.size());
-    _worldPacket << uint32(0); // TODO(verify): 5.5.4 vector of (uint32, uint32, uint32)
+    _worldPacket << uint32(0); // TODO(verify): {u8, i32, i32} array (retail sends 2 entries, as in FEATURE_SYSTEM_STATUS)
+    _worldPacket << uint32(GameRuleValues.size()); // real game rules are the 2nd array (70449 sniff, 10 entries)
     _worldPacket << uint32(0); // TODO(verify): 5.5.4 vector of uint32
     _worldPacket << int32(ActiveTimerunningSeasonID);
     _worldPacket << int32(RemainingTimerunningSeasonSeconds);
@@ -260,13 +260,8 @@ WorldPacket const* FeatureSystemStatusGlueScreen::Write()
     if (!LiveRegionCharacterCopySourceRegions.empty())
         _worldPacket.append(LiveRegionCharacterCopySourceRegions.data(), LiveRegionCharacterCopySourceRegions.size());
 
-    // 5.5.4 client reads Rule as uint8 here (IDA 0x1405A8450)
     for (GameRuleValuePair const& gameRuleValue : GameRuleValues)
-    {
-        _worldPacket << uint8(gameRuleValue.Rule);
-        _worldPacket << int32(gameRuleValue.Value);
-        _worldPacket << float(gameRuleValue.ValueF);
-    }
+        _worldPacket << gameRuleValue;
 
     for (DebugTimeEventInfo const& debugTimeEventInfo : DebugTimeEvents)
         _worldPacket << debugTimeEventInfo;

@@ -21,6 +21,7 @@ namespace WorldPackets::PerksProgram
 {
 ByteBuffer& operator<<(ByteBuffer& data, PerksVendorItem const& perksVendorItem)
 {
+    data << perksVendorItem.AvailableUntil; // 5.5.x order (WPP PerksProgramHandler.ReadPerksVendorItem550; matches 5.5.4 sniffs)
     data << int32(perksVendorItem.VendorItemID);
     data << int32(perksVendorItem.MountID);
     data << int32(perksVendorItem.BattlePetSpeciesID);
@@ -29,7 +30,8 @@ ByteBuffer& operator<<(ByteBuffer& data, PerksVendorItem const& perksVendorItem)
     data << int32(perksVendorItem.Field_14);
     data << int32(perksVendorItem.Field_18);
     data << int32(perksVendorItem.Price);
-    data << perksVendorItem.AvailableUntil;
+    data << int32(perksVendorItem.OriginalPrice);
+    data << int32(perksVendorItem.WarbandSceneID);
     data << Bits<1>(perksVendorItem.Disabled);
     data << Bits<1>(perksVendorItem.Field_41);
     data.FlushBits();
