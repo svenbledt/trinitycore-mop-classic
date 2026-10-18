@@ -833,7 +833,7 @@ namespace WorldPackets
 
             bool IsFullUpdate = false;
             std::map<uint32, HeirloomData> const* Heirlooms = nullptr;
-            int32 Unk = 0;
+            uint8 Unk = 0; // TODO(verify): meaning of the 5.5.4 u8 after IsFullUpdate
         };
 
         class MountSpecial final : public ClientPacket
@@ -949,6 +949,7 @@ namespace WorldPackets
             Duration<Seconds> TotalTime;
             Duration<Seconds> TimeLeft;
             CountdownTimerType Type = {};
+            Optional<ObjectGuid> PlayerGuid;
         };
 
         class QueryCountdownTimer final : public ClientPacket

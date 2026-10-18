@@ -756,8 +756,9 @@ void WorldSession::HandleRequestAccountData(WorldPackets::ClientConfig::RequestA
 
 void WorldSession::HandleSetActionButtonOpcode(WorldPackets::Spells::SetActionButton& packet)
 {
-    uint32 action = ACTION_BUTTON_ACTION(packet.Action);
-    uint32 type = ACTION_BUTTON_TYPE(packet.Action);
+    // 5.5.x packs the type into the top byte of the u64 (WPP V5_5_0 ActionBarHandler)
+    uint32 action = uint32(packet.Action & UI64LIT(0x00FFFFFFFFFFFFFF));
+    uint32 type = uint32(packet.Action >> 56);
 
     TC_LOG_DEBUG("network", "CMSG_SET_ACTION_BUTTON Button: {} Action: {} Type: {}", packet.Index, action, uint32(type));
 

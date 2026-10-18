@@ -25,7 +25,7 @@
 #include <algorithm>
 #include <array>
 
-inline constexpr std::array<uint32, 300> UnverifiedServerOpcodes =
+inline constexpr std::array<uint32, 299> UnverifiedServerOpcodes =
 {
     0x460013, // SMSG_CLEAR_RESURRECT
     0x460019, // SMSG_REGIONWIDE_CHARACTER_RESTRICTIONS_DATA
@@ -58,7 +58,6 @@ inline constexpr std::array<uint32, 300> UnverifiedServerOpcodes =
     0x460122, // SMSG_CAS_REFRESH_REMOTE_DATA
     0x460177, // SMSG_TOTEM_DURATION_CHANGED
     0x460194, // SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA
-    0x460197, // SMSG_LEVEL_UP_INFO
     0x4601AB, // SMSG_PLAY_TIME_WARNING
     0x4601C7, // SMSG_SPEC_INVOLUNTARILY_CHANGED
     0x4601C9, // SMSG_GAME_OBJECT_UI_LINK

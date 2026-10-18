@@ -116,6 +116,7 @@ WorldPacket const* WorldPackets::Instance::RaidInstanceMessage::Write()
     _worldPacket << Bits<1>(Locked);
     _worldPacket << Bits<1>(Extended);
     _worldPacket.FlushBits();
+    _worldPacket.WriteString(WarningMessage);
 
     return &_worldPacket;
 }

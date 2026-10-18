@@ -131,7 +131,7 @@ namespace WorldPackets
 
             void Read() override;
 
-            uint32 Action = 0; ///< two packed values (action and type)
+            uint64 Action = 0; ///< two packed values (action and type)
             uint8 Index = 0;
         };
 
@@ -155,13 +155,16 @@ namespace WorldPackets
             uint16 CastLevel = 1;
             uint8 Applications = 1;
             int32 ContentTuningID = 0;
+            TaggedPosition<Position::XYZ> DstLocation; // TODO(verify): meaning taken from WPP 5.5.3 naming
             Optional<ContentTuningParams> ContentTuning;
             Optional<ObjectGuid> CastUnit;
+            Optional<ObjectGuid> CastUnit2; // TODO(verify): meaning unknown, client 0x140641a5c
             Optional<int32> Duration;
             Optional<int32> Remaining;
             Optional<float> TimeMod;
             std::vector<float> Points;
             std::vector<float> EstimatedPoints;
+            Optional<uint8> Unk268; // TODO(verify): 2-bit value behind its own presence bit, client 0x140641a2c
         };
 
         struct AuraInfo
@@ -193,6 +196,8 @@ namespace WorldPackets
             uint32 Flags = 0;
             ObjectGuid Unit;
             ObjectGuid Item;
+            ObjectGuid Unk28; // TODO(verify): third target GUID, meaning unknown (client writer 0x14069ea41)
+            bool Unk38 = false; // TODO(verify): bit before the location bits, no payload
             Optional<TargetLocation> SrcLocation;
             Optional<TargetLocation> DstLocation;
             Optional<float> Orientation;
@@ -217,7 +222,8 @@ namespace WorldPackets
         {
             int32 ItemID = 0;
             int32 DataSlotIndex = 0;
-            int32 Quantity = 0;
+            int32 Quantity = 0; // TODO(verify): 5.5.4 sends it as the first of two optional u32 (0x1406bcd10)
+            Optional<int32> Unk12; // TODO(verify): second optional u32, meaning unknown
             Optional<uint8> Unknown_1000;
         };
 
@@ -232,7 +238,8 @@ namespace WorldPackets
             ObjectGuid CastID;
             int32 SpellID = 0;
             SpellCastVisual Visual;
-            uint8 SendCastFlags = 0;
+            uint8 SendCastFlags = 0; // TODO(verify): 5.5.4 sends a u8 right after CastID; assumed to be this
+            Optional<int32> Unk18; // TODO(verify): optional u32 after Target, meaning unknown (0x1406a079f)
             SpellTargetData Target;
             MissileTrajectoryRequest MissileTrajectory;
             Optional<MovementInfo> MoveUpdate;
@@ -244,6 +251,7 @@ namespace WorldPackets
             uint8 CraftingFlags = 0; // 1 = ApplyConcentration
             ObjectGuid CraftingNPC;
             std::array<int32, 2> Misc = { };
+            int32 Misc3 = 0; // TODO(verify): 5.5.4 sends three u32 here; assumed Misc[0], Misc[1], then this
         };
 
         class CastSpell final : public ClientPacket
@@ -342,6 +350,7 @@ namespace WorldPackets
             SpellCastVisual Visual;
             uint32 CastFlags    = 0;
             uint32 CastFlagsEx  = 0;
+            uint32 CastFlagsEx2 = 0; // name from WPP 5.5.0 ReadSpellCastData
             uint32 CastTime     = 0;
             std::vector<ObjectGuid> HitTargets;
             std::vector<ObjectGuid> MissTargets;
@@ -396,7 +405,9 @@ namespace WorldPackets
 
             std::vector<LearnedSpellInfo> ClientLearnedSpellData;
             uint32 SpecializationID = 0;
+            uint32 Unk8 = 0; // TODO(verify): meaning unknown, client 0x14064feaf
             bool SuppressMessaging = false;
+            bool UnkBit = false; // TODO(verify): meaning unknown, client 0x14064fee0
         };
 
         class SupercededSpells final : public ServerPacket

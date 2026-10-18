@@ -5562,7 +5562,7 @@ void Player::SendActionButtons(uint32 state) const
 
     for (auto const& [i, button] : m_actionButtons)
         if (button.uState != ACTIONBUTTON_DELETED && i < packet.ActionButtons.size())
-            packet.ActionButtons[i] = button.packedData;
+            packet.ActionButtons[i] = uint64(button.GetAction()) | (uint64(button.GetType()) << 56); // 5.5.x: type in the top byte (WPP V5_5_0 ActionBarHandler)
 
     packet.Reason = state;
 

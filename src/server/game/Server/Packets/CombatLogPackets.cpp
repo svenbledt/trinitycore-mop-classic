@@ -227,6 +227,8 @@ WorldPacket const* SpellInterruptLog::Write()
     _worldPacket << Victim;
     _worldPacket << int32(InterruptedSpellID);
     _worldPacket << int32(SpellID);
+    _worldPacket.WriteBit(UnkBit);
+    _worldPacket.FlushBits();
 
     return &_worldPacket;
 }

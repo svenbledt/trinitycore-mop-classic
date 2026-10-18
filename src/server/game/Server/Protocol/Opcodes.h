@@ -154,7 +154,7 @@ enum OpcodeClient : uint32
     CMSG_CALENDAR_EVENT_SIGN_UP                        = 0x4400A9,
     CMSG_CALENDAR_GET                                  = 0x44009D,
     CMSG_CALENDAR_GET_EVENT                            = 0x44009E,
-    CMSG_CALENDAR_GET_NUM_PENDING                      = 0x4400A8, // TODO(verify): low-confidence match
+    CMSG_CALENDAR_GET_NUM_PENDING                      = 0x4400A8,
     CMSG_CALENDAR_INVITE                               = 0x4400A0,
     CMSG_CALENDAR_MODERATOR_STATUS                     = 0x4400A4,
     CMSG_CALENDAR_REMOVE_EVENT                         = 0x4400A5,
@@ -754,7 +754,7 @@ enum OpcodeClient : uint32
     CMSG_REPORT_SERVER_LAG                             = 0x3E01C7,
     CMSG_REQUEST_ACCOUNT_DATA                          = 0x4400C4,
     CMSG_REQUEST_AREA_POI_UPDATE                       = 0x3E01A8,
-    CMSG_REQUEST_BATTLEFIELD_STATUS                    = 0x440008, // TODO(verify): low-confidence match
+    CMSG_REQUEST_BATTLEFIELD_STATUS                    = 0x440008,
     CMSG_REQUEST_CEMETERY_LIST                         = 0x3E0024,
     CMSG_REQUEST_CROWD_CONTROL_SPELL                   = 0x3F00C3,
     CMSG_REQUEST_GUILD_PARTY_STATE                     = 0x3E005A,
@@ -1666,7 +1666,7 @@ enum OpcodeServer : uint32
     SMSG_LEARN_TALENT_FAILED                           = 0x460077,
     SMSG_LEGACY_LOOT_RULES                             = 0x4602DE,
     SMSG_LEVEL_LINKING_RESULT                          = 0x4602F3, // TODO(verify): low-confidence match
-    SMSG_LEVEL_UP_INFO                                 = 0x460197, // TODO(verify): low-confidence match
+    SMSG_LEVEL_UP_INFO                                 = 0x460197,
     SMSG_LFG_BOOT_PLAYER                               = 0x5A0019,
     SMSG_LFG_DISABLED                                  = 0x5A0017,
     SMSG_LFG_EXPAND_SEARCH_PROMPT                      = 0x5A001F,

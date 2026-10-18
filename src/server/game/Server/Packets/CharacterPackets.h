@@ -120,6 +120,7 @@ namespace WorldPackets
         {
             int32 WarbandScenePlacementID = 0;
             int32 Type = 0;
+            int32 Unk8 = 0; // TODO(verify): third u32 per member in 5.5.4 (client 0x14058bf3c), meaning unknown
             ObjectGuid Guid;
         };
 
@@ -127,8 +128,11 @@ namespace WorldPackets
         {
             uint64 GroupID = 0;
             uint8 Unknown_1100 = 0;
+            int32 WarbandSceneID = 0; // name from WPP 5.5.0 ReadWarbandGroup
             int32 Flags = 0;    ///< enum WarbandGroupFlags { Collapsed = 1 }
+            int32 Unk114 = 0; // TODO(verify): extra u32 before the member count (client 0x14058beae)
             std::vector<WarbandGroupMember> Members;
+            std::string Name;
         };
 
         class EnumCharactersResult final : public ServerPacket
@@ -222,6 +226,7 @@ namespace WorldPackets
                 CharacterInfoBasic Basic;
                 uint64 Money = 0;
                 float CurrentSeasonMythicPlusOverallScore = 0.0f;
+                float Unk324 = 0.0f; // TODO(verify): second float in 5.5.4 (client 0x1405a1006), meaning unknown
                 uint32 CurrentSeasonBestPvpRating = 0;
                 int8 PvpRatingBracket = 0;
                 int16 PvpRatingAssociatedSpecID = 0;
@@ -738,6 +743,7 @@ namespace WorldPackets
             WorldPacket const* Write() override;
 
             ResultEnum Result = ResultEnum::Success;
+            bool IgnoreChair = false; // TODO(verify): name from WPP 5.5.0, client only reads one bit (0x1405b88f0)
         };
 
         class LogXPGain final : public ServerPacket

@@ -298,6 +298,7 @@ ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::RegionwideCharact
     data << charInfo.Basic;
     data << uint64(charInfo.Money);
     data << float(charInfo.CurrentSeasonMythicPlusOverallScore);
+    data << float(charInfo.Unk324);
     data << int32(charInfo.CurrentSeasonBestPvpRating);
     data << int8(charInfo.PvpRatingBracket);
     data << int16(charInfo.PvpRatingAssociatedSpecID);
@@ -330,8 +331,8 @@ ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::UnlockedCondition
 
 ByteBuffer& operator<<(ByteBuffer& data, EnumCharactersResult::RaceLimitDisableInfo const& raceLimitDisableInfo)
 {
-    data << int32(raceLimitDisableInfo.RaceID);
-    data << int32(raceLimitDisableInfo.BlockReason);
+    data << uint8(raceLimitDisableInfo.RaceID);
+    data << uint8(raceLimitDisableInfo.BlockReason);
 
     return data;
 }
@@ -340,6 +341,7 @@ ByteBuffer& operator<<(ByteBuffer& data, WarbandGroupMember const& warbandGroupM
 {
     data << int32(warbandGroupMember.WarbandScenePlacementID);
     data << int32(warbandGroupMember.Type);
+    data << int32(warbandGroupMember.Unk8);
     if (warbandGroupMember.Type == 0)
         data << warbandGroupMember.Guid;
 
@@ -350,11 +352,17 @@ ByteBuffer& operator<<(ByteBuffer& data, WarbandGroup const& warbandGroup)
 {
     data << uint64(warbandGroup.GroupID);
     data << uint8(warbandGroup.Unknown_1100);
+    data << int32(warbandGroup.WarbandSceneID);
     data << int32(warbandGroup.Flags);
+    data << int32(warbandGroup.Unk114);
     data << uint32(warbandGroup.Members.size());
 
     for (WarbandGroupMember const& member : warbandGroup.Members)
         data << member;
+
+    data << BitsSize<9>(warbandGroup.Name);
+    data.FlushBits();
+    data.WriteString(warbandGroup.Name);
 
     return data;
 }
@@ -718,9 +726,9 @@ void AlterApperance::Read()
 {
     Customizations.resize(_worldPacket.read<uint32>());
     _worldPacket >> NewSex;
-    _worldPacket >> CustomizedRace;
+    CustomizedRace = _worldPacket.read<uint8>();
     _worldPacket >> CustomizedChrModelID;
-    _worldPacket >> UnalteredVisualRaceID;
+    UnalteredVisualRaceID = _worldPacket.read<uint8>();
     for (ChrCustomizationChoice& customization : Customizations)
         _worldPacket >> customization;
 
@@ -730,6 +738,8 @@ void AlterApperance::Read()
 WorldPacket const* BarberShopResult::Write()
 {
     _worldPacket << int32(Result);
+    _worldPacket.WriteBit(IgnoreChair);
+    _worldPacket.FlushBits();
     return &_worldPacket;
 }
 

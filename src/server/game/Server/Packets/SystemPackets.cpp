@@ -109,8 +109,9 @@ WorldPacket const* FeatureSystemStatus::Write()
     _worldPacket << OptionalInit(SessionAlert);
     _worldPacket << Bits<3>(0);
 
-    _worldPacket << Bits<32>(0); // TODO(verify): 4 bytes of feature flags not yet mapped to names
+    _worldPacket << Bits<24>(0); // TODO(verify): 3 bytes of feature flags not yet mapped to names
 
+    // 70449 reader 0x1405A5F00: 8 flag bytes in total, RaceClassExpansionLevels is bit 5 of the 5th
     _worldPacket << Bits<2>(0);
     _worldPacket << OptionalInit(RaceClassExpansionLevels);
     _worldPacket << Bits<5>(0);

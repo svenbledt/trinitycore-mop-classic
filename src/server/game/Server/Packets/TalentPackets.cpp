@@ -26,9 +26,32 @@ ByteBuffer& operator>>(ByteBuffer& data, TalentInfo& talent)
     return data;
 }
 
+// 5.5.4 ctor 0x1405A8940 reads the MoP group layout; Info's operator<< stays for InspectResult
 WorldPacket const* UpdateTalentData::Write()
 {
-    _worldPacket << Info;
+    _worldPacket << uint8(Info.ActiveGroup);
+    _worldPacket << int32(PrimarySpecialization);
+    _worldPacket << uint32(Info.TalentGroups.size());
+
+    for (TalentGroupInfo const& talentGroupInfo : Info.TalentGroups)
+    {
+        _worldPacket << int32(talentGroupInfo.PrimarySpecialization);
+        _worldPacket << uint32(talentGroupInfo.Talents.size());
+        _worldPacket << uint32(talentGroupInfo.PvPTalents.size());
+        _worldPacket << uint32(talentGroupInfo.Glyphs.size());
+
+        for (TalentInfo const& talent : talentGroupInfo.Talents)
+            _worldPacket << uint16(talent.TalentID);
+
+        for (PvPTalent const& pvpTalent : talentGroupInfo.PvPTalents)
+        {
+            _worldPacket << uint16(pvpTalent.PvPTalentID);
+            _worldPacket << uint8(pvpTalent.Slot);
+        }
+
+        for (uint16 glyph : talentGroupInfo.Glyphs)
+            _worldPacket << uint32(glyph);
+    }
 
     return &_worldPacket;
 }

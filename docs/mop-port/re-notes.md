@@ -208,3 +208,24 @@ the change. Unnamed new fields are sent as zero/false and marked `TODO(verify)` 
 
 Not yet fixed (second pass): ping packets, PLAYER_CHOICE_CLEAR, GUILD_KNOWN_RECIPES size, CMSG_SET_PET_SPECIALIZATION
 (0x3E0015 is the player spec change), SMSG_ENABLE_BARBER_SHOP size, the full update-field layout for UPDATE_OBJECT.
+
+## 5.5.4.70449 layout pass (2026-10-18)
+Found by `tools/mop-re/pe/tc_layouts.py` (server tokens vs client tokens per opcode), each fix checked against the
+70449 client reader/writer by the fixers (`tools/mop-re/verify/FIX.md`; per-packet evidence in
+`tools/mop-re/out/70449/layouts/results/*.json`, gitignored).
+
+| Packet / struct | Change | Client |
+|---|---|---|
+| FEATURE_SYSTEM_STATUS | one flag byte too many: 8 flag bytes, RaceClassExpansionLevels is bit 5 of the 5th | 0x1405A5F00 |
+| SpellTargetData (CAST_SPELL, SPELL_START/GO...) | u32 Flags + 3 GUIDs first, then bits (new Unk38) | CMSG 0x1406561B0 |
+| SpellCastRequest | u8 SendCastFlags after CastID, Misc3, optional Unk18; reagent quantity optional | CMSG 0x1406561B0 |
+| SpellCastData / SpellHealPrediction | + CastFlagsEx2; heal prediction Type u32 | SPELL_START 0x14064DF09 |
+| AuraDataInfo / AuraInfo | + DstLocation, CastUnit2, 2-bit Unk268; Slot u16 | AURA_UPDATE |
+| ItemModList | count 7 bits (was 6) | 0x1406D2A20 / 0x140581AE0 |
+| Action buttons | u64, type in bits 56-63 (Player/MiscHandler convert from Cata packing) | WPP V5_5_0 ActionBarHandler |
+| UPDATE_TALENT_DATA | MoP group layout written directly (InspectResult keeps the shared serializer) | 0x1405A8940 |
+| START_TIMER | TotalTime, Type, TimeLeft, optional PlayerGuid | 0x1405A3010 |
+| CUF profiles | 2 more bool bits before PvP (written false) | 0x140586300 |
+| Small | ACCOUNT_HEIRLOOM_UPDATE u8; ENABLE_BARBER_SHOP u32; RAID_INSTANCE_MESSAGE string; LEARNED_SPELLS +u32 +bit; PLAY_SPELL_VISUAL u8 reasons; SPELL_INTERRUPT_LOG bit; BARBER_SHOP_RESULT bit; ALTER_APPEARANCE u8 races; warband/regionwide enum blocks | per results |
+
+Open: `UpdateTalentData::PrimarySpecialization` is not filled by Player (sent 0, Phase 4).

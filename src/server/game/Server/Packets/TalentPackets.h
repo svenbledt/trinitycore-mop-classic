@@ -33,11 +33,18 @@ namespace WorldPackets
             uint32 Rank = 0;
         };
 
+        struct PvPTalent
+        {
+            uint16 PvPTalentID = 0;
+            uint8 Slot = 0;
+        };
+
         struct TalentGroupInfo
         {
             uint8 SpecID = 0;
             uint32 PrimarySpecialization = 0;
             std::vector<TalentInfo> Talents;
+            std::vector<PvPTalent> PvPTalents; // TODO(verify): 5.5.4 {u16, u8} list per group; WPP names it PvP talents
             std::vector<uint16> Glyphs;
         };
 
@@ -58,6 +65,7 @@ namespace WorldPackets
             WorldPacket const* Write() override;
 
             TalentInfoUpdate Info;
+            int32 PrimarySpecialization = 0; // TODO(verify): WPP 5.5.0 name for the u32 after ActiveGroup
         };
 
         class LearnTalent final : public ClientPacket

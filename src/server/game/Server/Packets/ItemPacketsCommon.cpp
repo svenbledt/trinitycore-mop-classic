@@ -182,7 +182,7 @@ ByteBuffer& operator>>(ByteBuffer& data, ItemMod& itemMod)
 
 ByteBuffer& operator<<(ByteBuffer& data, ItemModList const& itemModList)
 {
-    data << BitsSize<6>(itemModList.Values);
+    data << BitsSize<7>(itemModList.Values); // 70449: 7-bit count (reader 0x1406D2A20, writer 0x140581AE0)
     data.FlushBits();
 
     for (ItemMod const& itemMod : itemModList.Values)
@@ -193,7 +193,7 @@ ByteBuffer& operator<<(ByteBuffer& data, ItemModList const& itemModList)
 
 ByteBuffer& operator>>(ByteBuffer& data, ItemModList& itemModList)
 {
-    data >> BitsSize<6>(itemModList.Values);
+    data >> BitsSize<7>(itemModList.Values);
     data.ResetBitPos();
 
     for (ItemMod& itemMod : itemModList.Values)

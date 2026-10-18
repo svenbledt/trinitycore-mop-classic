@@ -436,7 +436,7 @@ WorldPacket const* WorldPackets::Misc::RandomRoll::Write()
 
 WorldPacket const* WorldPackets::Misc::EnableBarberShop::Write()
 {
-    _worldPacket << uint8(CustomizationScope);
+    _worldPacket << uint32(CustomizationScope); // 5.5.4 handler 0x141A3C680 reads a u32 (WPP: CustomizationFeatureMask)
 
     return &_worldPacket;
 }
@@ -551,8 +551,14 @@ void WorldPackets::Misc::SaveCUFProfiles::Read()
 
         uint8 strLen = _worldPacket.ReadBits(7);
 
-        // Bool Options
-        for (uint8 option = 0; option < CUF_BOOL_OPTIONS_COUNT; option++)
+        // Bool Options; 5.5.4 (0x140586300) has 2 more bits before PvP/PvE, WPP 5.5.0 calls them AutoActivateSpec1/2
+        for (uint8 option = 0; option < CUF_AUTO_ACTIVATE_PVP; option++)
+            cufProfile->BoolOptions.set(option, _worldPacket.ReadBit());
+
+        _worldPacket.ReadBit(); // TODO(verify): AutoActivateSpec1, not stored
+        _worldPacket.ReadBit(); // TODO(verify): AutoActivateSpec2, not stored
+
+        for (uint8 option = CUF_AUTO_ACTIVATE_PVP; option < CUF_BOOL_OPTIONS_COUNT; option++)
             cufProfile->BoolOptions.set(option, _worldPacket.ReadBit());
 
         // Other Options
@@ -582,8 +588,14 @@ WorldPacket const* WorldPackets::Misc::LoadCUFProfiles::Write()
     {
         _worldPacket.WriteBits(cufProfile->ProfileName.size(), 7);
 
-        // Bool Options
-        for (uint8 option = 0; option < CUF_BOOL_OPTIONS_COUNT; option++)
+        // Bool Options; 5.5.4 (0x140586300) has 2 more bits before PvP/PvE, WPP 5.5.0 calls them AutoActivateSpec1/2
+        for (uint8 option = 0; option < CUF_AUTO_ACTIVATE_PVP; option++)
+            _worldPacket.WriteBit(cufProfile->BoolOptions[option]);
+
+        _worldPacket.WriteBit(false); // TODO(verify): AutoActivateSpec1
+        _worldPacket.WriteBit(false); // TODO(verify): AutoActivateSpec2
+
+        for (uint8 option = CUF_AUTO_ACTIVATE_PVP; option < CUF_BOOL_OPTIONS_COUNT; option++)
             _worldPacket.WriteBit(cufProfile->BoolOptions[option]);
 
         // Other Options
@@ -658,7 +670,7 @@ WorldPacket const* WorldPackets::Misc::AccountHeirloomUpdate::Write()
     _worldPacket.WriteBit(IsFullUpdate);
     _worldPacket.FlushBits();
 
-    _worldPacket << int32(Unk);
+    _worldPacket << uint8(Unk); // 5.5.4 ctor 0x1405A3C10 reads a u8 here, not an int32
 
     // both lists have to have the same size
     _worldPacket << uint32(Heirlooms->size());
@@ -761,8 +773,12 @@ void WorldPackets::Misc::CloseInteraction::Read()
 WorldPacket const* WorldPackets::Misc::StartTimer::Write()
 {
     _worldPacket << TotalTime;
-    _worldPacket << TimeLeft;
     _worldPacket << int32(Type);
+    _worldPacket << TimeLeft;
+    _worldPacket << OptionalInit(PlayerGuid);
+    _worldPacket.FlushBits();
+    if (PlayerGuid)
+        _worldPacket << *PlayerGuid;
 
     return &_worldPacket;
 }

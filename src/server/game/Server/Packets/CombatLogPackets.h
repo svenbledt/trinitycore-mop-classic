@@ -150,6 +150,7 @@ namespace WorldPackets
             ObjectGuid Victim;
             int32 InterruptedSpellID = 0;
             int32 SpellID = 0;
+            bool UnkBit = false; // TODO(verify): trailing bit read by 5.5.4 (case 0x14064dd6a), meaning unknown
         };
 
         struct SpellDispellData
