@@ -836,6 +836,16 @@ namespace WorldPackets
             uint8 Unk = 0; // TODO(verify): meaning of the 5.5.4 u8 after IsFullUpdate
         };
 
+        class Dismount final : public ServerPacket
+        {
+        public:
+            Dismount(ObjectGuid guid) : ServerPacket(SMSG_DISMOUNT, 16 + 2), Guid(guid) { }
+
+            WorldPacket const* Write() override;
+
+            ObjectGuid Guid;
+        };
+
         class MountSpecial final : public ClientPacket
         {
         public:

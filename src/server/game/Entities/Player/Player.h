@@ -34,6 +34,7 @@
 #include "PlayerTaxi.h"
 #include "QuestDef.h"
 #include "SceneMgr.h"
+#include <span>
 
 struct AccessRequirement;
 struct AchievementEntry;
@@ -120,6 +121,13 @@ namespace WorldPackets
     namespace Movement
     {
         enum class UpdateCollisionHeightReason : uint8;
+    }
+
+    namespace Transmogrification
+    {
+        struct TransmogOutfitDataInfo;
+        struct TransmogOutfitSituationInfo;
+        struct TransmogOutfitSlotData;
     }
 }
 
@@ -547,6 +555,7 @@ enum PlayerLocalFlags
     PLAYER_LOCAL_FLAG_OVERRIDE_TRANSPORT_SERVER_TIME= 0x00008000,
     PLAYER_LOCAL_FLAG_MENTOR_RESTRICTED             = 0x00020000,
     PLAYER_LOCAL_FLAG_WEEKLY_REWARD_AVAILABLE       = 0x00040000,
+    PLAYER_LOCAL_FLAG_FREE_TRANSMOG_CLAIMED         = 0x00400000,   // 5.5.4 sniff: set right after the first discounted outfit update
 };
 
 DEFINE_ENUM_FLAG(PlayerLocalFlags);
@@ -576,6 +585,8 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_HAS_RACE_CHANGED           = 0x0200,
     PLAYER_EXTRA_GRANTED_LEVELS_FROM_RAF    = 0x0400,
     PLAYER_EXTRA_LEVEL_BOOSTED              = 0x0800,
+
+    PLAYER_EXTRA_FLAG_FREE_TRANSMOG_CLAIMED = 0x1000,
 };
 
 // 2^n values
@@ -925,6 +936,9 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOAD_ACHIEVEMENTS,
     PLAYER_LOGIN_QUERY_LOAD_CRITERIA_PROGRESS,
     PLAYER_LOGIN_QUERY_LOAD_EQUIPMENT_SETS,
+    PLAYER_LOGIN_QUERY_LOAD_TRANSMOG_OUTFIT,
+    PLAYER_LOGIN_QUERY_LOAD_TRANSMOG_OUTFIT_SITUATION,
+    PLAYER_LOGIN_QUERY_LOAD_TRANSMOG_OUTFIT_SLOT,
     PLAYER_LOGIN_QUERY_LOAD_TRANSMOG_OUTFITS,
     PLAYER_LOGIN_QUERY_LOAD_BG_DATA,
     PLAYER_LOGIN_QUERY_LOAD_GLYPHS,
@@ -1227,6 +1241,8 @@ class TC_GAME_API Player final : public Unit, public GridObject<Player>
         void SetBeenGrantedLevelsFromRaF() { m_ExtraFlags |= PLAYER_EXTRA_GRANTED_LEVELS_FROM_RAF; }
         bool HasLevelBoosted() const { return (m_ExtraFlags & PLAYER_EXTRA_LEVEL_BOOSTED) != 0; }
         void SetHasLevelBoosted() { m_ExtraFlags |= PLAYER_EXTRA_LEVEL_BOOSTED; }
+        bool HasClaimedFreeTransmog() const { return (m_ExtraFlags & PLAYER_EXTRA_FLAG_FREE_TRANSMOG_CLAIMED) != 0; }
+        void SetHasClaimedFreeTransmog() { m_ExtraFlags |= PLAYER_EXTRA_FLAG_FREE_TRANSMOG_CLAIMED; }
 
         uint32 GetXP() const { return m_activePlayerData->XP; }
         uint32 GetXPForNextLevel() const { return m_activePlayerData->NextLevelXP; }
@@ -2859,6 +2875,12 @@ class TC_GAME_API Player final : public Unit, public GridObject<Player>
         bool CanEnableWarModeInArea() const;
         void UpdateWarModeAuras();
 
+        void CreateTransmogOutfit(uint32 id, WorldPackets::Transmogrification::TransmogOutfitDataInfo const& outfitData);
+        bool UpdateTransmogOutfit(uint32 id, WorldPackets::Transmogrification::TransmogOutfitDataInfo const& outfitData);
+        void UpdateTransmogOutfitSituations(uint32 id, bool situationsEnabled, std::span<WorldPackets::Transmogrification::TransmogOutfitSituationInfo const> situations);
+        void UpdateTransmogOutfitSlots(uint32 id, std::span<WorldPackets::Transmogrification::TransmogOutfitSlotData const> slots);
+        void EquipTransmogOutfit(uint32 id, TransmogSituationTrigger trigger, Optional<bool> locked);
+
         std::string GetDebugInfo() const override;
 
         UF::UpdateField<UF::PlayerData, int32(WowCS::EntityFragment::CGObject), TYPEID_PLAYER> m_playerData;
@@ -2954,6 +2976,7 @@ class TC_GAME_API Player final : public Unit, public GridObject<Player>
         void _LoadArenaTeamInfo(PreparedQueryResult result);
         void _LoadEquipmentSets(PreparedQueryResult result);
         void _LoadTransmogOutfits(PreparedQueryResult result);
+        void _LoadTransmogOutfitData(PreparedQueryResult setsResult, PreparedQueryResult situationsResult, PreparedQueryResult slotsResult);
         void _LoadBGData(PreparedQueryResult result);
         void _LoadGlyphs(PreparedQueryResult result);
         void _LoadTalents(PreparedQueryResult talentGroupResult, PreparedQueryResult talentResult);
@@ -2981,6 +3004,7 @@ class TC_GAME_API Player final : public Unit, public GridObject<Player>
         void _SaveSpells(CharacterDatabaseTransaction trans);
         void _SaveStoredAuraTeleportLocations(CharacterDatabaseTransaction trans);
         void _SaveEquipmentSets(CharacterDatabaseTransaction trans);
+        void _SaveTransmogOutfits(CharacterDatabaseTransaction trans);
         void _SaveBGData(CharacterDatabaseTransaction trans);
         void _SaveGlyphs(CharacterDatabaseTransaction trans) const;
         void _SaveTalents(CharacterDatabaseTransaction trans);
@@ -3132,6 +3156,7 @@ class TC_GAME_API Player final : public Unit, public GridObject<Player>
 
         std::unique_ptr<Runes> m_runes;
         EquipmentSetContainer _equipmentSets;
+        std::set<uint32> m_changedTransmogOutfits;
 
         bool CanNeverSee(WorldObject const* obj, bool ignorePhaseShift = false) const override;
         bool CanAlwaysSee(WorldObject const* obj) const override;

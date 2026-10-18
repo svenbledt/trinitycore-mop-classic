@@ -8339,6 +8339,10 @@ void Unit::Dismount()
     SetMountDisplayId(0);
     RemoveUnitFlag(UNIT_FLAG_MOUNT);
 
+    // 5.5.4 retail sends this to the set (self included) on every dismount, before the display update
+    if (IsInWorld())
+        SendMessageToSet(WorldPackets::Misc::Dismount(GetGUID()).Write(), true);
+
     if (Player* thisPlayer = ToPlayer())
         thisPlayer->SendMovementSetCollisionHeight(thisPlayer->GetCollisionHeight(), WorldPackets::Movement::UpdateCollisionHeightReason::Mount);
 

@@ -11,9 +11,10 @@ import { specs as misc2, fixed as misc2Fixed } from "./specs_misc2.mjs";
 import { specs as spot, fixed as spotFixed } from "./specs_spot.mjs";
 import { specs as spot2, fixed as spot2Fixed } from "./specs_spot2.mjs";
 import { specs as spot3, fixed as spot3Fixed } from "./specs_spot3.mjs";
+import { specs as tmog } from "./specs_transmog.mjs";
 
 const useFixed = !process.argv.includes("--old");
-const specs = { ...mv, ...sp, ...sp2, ...misc, ...misc2, ...spot, ...spot2, ...spot3, ...(useFixed ? { ...spot3Fixed, ...spFixed, ...sp2Fixed, ...miscFixed, ...misc2Fixed, ...spotFixed, ...spot2Fixed } : {}) };
+const specs = { ...mv, ...sp, ...sp2, ...misc, ...misc2, ...spot, ...spot2, ...spot3, ...tmog, ...(useFixed ? { ...spot3Fixed, ...spFixed, ...sp2Fixed, ...miscFixed, ...misc2Fixed, ...spotFixed, ...spot2Fixed } : {}) };
 const args = process.argv.slice(2);
 const files = [], opt = { show: 1 };
 for (let i = 0; i < args.length; i++) {

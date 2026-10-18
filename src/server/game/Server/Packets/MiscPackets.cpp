@@ -665,6 +665,13 @@ void WorldPackets::Misc::SetPvP::Read()
     EnablePVP = _worldPacket.ReadBit();
 }
 
+WorldPacket const* WorldPackets::Misc::Dismount::Write()
+{
+    _worldPacket << Guid;
+
+    return &_worldPacket;
+}
+
 WorldPacket const* WorldPackets::Misc::AccountHeirloomUpdate::Write()
 {
     _worldPacket.WriteBit(IsFullUpdate);

@@ -29,7 +29,8 @@ namespace WorldPackets
             NONE            = -1,
             TOYBOX          = 1,
             APPEARANCE      = 3,
-            TRANSMOG_SET    = 4
+            TRANSMOG_SET    = 4,
+            WARBAND_SCENE   = 7
         };
 
         class CollectionItemSetFavorite final : public ClientPacket
@@ -42,6 +43,27 @@ namespace WorldPackets
             CollectionType Type = NONE;
             uint32 ID = 0;
             bool IsFavorite = false;
+        };
+
+        struct ItemCollectionItemData
+        {
+            int32 ID = 0;
+            CollectionType Type = NONE;
+            int64 Unknown1110 = 0;
+            int32 Flags = 0;
+        };
+
+        class AccountItemCollectionData final : public ServerPacket
+        {
+        public:
+            AccountItemCollectionData() : ServerPacket(SMSG_ACCOUNT_ITEM_COLLECTION_DATA) { }
+
+            WorldPacket const* Write() override;
+
+            uint32 Unknown1110_1 = 0;
+            CollectionType Type = NONE;
+            bool Unknown1110_2 = false;
+            std::vector<ItemCollectionItemData> Items;
         };
     }
 }

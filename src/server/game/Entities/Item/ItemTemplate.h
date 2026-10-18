@@ -924,6 +924,7 @@ struct TC_GAME_API ItemTemplate
     char const* GetDefaultLocaleName() const;
     float GetDPS(uint32 itemLevel) const;
     void GetDamage(uint32 itemLevel, float& minDamage, float& maxDamage) const;
+    TransmogOutfitSlotOption GetWeaponTransmogOutfitSlotOption() const;
 };
 
 #endif

@@ -799,6 +799,8 @@ struct TransmogOutfitDataInfo : public IsUpdateFieldStructureTag, public HasChan
     void WriteCreate(ByteBuffer& data, Player const* owner, Player const* receiver) const;
     void WriteUpdate(ByteBuffer& data, bool ignoreChangesMask, Player const* owner, Player const* receiver) const;
     void ClearChangesMask();
+    bool operator==(TransmogOutfitDataInfo const& right) const;
+    bool operator!=(TransmogOutfitDataInfo const& right) const { return !(*this == right); }
 };
 struct TransmogOutfitSituationInfo : public IsUpdateFieldStructureTag, public HasChangesMask<4>
 {
@@ -810,6 +812,8 @@ struct TransmogOutfitSituationInfo : public IsUpdateFieldStructureTag, public Ha
     void WriteCreate(ByteBuffer& data, Player const* owner, Player const* receiver) const;
     void WriteUpdate(ByteBuffer& data, bool ignoreChangesMask, Player const* owner, Player const* receiver) const;
     void ClearChangesMask();
+    bool operator==(TransmogOutfitSituationInfo const& right) const;
+    bool operator!=(TransmogOutfitSituationInfo const& right) const { return !(*this == right); }
 };
 struct TransmogOutfitSlotData : public IsUpdateFieldStructureTag, public HasChangesMask<11>
 {
@@ -825,6 +829,8 @@ struct TransmogOutfitSlotData : public IsUpdateFieldStructureTag, public HasChan
     void WriteCreate(ByteBuffer& data, Player const* owner, Player const* receiver) const;
     void WriteUpdate(ByteBuffer& data, bool ignoreChangesMask, Player const* owner, Player const* receiver) const;
     void ClearChangesMask();
+    bool operator==(TransmogOutfitSlotData const& right) const;
+    bool operator!=(TransmogOutfitSlotData const& right) const { return !(*this == right); }
 };
 struct TransmogOutfitData : public IsUpdateFieldStructureTag, public HasChangesMask<5>
 {
@@ -837,6 +843,8 @@ struct TransmogOutfitData : public IsUpdateFieldStructureTag, public HasChangesM
     void WriteCreate(ByteBuffer& data, Player const* owner, Player const* receiver) const;
     void WriteUpdate(ByteBuffer& data, bool ignoreChangesMask, Player const* owner, Player const* receiver) const;
     void ClearChangesMask();
+    bool operator==(TransmogOutfitData const& right) const;
+    bool operator!=(TransmogOutfitData const& right) const { return !(*this == right); }
 };
 struct TransmogOutfitMetadata : public IsUpdateFieldStructureTag
 {

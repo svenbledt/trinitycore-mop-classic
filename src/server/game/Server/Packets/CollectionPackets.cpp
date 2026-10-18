@@ -23,3 +23,25 @@ void WorldPackets::Collections::CollectionItemSetFavorite::Read()
     ID = _worldPacket.read<uint32>();
     IsFavorite = _worldPacket.ReadBit();
 }
+
+ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Collections::ItemCollectionItemData const& item)
+{
+    data << int32(item.ID);
+    data << uint8(item.Type);
+    data << int64(item.Unknown1110);
+    data << int32(item.Flags);
+    return data;
+}
+
+WorldPacket const* WorldPackets::Collections::AccountItemCollectionData::Write()
+{
+    _worldPacket << uint32(Unknown1110_1);
+    _worldPacket << uint8(Type);
+    _worldPacket << uint32(Items.size());
+    for (ItemCollectionItemData const& item : Items)
+        _worldPacket << item;
+
+    _worldPacket.WriteBit(Unknown1110_2);
+    _worldPacket.FlushBits();
+    return &_worldPacket;
+}

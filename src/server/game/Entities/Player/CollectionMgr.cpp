@@ -883,6 +883,7 @@ void CollectionMgr::SendFavoriteAppearances() const
 {
     WorldPackets::Transmogrification::AccountTransmogUpdate accountTransmogUpdate;
     accountTransmogUpdate.IsFullUpdate = true;
+    accountTransmogUpdate.IsSetFavorite = true; // 5.5.4 retail login burst sends both bits set
     accountTransmogUpdate.FavoriteAppearances.reserve(_favoriteAppearances.size());
     for (auto itr = _favoriteAppearances.begin(); itr != _favoriteAppearances.end(); ++itr)
         if (itr->second != FavoriteAppearanceState::Removed)

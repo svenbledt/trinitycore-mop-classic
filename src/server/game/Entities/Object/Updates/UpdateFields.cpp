@@ -3861,6 +3861,43 @@ void TransmogOutfitData::ClearChangesMask()
     _changesMask.ResetAll();
 }
 
+bool TransmogOutfitDataInfo::operator==(TransmogOutfitDataInfo const& right) const
+{
+    return SituationsEnabled == right.SituationsEnabled
+        && SetType == right.SetType
+        && *Name == *right.Name
+        && Icon == right.Icon;
+}
+
+bool TransmogOutfitSituationInfo::operator==(TransmogOutfitSituationInfo const& right) const
+{
+    return SituationID == right.SituationID
+        && SpecID == right.SpecID
+        && LoadoutID == right.LoadoutID
+        && EquipmentSetID == right.EquipmentSetID;
+}
+
+bool TransmogOutfitSlotData::operator==(TransmogOutfitSlotData const& right) const
+{
+    return Slot == right.Slot
+        && SlotOption == right.SlotOption
+        && SheatheCategory == right.SheatheCategory
+        && ItemModifiedAppearanceID == right.ItemModifiedAppearanceID
+        && AppearanceDisplayType == right.AppearanceDisplayType
+        && SpellItemEnchantmentID == right.SpellItemEnchantmentID
+        && IllusionDisplayType == right.IllusionDisplayType
+        && Flags == right.Flags;
+}
+
+bool TransmogOutfitData::operator==(TransmogOutfitData const& right) const
+{
+    return std::ranges::equal(Situations, right.Situations)
+        && std::ranges::equal(Slots, right.Slots)
+        && Id == right.Id
+        && *OutfitInfo == *right.OutfitInfo
+        && Flags == right.Flags;
+}
+
 void TransmogOutfitMetadata::WriteCreate(ByteBuffer& data, Player const* owner, Player const* receiver) const
 {
     data << uint8(SituationTrigger);

@@ -18,6 +18,7 @@
 #include "WorldSession.h"
 #include "AccountMgr.h"
 #include "CharacterCache.h"
+#include "CollectionPackets.h"
 #include "DatabaseEnv.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
@@ -177,6 +178,11 @@ void WorldSession::HandleSetContactNotesOpcode(WorldPackets::Social::SetContactN
 
 void WorldSession::HandleSocialContractRequest(WorldPackets::Social::SocialContractRequest& /*socialContractRequest*/)
 {
+    // retail sends the (empty) warband scene collection right before this reply on every character list (5.5.4 client ignores it)
+    WorldPackets::Collections::AccountItemCollectionData accountItemCollection;
+    accountItemCollection.Type = WorldPackets::Collections::WARBAND_SCENE;
+    SendPacket(accountItemCollection.Write());
+
     WorldPackets::Social::SocialContractRequestResponse response;
     response.ShowSocialContract = false;
     SendPacket(response.Write());
