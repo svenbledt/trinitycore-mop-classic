@@ -1,5 +1,5 @@
-// usage: bun check.mjs <pkt...> [--only REGEX] [--show N] [--trace file@idx] [--fixed]
-// --fixed swaps in the corrected 5.5.4 layouts (`fixed` exports) for opcodes where TC is wrong.
+// usage: bun check.mjs <pkt...> [--only REGEX] [--show N] [--trace file@idx] [--old]
+// `fixed` exports are TC's layouts since 0f8ac50489 (default); --old checks the pre-fix layouts.
 // Runs every TC-layout spec against matching sniff packets; a packet passes only if the
 // spec consumes exactly all bytes without reading past the end.
 import { loadOpcodeNames, loadPkt, Reader, ParseError, hex } from "./lib.mjs";
@@ -12,7 +12,7 @@ import { specs as spot, fixed as spotFixed } from "./specs_spot.mjs";
 import { specs as spot2, fixed as spot2Fixed } from "./specs_spot2.mjs";
 import { specs as spot3, fixed as spot3Fixed } from "./specs_spot3.mjs";
 
-const useFixed = process.argv.includes("--fixed");
+const useFixed = !process.argv.includes("--old");
 const specs = { ...mv, ...sp, ...sp2, ...misc, ...misc2, ...spot, ...spot2, ...spot3, ...(useFixed ? { ...spot3Fixed, ...spFixed, ...sp2Fixed, ...miscFixed, ...misc2Fixed, ...spotFixed, ...spot2Fixed } : {}) };
 const args = process.argv.slice(2);
 const files = [], opt = { show: 1 };
@@ -20,7 +20,7 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === "--only") opt.only = new RegExp(args[++i]);
   else if (args[i] === "--show") opt.show = +args[++i];
   else if (args[i] === "--trace") opt.trace = args[++i];
-  else if (args[i] === "--list" || args[i] === "--fixed") {}
+  else if (args[i] === "--list" || args[i] === "--fixed" || args[i] === "--old") {}
   else files.push(args[i]);
 }
 const { names } = loadOpcodeNames();
