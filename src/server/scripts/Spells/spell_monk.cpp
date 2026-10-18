@@ -33,6 +33,7 @@ namespace Scripts::Spells::Monk
 {
     enum MonkSpells
     {
+        SPELL_MONK_CHI_ENERGIZE             = 121588,
         SPELL_MONK_PROVOKE_SINGLE_TARGET    = 116189,
         SPELL_MONK_PROVOKE_AOE              = 118635,
         SPELL_MONK_ROLL_BACKWARD            = 109131,
@@ -50,15 +51,16 @@ namespace Scripts::Spells::Monk
     {
         bool Validate(SpellInfo const* spellInfo) override
         {
-            return ValidateSpellEffect({ { spellInfo->Id, EFFECT_1 } });
+            return ValidateSpellInfo({ SPELL_MONK_CHI_ENERGIZE }) && ValidateSpellEffect({ { spellInfo->Id, EFFECT_1 } });
         }
 
-        // 5.5.4 data makes the Chi gain a dummy (5.4.8: ENERGIZE Chi); Fierce Tiger's PointsIndex1 mod adds +1.
-        // TODO(verify): energize spell ID and amount in a retail SPELL_ENERGIZE_LOG.
+        // Retail 70449 sniff: one 121588 cast (+1 Chi) per effect point on each hit, none on a miss;
+        // Fierce Tiger's PointsIndex1 mod makes it 2.
         void HandleChi(SpellEffIndex /*effIndex*/) const
         {
             Unit* caster = GetCaster();
-            caster->EnergizeBySpell(caster, GetSpellInfo(), GetEffectValueAsInt(), POWER_CHI);
+            for (int32 i = 0; i < GetEffectValueAsInt(); ++i)
+                caster->CastSpell(caster, SPELL_MONK_CHI_ENERGIZE, GetSpell());
         }
 
         void Register() override
@@ -141,7 +143,7 @@ namespace Scripts::Spells::Monk
     // 109131 - Roll (backward)
     class spell_monk_roll_aura : public AuraScript
     {
-        // A backward roll moves at run speed, not run-back speed.
+        // A backward roll moves at run speed: retail 70449 sends run and run-back 21.175 during the roll.
         void ChangeRunBackSpeed(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/) const
         {
             GetTarget()->SetSpeed(MOVE_RUN_BACK, GetTarget()->GetSpeed(MOVE_RUN));

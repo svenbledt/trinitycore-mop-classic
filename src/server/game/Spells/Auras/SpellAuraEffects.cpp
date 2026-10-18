@@ -54,18 +54,8 @@
 #include <numeric>
 
 class Aura;
-//
-// EFFECT HANDLER NOTES
-//
-// in aura handler there should be check for modes:
-// AURA_EFFECT_HANDLE_REAL set
-// AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK set
-// AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK set - aura is recalculated or is just applied/removed - need to redo all things related to m_amount
-// AURA_EFFECT_HANDLE_CHANGE_AMOUNT_SEND_FOR_CLIENT_MASK - logical or of above conditions
-// AURA_EFFECT_HANDLE_STAT - set when stats are reapplied
-// such checks will speedup trinity change amount/send for client operations
-// because for change amount operation packets will not be send
-// aura effect handlers shouldn't contain any AuraEffect or Aura object modifications
+// EFFECT HANDLER NOTES: check the AURA_EFFECT_HANDLE_* modes (REAL, SEND_FOR_CLIENT_MASK, CHANGE_AMOUNT_MASK, STAT) so amount
+// changes skip packets; handlers must not modify AuraEffect or Aura objects (full comment: docs/mop-port/upstream-comments.md)
 
 NonDefaultConstructible<pAuraEffectHandler> AuraEffectHandler[TOTAL_AURAS]=
 {
@@ -442,7 +432,7 @@ NonDefaultConstructible<pAuraEffectHandler> AuraEffectHandler[TOTAL_AURAS]=
     &AuraEffect::HandleNULL,                                      //370 SPELL_AURA_SPELL_OVERRIDE_NAME_GROUP
     &AuraEffect::HandleNoImmediateEffect,                         //371 SPELL_AURA_DISABLE_AUTOATTACK implemented in Unit::_UpdateAutoRepeatSpell and Unit::AttackerStateUpdate
     &AuraEffect::HandleNULL,                                      //372 SPELL_AURA_OVERRIDE_MOUNT_FROM_SET
-    &AuraEffect::HandleNULL,                                      //373 SPELL_AURA_MOD_SPEED_NO_CONTROL
+    &AuraEffect::HandleAuraModIncreaseSpeed,                      //373 SPELL_AURA_MOD_SPEED_NO_CONTROL implemented in Unit::UpdateSpeed
     &AuraEffect::HandleNoImmediateEffect,                         //374 SPELL_AURA_MODIFY_FALL_DAMAGE_PCT implemented in Player::HandleFall
     &AuraEffect::HandleNULL,                                      //375 SPELL_AURA_HIDE_MODEL_AND_EQUIPEMENT_SLOTS implemented clientside
     &AuraEffect::HandleNULL,                                      //376 SPELL_AURA_MOD_CURRENCY_GAIN_FROM_SOURCE
@@ -2042,9 +2032,8 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
         if (AuraEffect* aurEff = target->GetAuraEffect(SPELL_AURA_MOD_INCREASE_SPEED, SPELLFAMILY_DRUID, flag128(0, 0, 0x8)))
             aurEff->RecalculateAmount();
 
-        // Disarm handling
-        // If druid shifts while being disarmed we need to deal with that since forms aren't affected by disarm
-        // and also HandleAuraModDisarm is not triggered
+        // Disarm handling: forms aren't affected by disarm and HandleAuraModDisarm isn't triggered,
+        // so handle a druid shifting while disarmed here
         if (!target->CanUseAttackType(BASE_ATTACK))
         {
             if (Item* pItem = target->ToPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
@@ -2763,9 +2752,7 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
                             displayId = Trinity::Containers::SelectRandomContainerElement(usableDisplays)->CreatureDisplayInfoID;
                     }
                 }
-                // TODO: CREATE TABLE mount_vehicle (mountId, vehicleCreatureId) for future mounts that are vehicles (new mounts no longer have proper data in MiscValue)
-                //if (MountVehicle const* mountVehicle = sObjectMgr->GetMountVehicle(mountEntry->Id))
-                //    creatureEntry = mountVehicle->VehicleCreatureId;
+                // TODO: CREATE TABLE mount_vehicle (mountId, vehicleCreatureId); new vehicle mounts lack MiscValue data (full comment: docs/mop-port/upstream-comments.md)
             }
 
             if (CreatureTemplate const* creatureInfo = sObjectMgr->GetCreatureTemplate(creatureEntry))
@@ -2798,9 +2785,8 @@ void AuraEffect::HandleAuraMounted(AuraApplication const* aurApp, uint8 mode, bo
         if (mode & AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK)
             target->Dismount();
 
-        //some mounts like Headless Horseman's Mount or broom stick are skill based spell
-        // need to remove ALL arura related to mounts, this will stop client crash with broom stick
-        // and never endless flying after using Headless Horseman's Mount
+        // skill based mounts (Headless Horseman's Mount, broom stick): remove ALL mount auras,
+        // stops the broom stick client crash and endless flying
         if (mode & AURA_EFFECT_HANDLE_REAL)
             target->RemoveAurasByType(SPELL_AURA_MOUNTED);
 
@@ -3216,9 +3202,7 @@ void AuraEffect::HandleModPossessPet(AuraApplication const* aurApp, uint8 mode, 
     if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    // seems it may happen that when removing it is no longer owner's pet
-    //if (caster->ToPlayer()->GetPet() != target)
-    //    return;
+    // it may no longer be the owner's pet when removing (disabled GetPet() check (full comment: docs/mop-port/upstream-comments.md))
 
     Unit* target = aurApp->GetTarget();
     if (target->GetTypeId() != TYPEID_UNIT || !target->IsPet())
@@ -3299,11 +3283,8 @@ void AuraEffect::HandleAuraControlVehicle(AuraApplication const* aurApp, uint8 m
 
     if (apply)
     {
-        // Currently spells that have base points  0 and DieSides 0 = "0/0" exception are pushed to -1,
-        // however the idea of 0/0 is to ingore flag VEHICLE_SEAT_FLAG_CAN_ENTER_OR_EXIT and -1 checks for it,
-        // so this break such spells or most of them.
-        // Current formula about m_amount: effect base points + dieside - 1
-        // TO DO: Reasearch more about 0/0 and fix it.
+        // Spells with base points 0 and DieSides 0 ("0/0") are pushed to -1, which breaks the 0/0 meaning
+        // (ignore VEHICLE_SEAT_FLAG_CAN_ENTER_OR_EXIT); m_amount = base points + dieside - 1. TODO: research 0/0 (full comment: docs/mop-port/upstream-comments.md)
         caster->_EnterVehicle(target->GetVehicleKit(), GetAmountAsInt() - 1, aurApp);
     }
     else
@@ -3764,8 +3745,7 @@ void AuraEffect::HandleModSpellDamagePercentFromStat(AuraApplication const* aurA
     if (target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    // Magic damage modifiers implemented in Unit::SpellDamageBonus
-    // This information for client side use only
+    // Magic damage modifiers implemented in Unit::SpellDamageBonus; this is for the client only.
     // Recalculate bonus
     target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
 }
@@ -5347,10 +5327,8 @@ void AuraEffect::HandleTriggerSpellOnExpire(AuraApplication const* aurApp, uint8
 
     Unit* caster = aurApp->GetTarget();
 
-    // MiscValue (Caster):
-    // 0 - Aura target
-    // 1 - Aura caster
-    // 2 - ? Aura target is always TARGET_UNIT_CASTER so we consider the same behavior as MiscValue 1
+    // MiscValue (Caster): 0 - aura target, 1 - aura caster, 2 - ? (target is always TARGET_UNIT_CASTER,
+    // so treated like 1)
     uint32 casterType = uint32(GetMiscValue());
     if (casterType > 0)
         caster = GetCaster();

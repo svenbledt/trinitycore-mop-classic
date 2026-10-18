@@ -432,9 +432,8 @@ Unit::~Unit()
 
 void Unit::Update(uint32 p_time)
 {
-    // WARNING! Order of execution here is important, do not change.
-    // Spells must be processed with event system BEFORE they go to _UpdateSpells.
-    // Or else we may have some SPELL_STATE_FINISHED spells stalled in pointers, that is bad.
+    // WARNING! Order matters: spells must go through the event system BEFORE _UpdateSpells,
+    // or SPELL_STATE_FINISHED spells stay stalled in pointers.
     WorldObject::Update(p_time);
 
     if (!IsInWorld())
@@ -2359,9 +2358,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(Unit const* victim, WeaponAttackTy
     int32 block_chance = int32(GetUnitBlockChance(attType, victim) * 100.0f);
     int32 parry_chance = int32(GetUnitParryChance(attType, victim) * 100.0f);
 
-    // melee attack table implementation
-    // outcome priority:
-    //   1. >    2. >    3. >       4. >    5. >   6. >       7. >  8.
+    // melee attack table, outcome priority:
     // MISS > DODGE > PARRY > GLANCING > BLOCK > CRIT > CRUSHING > HIT
 
     int32    sum = 0, tmp = 0;
@@ -3387,9 +3384,7 @@ Aura* Unit::_TryStackingOrRefreshingExistingAura(AuraCreateInfo& createInfo)
         // find current aura from spell and change it's stackamount, or refresh it's duration
         if (Aura* foundAura = GetOwnedAura(createInfo.GetSpellInfo()->Id, createInfo.GetSpellInfo()->IsStackableOnOneSlotWithDifferentCasters() ? ObjectGuid::Empty : createInfo.CasterGUID, createInfo.GetSpellInfo()->HasAttribute(SPELL_ATTR0_CU_ENCHANT_PROC) ? castItemGUID : ObjectGuid::Empty, 0))
         {
-            // effect masks do not match
-            // extremely rare case
-            // let's just recreate aura
+            // effect masks do not match (extremely rare): just recreate the aura
             if (createInfo.GetAuraEffectMask() != foundAura->GetEffectMask())
                 return nullptr;
 
@@ -3843,10 +3838,8 @@ void Unit::RemoveAura(uint32 spellId, ObjectGuid caster, uint32 reqEffMask, Aura
 
 void Unit::RemoveAura(AuraApplication * aurApp, AuraRemoveMode mode)
 {
-    // we've special situation here, RemoveAura called while during aura removal
-    // this kind of call is needed only when aura effect removal handler
-    // or event triggered by it expects to remove
-    // not yet removed effects of an aura
+    // special case: RemoveAura called during aura removal, needed only when an effect removal handler
+    // (or an event it triggers) expects to remove the aura's not yet removed effects
     if (aurApp->GetRemoveMode())
     {
         // remove remaining effects of an aura
@@ -4144,15 +4137,8 @@ void Unit::RemoveAurasWithAttribute(SpellAttr0 flags)
 
 void Unit::RemoveNotOwnSingleTargetAuras(bool onPhaseChange /*= false*/)
 {
-    // single target auras from other casters
-    // Iterate m_ownedAuras - aura is marked as single target in Unit::AddAura (and pushed to m_ownedAuras).
-    // m_appliedAuras will NOT contain the aura before first Unit::Update after adding it to m_ownedAuras.
-    // Quickly removing such an aura will lead to it not being unregistered from caster's single cast auras container
-    // leading to assertion failures if the aura was cast on a player that can
-    // (and is changing map at the point where this function is called).
-    // Such situation occurs when player is logging in inside an instance and fails the entry check for any reason.
-    // The aura that was loaded from db (indirectly, via linked casts) gets removed before it has a chance
-    // to register in m_appliedAuras
+    // single target auras from other casters: iterate m_ownedAuras, since m_appliedAuras lacks them until the next Update;
+    // otherwise they never unregister from the caster and assert on a failed instance login (full comment: docs/mop-port/upstream-comments.md)
     for (AuraMap::iterator iter = m_ownedAuras.begin(); iter != m_ownedAuras.end();)
     {
         Aura const* aura = iter->second;
@@ -4735,9 +4721,8 @@ void Unit::GetDispellableAuraList(WorldObject const* caster, uint32 dispelMask, 
 
         if (aura->GetSpellInfo()->GetDispelMask() & dispelMask)
         {
-            // do not remove positive auras if friendly target
-            //               negative auras if non-friendly
-            // unless we're reflecting (dispeller eliminates one of it's benefitial buffs)
+            // keep positive auras on a friendly target and negative ones on a hostile one,
+            // unless reflecting (the dispeller loses one of its beneficial buffs)
             if (isReflect != (aurApp->IsPositive() == IsFriendlyTo(caster)))
                 continue;
 
@@ -4746,9 +4731,8 @@ void Unit::GetDispellableAuraList(WorldObject const* caster, uint32 dispelMask, 
             if (!chance)
                 continue;
 
-            // The charges / stack amounts don't count towards the total number of auras that can be dispelled.
-            // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) -> 50% chance to dispell
-            // Polymorph instead of 1 / (5 + 1) -> 16%.
+            // charges/stacks don't count towards the dispellable total: 5 stacks of Winter's Chill and a Polymorph
+            // give Polymorph a 1 / (1 + 1) = 50% chance, not 1 / (5 + 1)
             bool const dispelCharges = aura->GetSpellInfo()->HasAttribute(SPELL_ATTR7_DISPEL_REMOVES_CHARGES);
             uint8 charges = dispelCharges ? aura->GetCharges() : aura->GetStackAmount();
             if (charges > 0)
@@ -5921,9 +5905,7 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     if (meleeAttack)
         AddUnitState(UNIT_STATE_MELEE_ATTACKING);
 
-    // set position before any AI calls/assistance
-    //if (GetTypeId() == TYPEID_UNIT)
-    //    ToCreature()->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ());
+    // set position before any AI calls/assistance (disabled SetCombatStartPosition call (full comment: docs/mop-port/upstream-comments.md))
 
     if (creature && !IsControlledByPlayer())
     {
@@ -8371,9 +8353,8 @@ void Unit::Dismount()
 
     RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags::Dismount);
 
-    // only resummon old pet if the player is already added to a map
-    // this prevents adding a pet to a not created map which would otherwise cause a crash
-    // (it could probably happen when logging in after a previous crash)
+    // only resummon the old pet once the player is on a map; adding a pet to a not created map crashes
+    // (could happen when logging in after a previous crash)
     if (Player* player = ToPlayer())
     {
         player->EnablePetControlsOnDismount();
@@ -8827,7 +8808,8 @@ void Unit::UpdateSpeed(UnitMoveType mtype)
             }
             else
             {
-                main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_SPEED);
+                // Monk Roll 107427 (373 bp175): retail 70449 run speed 21.175 = 7 * 1.1 (stance) * 2.75. TODO(verify): stacking with 31.
+                main_speed_mod  = std::max(GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_SPEED), GetMaxPositiveAuraModifier(SPELL_AURA_MOD_SPEED_NO_CONTROL));
                 stack_bonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_SPEED_ALWAYS);
                 non_stack_bonus += GetMaxPositiveAuraModifier(SPELL_AURA_MOD_SPEED_NOT_STACK) / 100.0f;
             }
@@ -11283,9 +11265,8 @@ void Unit::SetMeleeAnimKitId(uint16 animKitId)
         victim->setDeathState(JUST_DIED);
     }
 
-    // Inform pets (if any) when player kills target)
-    // MUST come after victim->setDeathState(JUST_DIED); or pet next target
-    // selection will get stuck on same target and break pet react state
+    // Inform pets when the player kills the target; MUST come after victim->setDeathState(JUST_DIED),
+    // or pet target selection gets stuck on the same target and breaks the react state
     for (Player* tapper : tappers)
     {
         Pet* pet = tapper->GetPet();
@@ -11382,9 +11363,7 @@ void Unit::SetMeleeAnimKitId(uint16 animKitId)
             bf->HandleKill(player, victim);
     }
 
-    //if (victim->GetTypeId() == TYPEID_PLAYER)
-    //    if (OutdoorPvP* pvp = victim->ToPlayer()->GetOutdoorPvP())
-    //        pvp->HandlePlayerActivityChangedpVictim->ToPlayer();
+    // disabled OutdoorPvP::HandlePlayerActivityChanged call for player victims (full comment: docs/mop-port/upstream-comments.md)
 
     // battleground things (do this at the end, so the death state flag will be properly set to handle in the bg->handlekill)
     if (attacker)
@@ -11567,9 +11546,8 @@ void Unit::SetRooted(bool apply)
 {
     if (apply)
     {
-        // MOVEMENTFLAG_ROOT cannot be used in conjunction with MOVEMENTFLAG_MASK_MOVING (tested 3.3.5a)
-        // this will freeze clients. That's why we remove MOVEMENTFLAG_MASK_MOVING before
-        // setting MOVEMENTFLAG_ROOT
+        // MOVEMENTFLAG_ROOT together with MOVEMENTFLAG_MASK_MOVING freezes clients (tested 3.3.5a),
+        // so remove the moving flags before setting the root flag
         RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
         AddUnitMovementFlag(MOVEMENTFLAG_ROOT);
         StopMoving();
@@ -13643,9 +13621,7 @@ bool Unit::SetWaterWalking(bool enable)
 
 bool Unit::SetFeatherFall(bool enable)
 {
-    // Temporarily disabled for short lived auras that unapply before client had time to ACK applying
-    //if (enable == HasUnitMovementFlag(MOVEMENTFLAG_FALLING_SLOW))
-    //    return false;
+    // Temporarily disabled for short lived auras that unapply before the client ACKs applying (full comment: docs/mop-port/upstream-comments.md)
 
     if (enable)
         AddUnitMovementFlag(MOVEMENTFLAG_FALLING_SLOW);
@@ -13824,9 +13800,7 @@ bool Unit::SetCanTransitionBetweenSwimAndFly(bool enable)
 
 bool Unit::SetCanTurnWhileFalling(bool enable)
 {
-    // Temporarily disabled for short lived auras that unapply before client had time to ACK applying
-    //if (enable == HasExtraUnitMovementFlag(MOVEMENTFLAG2_CAN_TURN_WHILE_FALLING))
-    //    return false;
+    // Temporarily disabled for short lived auras that unapply before the client ACKs applying (full comment: docs/mop-port/upstream-comments.md)
 
     if (enable)
         AddExtraUnitMovementFlag(MOVEMENTFLAG2_CAN_TURN_WHILE_FALLING);
