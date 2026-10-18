@@ -27,3 +27,23 @@ Goal: SMSG_UPDATE_OBJECT create/update blocks that the 70449 client parses, so a
 
 ## Not in scope
 Filling the new fields with real values (Phase 4), new object types (housing, mesh objects), DB2 changes.
+
+## 5.5.4 deltas ported (2026-10-18)
+Source: 11 ymir sniffs (5.5.4.68077/70268) plus one 70449 sniff, decoded with the local WPP reader
+`tools/mop-re/refs/wpp/.../UpdateFieldsHandler554.cs` (v3, sha256 `8db9ac78...`; 0 parse errors on 14 sniffs, 18.5k UPDATE_OBJECTs). Every delta
+with its evidence: [uf554-deltas.md](uf554-deltas.md).
+
+- Ported: VisibleItem (11-bit mask, transmog fields), UnitData (VirtualItems moved, NameplateAttach, +1 bit shift),
+  GameObjectData Flags2, PlayerData (QuestLogQuestIdToIndex map, VisibleItems moved, bit shifts), QuestLog update order,
+  ItemModList 7-bit count, VisualAnim (retail 11.2.7 layout), AreaTriggerData create (TimeToTargetShape,
+  PeriodModifier, OverrideShapeCurve), SkillInfo 300, BitVectors 14, ActivePlayerData create (TransmogCostMinScalingLevel,
+  unknown dwords, TraitConfigs as map, TransmogOutfits/ViewedOutfit/TransmogMetadata) and update (groups 0/32/70/102/134,
+  arrays +13), movement create `GravityModifier` (1.0), FVendor_C no longer an indirect fragment.
+- Gate: `py -3.12 tools/mop-re/uf/uf_check.py <UpdateFields.cpp> <UpdateFieldsHandler554.cs>` gives 0 differing functions.
+  The checker skips reader-only `UNVERIFIED554` diagnostics and the map delta branch (we always send the full map).
+- `TODO(verify)` left in `UpdateFields.h`/`.cpp`: VisibleItem HasTransmog/HasIllusion/SheatheCategory; UnitData
+  NameplateAttach position; GameObjectData Flags2; QuestLog update bits 3/4; PlayerData QuestLogQuestIdToIndex full-map
+  update form; SkillInfo/BitVectors update paths; ActivePlayerData ToyFlags/TraitConfigs update bits, create-only
+  Unk554_* fields (names, update bits 31/33-39/142/145-147; sniffs show Unk554_Arr = {1,2,3}, we send empty);
+  VisualAnim update path and "0 = no AnimationDataID"; AreaTriggerData update (5.5.3 layout, lacks the 3 new fields),
+  OverrideShapeCurve position, Spline/Orbit placement.

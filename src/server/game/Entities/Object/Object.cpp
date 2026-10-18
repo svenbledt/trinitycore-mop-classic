@@ -339,6 +339,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, CreateObjectBits flags, Playe
 
         *data << uint32(0);                                             // RemoveForcesIDs.size()
         *data << uint32(0);                                             // MoveIndex
+        *data << float(1.0f);                                           // GravityModifier (5.5.4; 1.0 in every sniffed create)
 
         //for (std::size_t i = 0; i < RemoveForcesIDs.size(); ++i)
         //    *data << ObjectGuid(RemoveForcesIDs);
@@ -685,108 +686,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, CreateObjectBits flags, Playe
         data->WriteBit(false);                                          // HasPetBattleFullUpdate
         data->FlushBits();
 
-    //    if (HasLocalScriptData)
-    //    {
-    //        data->WriteBits(Data.length(), 7);
-    //        data->FlushBits();
-    //        data->WriteString(Data);
-    //    }
-
-    //    if (HasPetBattleFullUpdate)
-    //    {
-    //        for (std::size_t i = 0; i < 2; ++i)
-    //        {
-    //            *data << ObjectGuid(Players[i].CharacterID);
-    //            *data << int32(Players[i].TrapAbilityID);
-    //            *data << int32(Players[i].TrapStatus);
-    //            *data << uint16(Players[i].RoundTimeSecs);
-    //            *data << int8(Players[i].FrontPet);
-    //            *data << uint8(Players[i].InputFlags);
-
-    //            data->WriteBits(Players[i].Pets.size(), 2);
-    //            data->FlushBits();
-    //            for (std::size_t j = 0; j < Players[i].Pets.size(); ++j)
-    //            {
-    //                *data << ObjectGuid(Players[i].Pets[j].BattlePetGUID);
-    //                *data << int32(Players[i].Pets[j].SpeciesID);
-    //                *data << int32(Players[i].Pets[j].CreatureID);
-    //                *data << int32(Players[i].Pets[j].DisplayID);
-    //                *data << int16(Players[i].Pets[j].Level);
-    //                *data << int16(Players[i].Pets[j].Xp);
-    //                *data << int32(Players[i].Pets[j].CurHealth);
-    //                *data << int32(Players[i].Pets[j].MaxHealth);
-    //                *data << int32(Players[i].Pets[j].Power);
-    //                *data << int32(Players[i].Pets[j].Speed);
-    //                *data << int32(Players[i].Pets[j].NpcTeamMemberID);
-    //                *data << uint8(Players[i].Pets[j].BreedQuality);
-    //                *data << uint16(Players[i].Pets[j].StatusFlags);
-    //                *data << int8(Players[i].Pets[j].Slot);
-
-    //                *data << uint32(Players[i].Pets[j].Abilities.size());
-    //                *data << uint32(Players[i].Pets[j].Auras.size());
-    //                *data << uint32(Players[i].Pets[j].States.size());
-    //                for (std::size_t k = 0; k < Players[i].Pets[j].Abilities.size(); ++k)
-    //                {
-    //                    *data << int32(Players[i].Pets[j].Abilities[k].AbilityID);
-    //                    *data << int16(Players[i].Pets[j].Abilities[k].CooldownRemaining);
-    //                    *data << int16(Players[i].Pets[j].Abilities[k].LockdownRemaining);
-    //                    *data << int8(Players[i].Pets[j].Abilities[k].AbilityIndex);
-    //                    *data << uint8(Players[i].Pets[j].Abilities[k].Pboid);
-    //                }
-
-    //                for (std::size_t k = 0; k < Players[i].Pets[j].Auras.size(); ++k)
-    //                {
-    //                    *data << int32(Players[i].Pets[j].Auras[k].AbilityID);
-    //                    *data << uint32(Players[i].Pets[j].Auras[k].InstanceID);
-    //                    *data << int32(Players[i].Pets[j].Auras[k].RoundsRemaining);
-    //                    *data << int32(Players[i].Pets[j].Auras[k].CurrentRound);
-    //                    *data << uint8(Players[i].Pets[j].Auras[k].CasterPBOID);
-    //                }
-
-    //                for (std::size_t k = 0; k < Players[i].Pets[j].States.size(); ++k)
-    //                {
-    //                    *data << uint32(Players[i].Pets[j].States[k].StateID);
-    //                    *data << int32(Players[i].Pets[j].States[k].StateValue);
-    //                }
-
-    //                data->WriteBits(Players[i].Pets[j].CustomName.length(), 7);
-    //                data->FlushBits();
-    //                data->WriteString(Players[i].Pets[j].CustomName);
-    //            }
-    //        }
-
-    //        for (std::size_t i = 0; i < 3; ++i)
-    //        {
-    //            *data << uint32(Enviros[j].Auras.size());
-    //            *data << uint32(Enviros[j].States.size());
-    //            for (std::size_t j = 0; j < Enviros[j].Auras.size(); ++j)
-    //            {
-    //                *data << int32(Enviros[j].Auras[j].AbilityID);
-    //                *data << uint32(Enviros[j].Auras[j].InstanceID);
-    //                *data << int32(Enviros[j].Auras[j].RoundsRemaining);
-    //                *data << int32(Enviros[j].Auras[j].CurrentRound);
-    //                *data << uint8(Enviros[j].Auras[j].CasterPBOID);
-    //            }
-
-    //            for (std::size_t j = 0; j < Enviros[j].States.size(); ++j)
-    //            {
-    //                *data << uint32(Enviros[i].States[j].StateID);
-    //                *data << int32(Enviros[i].States[j].StateValue);
-    //            }
-    //        }
-
-    //        *data << uint16(WaitingForFrontPetsMaxSecs);
-    //        *data << uint16(PvpMaxRoundTime);
-    //        *data << int32(CurRound);
-    //        *data << uint32(NpcCreatureID);
-    //        *data << uint32(NpcDisplayID);
-    //        *data << int8(CurPetBattleState);
-    //        *data << uint8(ForfeitPenalty);
-    //        *data << ObjectGuid(InitialWildPetGUID);
-    //        data->WriteBit(IsPVP);
-    //        data->WriteBit(CanAwardXP);
-    //        data->FlushBits();
-    //    }
+    // HasLocalScriptData / HasPetBattleFullUpdate layouts (unused): docs/mop-port/object-create-reference.md
     }
 
     if (flags.ActivePlayer)
@@ -1704,9 +1604,8 @@ bool WorldObject::CanDetectInvisibilityOf(WorldObject const* obj) const
     if (mask != obj->m_invisibility.GetFlags())
         return false;
 
-    // It isn't possible in invisibility to detect something that can't detect the invisible object
-    // (it's at least true for spell: 66)
-    // It seems like that only Units are affected by this check (couldn't see arena doors with preparation invisibility)
+    // In invisibility you can't detect something that can't detect the invisible object (true at least for spell 66).
+    // Only Units seem affected by this check (arena doors stay visible with preparation invisibility)
     if (obj->IsUnit() && (!IsUnit() || !ToUnit()->HasAuraType(SPELL_AURA_DETECT_VISIBLE_WHILE_INVISIBLE)))
         if ((m_invisibility.GetFlags() & obj->m_invisibilityDetect.GetFlags()) != m_invisibility.GetFlags())
             return false;
@@ -1729,8 +1628,7 @@ bool WorldObject::CanDetectInvisibilityOf(WorldObject const* obj) const
 
 bool WorldObject::CanDetectStealthOf(WorldObject const* obj, bool checkAlert) const
 {
-    // Combat reach is the minimal distance (both in front and behind),
-    //   and it is also used in the range calculation.
+    // Combat reach is the minimal distance (both in front and behind) and is also used in the range calculation.
     // One stealth point increases the visibility range by 0.3 yard.
 
     if (!obj->m_stealth.GetFlags())
@@ -1768,8 +1666,7 @@ bool WorldObject::CanDetectStealthOf(WorldObject const* obj, bool checkAlert) co
         int32 detectionValue = 30;
 
         // Level difference: 5 point / level, starting from level 1.
-        // There may be spells for this and the starting points too, but
-        // not in the DBCs of the client.
+        // There may be spells for this and the starting points too, but not in the DBCs of the client.
         detectionValue += int32(GetLevelForTarget(obj) - 1) * 5;
 
         // Apply modifiers
@@ -1878,9 +1775,7 @@ void WorldObject::ResetMap()
     if (IsStoredInWorldObjectGridContainer())
         m_currMap->RemoveWorldObject(this);
     m_currMap = nullptr;
-    //maybe not for corpse
-    //m_mapId = 0;
-    //m_InstanceId = 0;
+    //maybe not for corpse: m_mapId = 0; m_InstanceId = 0;
 }
 
 void WorldObject::AddObjectToRemoveList()
@@ -2652,14 +2547,8 @@ SpellMissInfo WorldObject::MagicSpellHitResult(Unit* victim, SpellInfo const* sp
     return SPELL_MISS_NONE;
 }
 
-// Calculate spell hit result can be:
-// Every spell can: Evade/Immune/Reflect/Sucesful hit
-// For melee based spells:
-//   Miss
-//   Dodge
-//   Parry
-// For spells
-//   Resist
+// Spell hit result: every spell can Evade/Immune/Reflect/hit successfully;
+// melee based spells can also Miss/Dodge/Parry, other spells can Resist
 SpellMissInfo WorldObject::SpellHitResult(Unit* victim, SpellInfo const* spellInfo, bool canReflect, bool canImmune) const
 {
     // Check for immune

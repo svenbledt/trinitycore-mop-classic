@@ -9,6 +9,9 @@ Last updated: 2026-10-18
 | Current phase | **2b — enter world; opcode round 4 + packet layout pass (2026-10-18)** |
 | Next | Finish layout batch L5, auth rows for 70449, update-field layout for UPDATE_OBJECT, then Enter World test (branch `mop/phase2b`) |
 
+## Update fields 5.5.4 (2026-10-18)
+- UPDATE_OBJECT update fields ported to the sniff-derived 5.5.4 layout (uf_check: 0 diffs vs WPP 554 v3); see `update-fields-plan.md` "5.5.4 deltas ported". Not yet tested against a live client.
+
 ## Opcode round 4 + layout pass (2026-10-18)
 - REA now runs **attached** to the user's IDA GUI database (no re-analysis); see `tools/mop-re/verify/AGENT.rea.md`.
 - Opcodes: only names MoP uses are verified; retail-only families (garrison, housing, delves...) stay `TODO(verify)` behind the send guard. Round 4: p00 (26 server-used names) and q00 (41 MoP-era names) → +9 anchors, nothing moved; the rest are order-only (handler globals never written).

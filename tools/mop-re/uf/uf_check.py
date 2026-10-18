@@ -42,8 +42,19 @@ def mask_expr(e):
 
 def norm_cs(body):
     toks = []
-    for raw in body.splitlines():
-        l = raw.strip()
+    lines = [re.sub(r"\s*//.*$", "", raw).strip() for raw in body.splitlines()]
+    # reader-only diagnostics for bits nothing is known about ("if (changesMask[N]) packet.WriteLine(...)")
+    lines = [l for i, l in enumerate(lines) if not l.startswith("packet.WriteLine(") and
+             not (re.match(r"if \(changesMask\[\d+\]\)$", l) and i + 1 < len(lines) and lines[i + 1].startswith("packet.WriteLine("))]
+    skip_delta = False
+    for l in lines:
+        # map update: compare only the full-map branch (TC always sends the full map), drop the delta branch
+        if l.startswith("var changesCount"):
+            skip_delta = True
+        if skip_delta:
+            if l.startswith(("packet.ReadInt32(\"QuestLogQuestIdToIndex\"", "Read")) and '"Value"' in l:
+                skip_delta = False
+            continue
         if not l or l in ("{", "}", "else") or l.startswith(("var data", "return data", "//", "var changesMask",
                                                              "var maskMask", "var noneChangesMask")):
             continue
@@ -59,7 +70,7 @@ def norm_cs(body):
             continue
         if re.match(r"var has\w+ = false;", l):
             continue
-        if re.match(r"(?:var )?\w+ = packet\.ReadBit\(", l):
+        if re.match(r"(?:var |bool )?\w+ = packet\.ReadBit\(", l):
             toks.append("PRESENCE"); continue
         if re.match(r"if \(\w+\)$", l):
             toks.append("IFPRESENT"); continue
@@ -109,7 +120,7 @@ def norm_cs(body):
         m = re.match(r"if \(\(flags & UpdateFieldFlag\.(\w+)\)", l)
         if m:
             toks.append(f"IFFLAG {m.group(1)}"); continue
-        m = re.match(r"for \(var \w+ = 0; \w+ < ([^;]+);", l)
+        m = re.match(r"for \(var \w+ = 0u?; \w+ < ([^;]+);", l)
         if m:
             toks.append("FOR " + (m.group(1) if m.group(1).isdigit() else "n")); continue
         m = re.search(r"data\.(\w+)(?:\[[^\]]*\])*(?:\.\w+)?\s*=\s*Read(Create|Update)(\w+)\(", l)
@@ -118,12 +129,38 @@ def norm_cs(body):
         m = re.search(r"data\.(\w+)(?:\[[^\]]*\])*\s*=\s*packet\.ReadBits\(\"[^\"]*\", (\d+)", l)
         if m:
             toks.append(f"BITS {m.group(1).lower()} {m.group(2)}"); continue
-        m = re.search(r"data\.(\w+)(?:\[[^\]]*\])*\s*=\s*packet\.Read(\w+?)(?:E<[^>]*>)?\(\"", l)
+        m = re.search(r"data\.(\w+)(?:\[[^\]]*\])*\s*=\s*(?:\(\w+\))?packet\.Read(\w+?)(?:E<[^>]*>)?\(\"", l)
         if m:
             w = CS_W.get(m.group(2), m.group(2))
             toks.append(f"BIT {m.group(1).lower()}" if w == "BIT" else f"RD {m.group(1).lower()} {w}"); continue
         if re.search(r"packet\.ReadUInt32\(\)", l):
             toks.append("SIZE32"); continue
+        # map / change-list encodings
+        if re.search(r"packet\.ReadUInt16\(\);", l):
+            toks.append("SIZE16"); continue
+        m = re.match(r"var updateType\w+ = packet\.ReadByte\(\);", l)
+        if m:
+            toks.append("MAPUPDATETYPE"); continue
+        m = re.match(r"if \(updateType\w+ != 0\)", l)
+        if m:
+            toks.append("IFMAPFULL"); continue
+        m = re.match(r"var changeType = packet\.ReadByte\(", l)
+        if m:
+            toks.append("MAPCHANGETYPE"); continue
+        if re.match(r"if \(changeType == 2\)", l) or l == "continue;":
+            toks.append("IFMAPDELETE") if l != "continue;" else None; continue
+        m = re.match(r"(?:return )?Read(Create|Update)(\w+)\(packet, indexes(?:, \"(\w+)\")?(.*)\);", l)
+        if m:
+            name = "value" if '"Value"' in m.group(4) else (m.group(3) or "").lower()
+            toks.append(f"SUB {name} {m.group(1)}" if name else f"ALIAS {m.group(1)}{m.group(2)}"); continue
+        # read without assignment (field the WPP data model has no member for)
+        m = re.match(r"(?:var \w+ = )?packet\.Read(\w+?)(?:E<[^>]*>)?\(\"(?:\w+\.)?(\w+)\"(.*)\);", l)
+        if m:
+            w = CS_W.get(m.group(1), m.group(1))
+            name = "value" if '"Value"' in m.group(3) else m.group(2).lower()
+            if name.endswith("count") and w == "32":
+                toks.append("SIZE32"); continue
+            toks.append(f"BIT {name}" if w == "BIT" else f"RD {name} {w}"); continue
         m = re.search(r"packet\.ReadBits\((\d+)\)", l)
         if m:
             toks.append(f"SIZEBITS {m.group(1)}"); continue
@@ -137,8 +174,12 @@ def norm_cs(body):
 
 def norm_cpp(body, members):
     toks = []
-    for raw in body.splitlines():
-        l = raw.strip()
+    lines = [raw.strip() for raw in body.splitlines()]
+    for n, l in enumerate(lines):
+        # map sent from a dynamic field, keyed by the element's ID: "data << int32(X[i].ID); X[i].WriteCreate(...)"
+        m = re.match(r"data << u?int32\((\w+)\[i\]\.ID\);", l)
+        if m and n + 1 < len(lines) and lines[n + 1].startswith(f"{m.group(1)}[i].WriteCreate("):
+            toks.append("RD key 32"); lines[n + 1] = "value.WriteCreate(data, owner, receiver);"; continue
         if not l or l in ("{", "}", "else") or l.startswith(("Mask changesMask", "changesMask.SetAll", "//", "UF::",
                                                              "ViewerDependentValue<", "noneChangesMask", "Mask ")):
             continue
@@ -146,9 +187,11 @@ def norm_cpp(body, members):
             continue
         if re.match(r"\w+ = ViewerDependentValue<", l):
             continue
+        if re.match(r"bool \w+ = false;", l):
+            continue
         if re.match(r"if \(\w+(?:->|\.)has_value\(\)\)", l) or re.match(r"if \(\w+\)$", l):
             toks.append("IFPRESENT"); continue
-        if re.match(r"bool \w+ = data\.WriteBit\(", l):
+        if re.match(r"(?:bool )?\w+ = data\.WriteBit\(", l):
             toks.append("PRESENCE"); continue
         if re.match(r"if \(!ignore\w*ChangesMask\)", l) or l.startswith("WriteCompleteDynamicFieldUpdateMask"):
             continue
@@ -186,6 +229,12 @@ def norm_cpp(body, members):
         m = re.match(r"if \(fieldVisibilityFlags\.HasFlag\(UpdateFieldFlag::(\w+)\)\)", l)
         if m:
             toks.append(f"IFFLAG {m.group(1)}"); continue
+        if re.match(r"for \(auto const& \[\w+, \w+\] : ", l):
+            toks.append("FOR n"); continue
+        if re.match(r"data << uint8\(1\);", l):
+            toks += ["MAPUPDATETYPE", "IFMAPFULL"]; continue
+        if re.match(r"data << uint16\(.*size\(\)\);", l):
+            toks.append("SIZE16"); continue
         m = re.match(r"for \((?:uint32|std::size_t|int32) \w+ = 0; \w+ < ([^;]+);", l)
         if m:
             toks.append("FOR " + (m.group(1) if m.group(1).isdigit() else "n")); continue
@@ -235,6 +284,8 @@ def main(cpp_path, cs_path, *args):
     for key in sorted(set(fs) | set(fc)):
         if want and key[0] not in want:
             continue
+        if key not in fc and all(t.startswith("ALIAS ") for t in norm_cs(fs[key])):
+            continue  # WPP-only wrapper that just calls another reader
         if key not in fc or key not in fs:
             print(f"{key[0]}::{key[1]}: only in {'WPP' if key not in fc else 'TC'}")
             differing += 1

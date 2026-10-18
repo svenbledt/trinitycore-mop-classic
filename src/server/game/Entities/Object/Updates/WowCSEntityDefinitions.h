@@ -32,7 +32,7 @@ enum class EntityFragment : uint8
     FTransportLink              = 5,
     FPlayerOwnershipLink        = 13,
     CActor                      = 15, //  INDIRECT,
-    FVendor_C                   = 17, //  UPDATEABLE, INDIRECT,
+    FVendor_C                   = 17, //  UPDATEABLE,
     FMirroredObject_C           = 18,
     Tag_Item                    = 200, //  TAG,
     Tag_Container               = 201, //  TAG,
@@ -64,7 +64,8 @@ inline constexpr bool IsUpdateableFragment(EntityFragment frag)
 
 inline constexpr bool IsIndirectFragment(EntityFragment frag)
 {
-    return frag == EntityFragment::CGObject || frag == EntityFragment::CActor || frag == EntityFragment::FVendor_C;
+    // 5.5.4: FVendor_C is no longer indirect (no IndirectFragmentActive byte; as retail 11.2.7)
+    return frag == EntityFragment::CGObject || frag == EntityFragment::CActor;
 }
 
 // common case optimization, make use of the fact that fragment arrays are sorted
