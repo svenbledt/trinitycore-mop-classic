@@ -1658,10 +1658,20 @@ void World::LoadConfigSettings(bool reload)
     // Loading of Locales
     m_bool_configs[CONFIG_LOAD_LOCALES] = sConfigMgr->GetBoolDefault("Load.Locales", true);
 
+    // Retail 5.5.4.70449 FEATURE_SYSTEM_STATUS game rules, in sniff order; the client gates the transmogrifier on TransmogEnabled
+    // TODO(verify): names of the unnamed rules (173, 190, 154, 102, 129)
     _gameRules =
     {
         { .Rule = ::GameRule::GroupFinderCapabilities, .Value = 1 },
-        { .Rule = ::GameRule::PremadeGroupFinderStyle, .Value = 1 }
+        { .Rule = ::GameRule::PremadeGroupFinderStyle, .Value = 1 },
+        { .Rule = ::GameRule::TransmogEnabled, .Value = 1 },
+        { .Rule = ::GameRule(173), .Value = 1 },
+        { .Rule = ::GameRule::LootMethodStyle, .Value = 1 },
+        { .Rule = ::GameRule(190), .Value = 0 },
+        { .Rule = ::GameRule(154), .Value = 0 },
+        { .Rule = ::GameRule(102), .Value = 1 },
+        { .Rule = ::GameRule::DisableHonorDecay, .Value = 1 },
+        { .Rule = ::GameRule(129), .Value = 1 }
     };
 
     // call ScriptMgr if we're reloading the configuration
