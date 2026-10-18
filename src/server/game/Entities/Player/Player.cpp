@@ -14142,8 +14142,9 @@ bool Player::CanSelectQuestPackageItem(QuestPackageItemEntry const* questPackage
 
     switch (questPackageItem->DisplayType)
     {
-        //case QUEST_PACKAGE_FILTER_LOOT_SPECIALIZATION:
-        //    return rewardProto->IsUsableByLootSpecialization(this, true);
+        case QUEST_PACKAGE_FILTER_LOOT_SPECIALIZATION:
+            // TODO(verify): 5.5.4 packages use this filter; usable-by-player until ItemSpec loot-spec data is ported
+            return CanUseItem(rewardProto, true) == EQUIP_ERR_OK;
         case QUEST_PACKAGE_FILTER_CLASS:
             return !rewardProto->ItemSpecClassMask || (rewardProto->ItemSpecClassMask & GetClassMask()) != 0;
         case QUEST_PACKAGE_FILTER_EVERYONE:

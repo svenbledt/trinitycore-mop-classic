@@ -9,6 +9,12 @@ Last updated: 2026-10-18
 | Current phase | **2b done: a character enters the world on 5.5.4.70449 (2026-10-18)** |
 | Next | Phase 3/4: DB2 layout hashes, gameplay baseline; keep checking new sniffs with `tools/mop-re/sniffcheck` |
 
+
+## Backlog (noted, not started)
+- Guild / guild bank / bank tabs / calendar / community finder: retail sniff `g1` (2026-10-18, 20.7k packets). Opcodes all at our values;
+  only QUERY_GUILD_INFO is in sniffcheck so far. Unhandled in TC: CMSG_GUILD_QUERY_RECIPES and the CLUB_FINDER_* requests/responses;
+  communities go through bnet ClubService (84 CMSG_BATTLENET_REQUEST). User: "just note it, not do anything for now".
+
 ## Transmog outfits + collection burst (2026-10-18)
 - Outfit UF, 6 TransmogOutfit/Situation DB2 stores + GlobalCurve, CMSG_TRANSMOG_OUTFIT_NEW/UPDATE_INFO/UPDATE_SITUATIONS/UPDATE_SLOTS with replies, persistence in `character_transmog_outfit*`, VisibleItems from the viewed outfit, SMSG_DISMOUNT, ACCOUNT_TRANSMOG_SET_FAVORITES_UPDATE, ACCOUNT_ITEM_COLLECTION_DATA. Not client-tested yet. Evidence and open items: `re-notes.md` "Transmog outfits and collection burst".
 
