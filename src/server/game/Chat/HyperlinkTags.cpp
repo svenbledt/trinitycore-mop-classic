@@ -198,11 +198,16 @@ bool Trinity::Hyperlinks::LinkTags::item::StoreTo(ItemLinkData& val, std::string
     if (!t.TryConsumeTo(itemId))
         return false;
     val.Item = sObjectMgr->GetItemTemplate(itemId);
+    uint32 linkSpecialization = 0;
     if (!(val.Item && t.TryConsumeTo(val.EnchantId) && t.TryConsumeTo(val.GemItemId[0]) && t.TryConsumeTo(val.GemItemId[1]) &&
         t.TryConsumeTo(val.GemItemId[2]) && t.TryConsumeTo(dummy) && !dummy && t.TryConsumeTo(dummy) && !dummy && t.TryConsumeTo(dummy) && !dummy &&
-        t.TryConsumeTo(val.RenderLevel) && t.TryConsumeTo(val.RenderSpecialization) && t.TryConsumeTo(dummy) && !dummy &&
+        t.TryConsumeTo(val.RenderLevel) && t.TryConsumeTo(val.RenderSpecialization) && t.TryConsumeTo(linkSpecialization) &&
         t.TryConsumeTo(val.Context) && t.TryConsumeTo(numBonusListIDs)))
         return false;
+
+    // 5.5.4 client puts the spec one field later ("...:2::1450:..." from a shift-clicked link)
+    if (!val.RenderSpecialization)
+        val.RenderSpecialization = linkSpecialization;
 
     constexpr uint32 maxBonusListIDs = 16;
     if (numBonusListIDs > maxBonusListIDs)

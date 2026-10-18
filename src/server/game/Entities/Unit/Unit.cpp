@@ -14129,7 +14129,8 @@ bool Unit::IsSplineEnabled() const
 
 UF::UpdateFieldFlag Unit::GetUpdateFieldFlagsFor(Player const* target) const
 {
-    UF::UpdateFieldFlag flags = UF::UpdateFieldFlag::None;
+    // 5.5.4 retail sends UnitAll for every unit and player (all 446 in the 70449 sniffs)
+    UF::UpdateFieldFlag flags = UF::UpdateFieldFlag::UnitAll;
     if (target == this || GetOwnerGUID() == target->GetGUID())
         flags |= UF::UpdateFieldFlag::Owner;
 

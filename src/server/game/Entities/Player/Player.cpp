@@ -7298,7 +7298,38 @@ void Player::_ApplyItemMods(Item* item, uint8 slot, bool apply, bool updateItemA
     ApplyEnchantment(item, apply);
     ApplyReforgedStats(item, apply);
 
+    if (slot == EQUIPMENT_SLOT_MAINHAND)
+        UpdateMonkWeaponOverride(apply ? item : nullptr);
+
     TC_LOG_DEBUG("entities.player.items", "Player::_ApplyItemMods: completed");
+}
+
+// Monk Weapon Override Driver (108562): Jab follows the main-hand weapon type (5.5.4 DB2; retail sniff casts 108561 with a staff)
+void Player::UpdateMonkWeaponOverride(Item const* mainHand)
+{
+    if (GetClass() != CLASS_MONK)
+        return;
+
+    static constexpr uint32 OverrideAuras[] = { 108561, 115697, 115689, 115694, 115696 };
+    for (uint32 auraId : OverrideAuras)
+        RemoveAurasDueToSpell(auraId);
+
+    uint32 overrideAura = 0;
+    if (ItemTemplate const* proto = mainHand ? mainHand->GetTemplate() : nullptr; proto && proto->GetClass() == ITEM_CLASS_WEAPON)
+    {
+        switch (proto->GetSubClass())
+        {
+            case ITEM_SUBCLASS_WEAPON_STAFF:   overrideAura = 108561; break; // Jab 108557
+            case ITEM_SUBCLASS_WEAPON_POLEARM: overrideAura = 115697; break; // Jab 115698
+            case ITEM_SUBCLASS_WEAPON_AXE:     overrideAura = 115689; break; // Jab 115687
+            case ITEM_SUBCLASS_WEAPON_MACE:    overrideAura = 115694; break; // Jab 115693
+            case ITEM_SUBCLASS_WEAPON_SWORD:   overrideAura = 115696; break; // Jab 115695
+            default: break;                                                // fist weapons keep Jab 100780
+        }
+    }
+
+    if (overrideAura)
+        CastSpell(this, overrideAura, true);
 }
 
 void Player::_ApplyItemBonuses(Item* item, uint8 slot, bool apply, bool onlyLevelScaling /*= false*/)

@@ -2371,6 +2371,7 @@ class TC_GAME_API Player final : public Unit, public GridObject<Player>
         bool CheckAttackFitToAuraRequirement(WeaponAttackType attackType, AuraEffect const* aurEff) const override;
 
         void _ApplyItemMods(Item* item, uint8 slot, bool apply, bool updateItemAuras = true, bool updateHeirloomStats = false);
+        void UpdateMonkWeaponOverride(Item const* mainHand);
         void _RemoveAllItemMods();
         void _ApplyAllItemMods();
         void _ApplyAllLevelScaleItemMods(bool apply);
