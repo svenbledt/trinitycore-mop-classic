@@ -1,0 +1,784 @@
+{
+ "mounts": {
+  "db2": 502,
+  "withItem": 473,
+  "noItem": 29,
+  "skyfireItem": 417,
+  "skyfireItemWithSkyfireSource": 238,
+  "notInSkyfire": 56,
+  "notInSkyfireWithWorldSource": 1,
+  "notInSkyfireWithMasterSource": 0,
+  "notInSkyfireList": [
+   {
+    "id": 7,
+    "spell": 459,
+    "sourceType": 4294967295,
+    "items": [
+     842,
+     1134
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 8,
+    "spell": 468,
+    "sourceType": 4294967295,
+    "items": [
+     1122,
+     901,
+     2415
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 13,
+    "spell": 579,
+    "sourceType": 4294967295,
+    "items": [
+     1044,
+     5663
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 15,
+    "spell": 581,
+    "sourceType": 4294967295,
+    "items": [
+     1042,
+     1133
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 22,
+    "spell": 6896,
+    "sourceType": 4294967295,
+    "items": [
+     5874
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 28,
+    "spell": 8980,
+    "sourceType": 4294967295,
+    "items": [
+     8583
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 32,
+    "spell": 10790,
+    "sourceType": 4294967295,
+    "items": [
+     8630
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 35,
+    "spell": 10795,
+    "sourceType": 4294967295,
+    "items": [
+     8589
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 70,
+    "spell": 18363,
+    "sourceType": 4294967295,
+    "items": [
+     14062
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 1761,
+    "spell": 348459,
+    "sourceType": 4294967295,
+    "items": [
+     184865
+    ],
+    "world": [
+     "quest 63448",
+     "quest 63450"
+    ],
+    "master": []
+   },
+   {
+    "id": 1763,
+    "spell": 387308,
+    "sourceType": 4294967295,
+    "items": [
+     198631
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 1764,
+    "spell": 387311,
+    "sourceType": 4294967295,
+    "items": [
+     198628
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 1765,
+    "spell": 387319,
+    "sourceType": 4294967295,
+    "items": [
+     198632
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 1766,
+    "spell": 387320,
+    "sourceType": 4294967295,
+    "items": [
+     198630
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 1767,
+    "spell": 387321,
+    "sourceType": 4294967295,
+    "items": [
+     198633
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 1768,
+    "spell": 387323,
+    "sourceType": 4294967295,
+    "items": [
+     198629
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2070,
+    "spell": 435115,
+    "sourceType": 4294967295,
+    "items": [
+     213601
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2147,
+    "spell": 446902,
+    "sourceType": 4294967295,
+    "items": [
+     265937
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2309,
+    "spell": 466948,
+    "sourceType": 4294967295,
+    "items": [
+     230214
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2310,
+    "spell": 466977,
+    "sourceType": 4294967295,
+    "items": [
+     230221
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2311,
+    "spell": 466980,
+    "sourceType": 4294967295,
+    "items": [
+     230222
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2312,
+    "spell": 466983,
+    "sourceType": 4294967295,
+    "items": [
+     230223
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2319,
+    "spell": 471440,
+    "sourceType": 4294967295,
+    "items": [
+     232614
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2342,
+    "spell": 473739,
+    "sourceType": 9,
+    "items": [
+     233282
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2343,
+    "spell": 473741,
+    "sourceType": 9,
+    "items": [
+     233283
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2344,
+    "spell": 473743,
+    "sourceType": 9,
+    "items": [
+     233284
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2345,
+    "spell": 473744,
+    "sourceType": 9,
+    "items": [
+     233285
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2346,
+    "spell": 473745,
+    "sourceType": 9,
+    "items": [
+     233286
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2485,
+    "spell": 1217476,
+    "sourceType": 4294967295,
+    "items": [
+     235562
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2513,
+    "spell": 1224596,
+    "sourceType": 4294967295,
+    "items": [
+     238297
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2514,
+    "spell": 1224643,
+    "sourceType": 4294967295,
+    "items": [
+     238330
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2515,
+    "spell": 1224645,
+    "sourceType": 4294967295,
+    "items": [
+     238331
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2516,
+    "spell": 1224646,
+    "sourceType": 4294967295,
+    "items": [
+     238332
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2517,
+    "spell": 1224647,
+    "sourceType": 4294967295,
+    "items": [
+     238333
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2596,
+    "spell": 1239204,
+    "sourceType": 4294967295,
+    "items": [
+     245584
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2597,
+    "spell": 1239240,
+    "sourceType": 4294967295,
+    "items": [
+     245612
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2599,
+    "spell": 1239372,
+    "sourceType": 4294967295,
+    "items": [
+     245613
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2636,
+    "spell": 1247591,
+    "sourceType": 4294967295,
+    "items": [
+     248741
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2637,
+    "spell": 1247597,
+    "sourceType": 4294967295,
+    "items": [
+     248744
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2638,
+    "spell": 1247598,
+    "sourceType": 4294967295,
+    "items": [
+     248742
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2639,
+    "spell": 1247596,
+    "sourceType": 4294967295,
+    "items": [
+     248743
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2646,
+    "spell": 1249659,
+    "sourceType": 4294967295,
+    "items": [
+     258883
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2647,
+    "spell": 1250045,
+    "sourceType": 4294967295,
+    "items": [
+     265944
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2742,
+    "spell": 1285725,
+    "sourceType": 9,
+    "items": [
+     254735
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2743,
+    "spell": 1285724,
+    "sourceType": 9,
+    "items": [
+     254736
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2830,
+    "spell": 1266866,
+    "sourceType": 4294967295,
+    "items": [
+     260759
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2844,
+    "spell": 1266345,
+    "sourceType": 4294967295,
+    "items": [
+     260438
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2916,
+    "spell": 1272988,
+    "sourceType": 4294967295,
+    "items": [
+     264986
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2924,
+    "spell": 1280068,
+    "sourceType": 4294967295,
+    "items": [
+     267300
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2936,
+    "spell": 1283471,
+    "sourceType": 4294967295,
+    "items": [
+     268706
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2946,
+    "spell": 1284044,
+    "sourceType": 4294967295,
+    "items": [
+     268924
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 3039,
+    "spell": 1298510,
+    "sourceType": 4294967295,
+    "items": [
+     275928
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 3040,
+    "spell": 1298512,
+    "sourceType": 4294967295,
+    "items": [
+     276075
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 3041,
+    "spell": 1298515,
+    "sourceType": 4294967295,
+    "items": [
+     276082
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 3042,
+    "spell": 1298516,
+    "sourceType": 4294967295,
+    "items": [
+     276081
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 3087,
+    "spell": 1302506,
+    "sourceType": 4294967295,
+    "items": [
+     277652
+    ],
+    "world": [],
+    "master": []
+   }
+  ]
+ },
+ "pets": {
+  "db2": 874,
+  "withItem": 368,
+  "noItem": 506,
+  "skyfireItem": 349,
+  "skyfireItemWithSkyfireSource": 165,
+  "notInSkyfire": 19,
+  "notInSkyfireWithWorldSource": 0,
+  "notInSkyfireWithMasterSource": 0,
+  "notInSkyfireList": [
+   {
+    "id": 247,
+    "spell": 69539,
+    "sourceType": 7,
+    "items": [
+     49664
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 1257,
+    "spell": 143732,
+    "sourceType": 0,
+    "items": [
+     100908
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 2062,
+    "spell": 246105,
+    "sourceType": 4294967295,
+    "items": [
+     151234
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 3024,
+    "spell": 340710,
+    "sourceType": 0,
+    "items": [
+     183107
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 3326,
+    "spell": 375473,
+    "sourceType": 4294967295,
+    "items": [
+     193837
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 4206,
+    "spell": 38842,
+    "sourceType": 4294967295,
+    "items": [
+     31665
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 4229,
+    "spell": 64351,
+    "sourceType": 4294967295,
+    "items": [
+     45942
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 4329,
+    "spell": 428053,
+    "sourceType": 5,
+    "items": [
+     211082
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 4532,
+    "spell": 446916,
+    "sourceType": 7,
+    "items": [
+     265933
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 4585,
+    "spell": 450535,
+    "sourceType": 7,
+    "items": [
+     224002
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 4683,
+    "spell": 468201,
+    "sourceType": 7,
+    "items": [
+     231295
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 4685,
+    "spell": 468247,
+    "sourceType": 7,
+    "items": [
+     231312
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 4862,
+    "spell": 1246166,
+    "sourceType": 9,
+    "items": [
+     248073
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 4897,
+    "spell": 1254207,
+    "sourceType": 4294967295,
+    "items": [
+     252194
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 4902,
+    "spell": 1256380,
+    "sourceType": 9,
+    "items": [
+     253404
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 4907,
+    "spell": 1261676,
+    "sourceType": 9,
+    "items": [
+     257515
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 4962,
+    "spell": 1266325,
+    "sourceType": 7,
+    "items": [
+     260433
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 5000,
+    "spell": 1280074,
+    "sourceType": 9,
+    "items": [
+     267303
+    ],
+    "world": [],
+    "master": []
+   },
+   {
+    "id": 5080,
+    "spell": 1297823,
+    "sourceType": 7,
+    "items": [
+     275818
+    ],
+    "world": [],
+    "master": []
+   }
+  ]
+ }
+}
