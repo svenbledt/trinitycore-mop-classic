@@ -158,9 +158,11 @@ namespace WorldPackets
             float RewardArtifactXPMultiplier = 0.0f;
             int32 RewardArtifactCategoryID  = 0;
             int32 StartItem                 = 0;
+            int32 Unk554                    = 0; // 5.5.4 client 0x14063A640: 8th u32 after RewardDisplaySpell; TODO(verify): name/position
             uint32 Flags                    = 0;
             uint32 FlagsEx                  = 0;
             uint32 FlagsEx2                 = 0;
+            uint32 FlagsEx3                 = 0; // name from WPP 5.5.3
             int32 POIContinent              = 0;
             float POIx                      = 0.0f;
             float POIy                      = 0.0f;
@@ -190,6 +192,8 @@ namespace WorldPackets
             int64 TimeAllowed               = 0;
             std::span<int32 const> TreasurePickerID;
             std::span<int32 const> TreasurePickerID2;   // unknown purpose, used only sometimes and only if TreasurePickerID is empty
+            std::vector<int32> Unk554IDs1;  // 5.5.4 client 0x14063A640: two more int32 arrays after the
+            std::vector<int32> Unk554IDs2;  // conditional text counts; TODO(verify): meaning
             int32 Expansion                 = 0;
             int32 QuestGiverCreatureID      = 0; // used to select ConditionalQuestText
             std::vector<QuestObjective> Objectives;
@@ -322,7 +326,7 @@ namespace WorldPackets
             int32 SuggestedPartyMembers = 0;
             QuestRewards Rewards;
             std::vector<QuestDescEmote> Emotes;
-            std::array<int32, 3> QuestFlags = { };
+            std::array<int32, 4> QuestFlags = { }; // 5.5.4 client sends 4; TODO(verify): [3] is FlagsEx3 per WPP 5.5.3
             int32 QuestInfoID = 0;
         };
 
@@ -421,7 +425,7 @@ namespace WorldPackets
             ObjectGuid InformUnit;
             int32 QuestID           = 0;
             int32 QuestPackageID    = 0;
-            uint32 QuestFlags[3]    = { };
+            uint32 QuestFlags[4]    = { }; // 5.5.4 client sends 4; TODO(verify): [3] is FlagsEx3 per WPP 5.5.3
             int32 SuggestedPartyMembers = 0;
             QuestRewards Rewards;
             std::vector<QuestObjectiveSimple> Objectives;
@@ -486,7 +490,7 @@ namespace WorldPackets
             std::vector<QuestCurrency> Currency;
             int32 StatusFlags           = 0;
             int32 QuestInfoID           = 0;
-            uint32 QuestFlags[3]        = { };
+            uint32 QuestFlags[4]        = { }; // 5.5.4 client sends 4; TODO(verify): [3] is FlagsEx3 per WPP 5.5.3
             std::string QuestTitle;
             std::string CompletionText;
             std::vector<ConditionalQuestText> ConditionalCompletionText;
@@ -782,6 +786,10 @@ namespace WorldPackets
             bool CloseChoiceFrame = false;
             bool HideWarboardHeader = false;
             bool KeepOpenAfterChoice = false;
+            bool ShowChoicesAsList = false;  // 5.5.4 client 0x140634520 reads 7 flag bits; names from WPP 5.5.3
+            bool HasPowerChoice = false;
+            bool Unk554_1 = false;           // TODO(verify): last two bits unnamed
+            bool Unk554_2 = false;
         };
     }
 }

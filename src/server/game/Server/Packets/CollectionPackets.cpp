@@ -19,7 +19,7 @@
 
 void WorldPackets::Collections::CollectionItemSetFavorite::Read()
 {
-    Type = _worldPacket.read<CollectionType>();
+    Type = CollectionType(_worldPacket.read<uint8>());
     ID = _worldPacket.read<uint32>();
     IsFavorite = _worldPacket.ReadBit();
 }

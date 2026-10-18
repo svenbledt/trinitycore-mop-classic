@@ -44,7 +44,7 @@ ByteBuffer& operator>>(ByteBuffer& data, Optional<WorldPackets::Who::WhoRequestS
 {
     serverInfo.emplace();
 
-    data >> serverInfo->FactionGroup;
+    serverInfo->FactionGroup = data.read<uint8>();
     data >> serverInfo->Locale;
     data >> serverInfo->RequesterVirtualRealmAddress;
 

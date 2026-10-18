@@ -136,6 +136,8 @@ namespace WorldPackets
             WorldPacket const* Write() override;
 
             PlayerModelDisplayInfo DisplayInfo;
+            std::vector<uint16> Glyphs; // TODO(verify): names per WPP 5.5.0; client 0x1405AFC00 reads 3 u16 arrays
+            std::vector<uint16> Talents;
             std::array<uint16, 3> PvpTalents;
             Talent::TalentInfoUpdate TalentInfo;
 

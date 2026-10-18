@@ -41,9 +41,9 @@ ByteBuffer& operator<<(ByteBuffer& data, TreasureLootList const& treasureLootLis
 ByteBuffer& operator<<(ByteBuffer& data, ClientGossipOptions const& gossipOption)
 {
     data << int32(gossipOption.GossipOptionID);
-    data << uint8(gossipOption.OptionNPC);
+    data << int32(gossipOption.OptionNPC);
     data << int8(gossipOption.OptionFlags);
-    data << int32(gossipOption.OptionCost);
+    data << uint64(gossipOption.OptionCost);
     data << uint32(gossipOption.OptionLanguage);
     data << int32(gossipOption.Flags);
     data << int32(gossipOption.OrderIndex);
@@ -83,6 +83,7 @@ ByteBuffer& operator<<(ByteBuffer& data, ClientGossipText const& gossipText)
     data << int32(gossipText.QuestFlags[0]);
     data << int32(gossipText.QuestFlags[1]);
     data << int32(gossipText.QuestFlags[2]);
+    data << int32(gossipText.QuestFlags[3]);
 
     data << Bits<1>(gossipText.Repeatable);
     data << Bits<1>(gossipText.ResetByScheduler);
@@ -171,7 +172,7 @@ WorldPacket const* VendorInventory::Write()
 WorldPacket const* TrainerList::Write()
 {
     _worldPacket << TrainerGUID;
-    _worldPacket << uint32(TrainerType);
+    _worldPacket << uint8(TrainerType);
     _worldPacket << uint32(TrainerID);
 
     _worldPacket << uint32(Spells.size());

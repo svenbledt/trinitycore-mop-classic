@@ -5,6 +5,14 @@ Work in `F:\WorkDir\trinitycore-mop-classic`. Read `tools/mop-re/verify/AGENT.md
 `tools/mop-re/verify/AGENT.rea.md` (REA attached to the user's IDA GUI; how to read pseudocode from the error details;
 70449 addresses) first. Same tool rules: REA only, never open/close the binary, never modify the IDA database.
 
+## Long functions
+REA truncates long pseudocode. For the full text, call the same IDA server's read-only `decompile` tool directly with
+paging: JSON-RPC `tools/call` to `http://127.0.0.1:13337/mcp`, arguments `{addr, offset, max_lines, include_addresses}`,
+repeat with a higher `offset` until `cursor.done`. Write it to your scratchpad, not the repo. Only `decompile`,
+`disasm`, `lookup_funcs`, `xrefs_to`, `callees` may be called this way (no renames, comments, types, patches). For
+instruction-level checks you may also disassemble the dump file with capstone (`tools/mop-re/pe/diff_builds.py`
+`Image` class reads `.text` without running anything).
+
 ## Input
 `tools/mop-re/out/70449/layouts/worklist.json`; you get a list of source files, take every item whose `file` is one
 of them. Per item: `name`, `value` (opcode, already proven), `class`, `tc` (our tokens), `client` (client tokens),

@@ -300,9 +300,9 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Movement::MonsterSplineJu
 ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Movement::MonsterSplineAnimTierTransition const& animTierTransition)
 {
     data << int32(animTierTransition.TierTransitionID);
+    data << uint8(animTierTransition.AnimTier);
     data << uint32(animTierTransition.StartTime);
     data << uint32(animTierTransition.ExtraDuration);
-    data << uint8(animTierTransition.AnimTier);
 
     return data;
 }
@@ -310,25 +310,13 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Movement::MonsterSplineAn
 ByteBuffer& WorldPackets::operator<<(ByteBuffer& data, Movement::MovementSpline const& movementSpline)
 {
     data << uint32(movementSpline.Flags);
+    data << uint8(movementSpline.Face);
     data << int32(movementSpline.Elapsed);
     data << uint32(movementSpline.MoveTime);
     data << uint32(movementSpline.FadeObjectTime);
     data << uint8(movementSpline.Mode);
     data << movementSpline.TransportGUID;
     data << int8(movementSpline.VehicleSeat);
-    data.WriteBits(movementSpline.Face, 2);
-    data.WriteBits(movementSpline.Points.size(), 16);
-    data.WriteBit(movementSpline.VehicleExitVoluntary);
-    data.WriteBit(movementSpline.Interpolate);
-    data.WriteBits(movementSpline.PackedDeltas.size(), 16);
-    data.WriteBit(movementSpline.SplineFilter.has_value());
-    data.WriteBit(movementSpline.SpellEffectExtraData.has_value());
-    data.WriteBit(movementSpline.JumpExtraData.has_value());
-    data.WriteBit(movementSpline.AnimTierTransition.has_value());
-    data.FlushBits();
-
-    if (movementSpline.SplineFilter)
-        data << *movementSpline.SplineFilter;
 
     switch (movementSpline.Face)
     {
@@ -344,6 +332,20 @@ ByteBuffer& WorldPackets::operator<<(ByteBuffer& data, Movement::MovementSpline 
             break;
     }
 
+    data.WriteBits(movementSpline.Points.size(), 16);
+    data.WriteBit(movementSpline.VehicleExitVoluntary);
+    data.WriteBit(movementSpline.Interpolate);
+    data.WriteBits(movementSpline.PackedDeltas.size(), 16);
+    data.WriteBit(movementSpline.SplineFilter.has_value());
+    data.WriteBit(movementSpline.SpellEffectExtraData.has_value());
+    data.WriteBit(movementSpline.JumpExtraData.has_value());
+    data.WriteBit(movementSpline.TurnData.has_value());
+    data.WriteBit(movementSpline.AnimTierTransition.has_value());
+    data.FlushBits();
+
+    if (movementSpline.SplineFilter)
+        data << *movementSpline.SplineFilter;
+
     for (TaggedPosition<Position::XYZ> const& pos : movementSpline.Points)
         data << pos;
 
@@ -356,6 +358,13 @@ ByteBuffer& WorldPackets::operator<<(ByteBuffer& data, Movement::MovementSpline 
     if (movementSpline.JumpExtraData)
         data << *movementSpline.JumpExtraData;
 
+    if (movementSpline.TurnData)
+    {
+        data << float(movementSpline.TurnData->StartFacing);
+        data << float(movementSpline.TurnData->TotalTurnRads);
+        data << float(movementSpline.TurnData->RadsPerSec);
+    }
+
     if (movementSpline.AnimTierTransition)
         data << *movementSpline.AnimTierTransition;
 
@@ -366,7 +375,9 @@ ByteBuffer& WorldPackets::operator<<(ByteBuffer& data, Movement::MovementMonster
 {
     data << movementMonsterSpline.ID;
     data.WriteBit(movementMonsterSpline.CrzTeleport);
+    data.WriteBit(movementMonsterSpline.StopUseFaceDirection);
     data.WriteBits(movementMonsterSpline.StopDistanceTolerance, 3);
+    data.FlushBits();
 
     data << movementMonsterSpline.Move;
 
@@ -411,18 +422,7 @@ void WorldPackets::Movement::CommonMovement::WriteCreateObjectSplineDataBlock(::
         data.WriteBit(false);                                                   // HasUnknown901
         data.FlushBits();
 
-        //if (HasSplineFilterKey)
-        //{
-        //    data << uint32(FilterKeysCount);
-        //    for (var i = 0; i < FilterKeysCount; ++i)
-        //    {
-        //        data << float(In);
-        //        data << float(Out);
-        //    }
-
-        //    data.WriteBits(FilterFlags, 2);
-        //    data.FlushBits();
-        //}
+        // HasSplineFilter is always false here, so no filter block follows
 
         switch (moveSpline.facing.type)
         {
@@ -473,16 +473,7 @@ void WorldPackets::Movement::CommonMovement::WriteCreateObjectSplineDataBlock(::
             data << uint8(moveSpline.anim_tier->AnimTier);
         }
 
-        //if (HasUnknown901)
-        //{
-        //    for (WorldPackets::Movement::MonsterSplineUnknown901::Inner const& unkInner : unk.Data) size = 16
-        //    {
-        //        data << int32(unkInner.Unknown_1);
-        //        data << int32(unkInner.Unknown_2);
-        //        data << int32(unkInner.Unknown_3);
-        //        data << uint32(unkInner.Unknown_4);
-        //    }
-        //}
+        // HasUnknown901 is always false, so its payload is never written
     }
 }
 
@@ -669,6 +660,8 @@ WorldPacket const* WorldPackets::Movement::TransferPending::Write()
     _worldPacket << OldMapPosition;
     _worldPacket.WriteBit(Ship.has_value());
     _worldPacket.WriteBit(TransferSpellID.has_value());
+    _worldPacket.WriteBit(TaxiPathID.has_value());
+    _worldPacket.FlushBits();
     if (Ship)
     {
         _worldPacket << uint32(Ship->ID);
@@ -678,7 +671,8 @@ WorldPacket const* WorldPackets::Movement::TransferPending::Write()
     if (TransferSpellID)
         _worldPacket << int32(*TransferSpellID);
 
-    _worldPacket.FlushBits();
+    if (TaxiPathID)
+        _worldPacket << uint32(*TaxiPathID);
 
     return &_worldPacket;
 }
@@ -704,8 +698,11 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Movement::TeleportLocatio
 
 WorldPacket const* WorldPackets::Movement::NewWorld::Write()
 {
+    // 5.5.4 handler 0x1401FDF00 reads MapID at +8, Pos at +12, Reason at +28, MovementOffset at +32
+    _worldPacket << int32(Loc.Unused901_1); // TODO(verify): +0/+4 and trailing Counter unread by the handler
+    _worldPacket << int32(Loc.Unused901_2);
     _worldPacket << int32(MapID);
-    _worldPacket << Loc;
+    _worldPacket << Loc.Pos;
     _worldPacket << uint32(Reason);
     _worldPacket << MovementOffset;
     _worldPacket << int32(Counter);
@@ -1050,6 +1047,7 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Movement::MoveSetCompound
     data.WriteBit(stateChange.MovementForceGUID.has_value());
     data.WriteBit(stateChange.MovementInertiaID.has_value());
     data.WriteBit(stateChange.MovementInertiaLifetimeMs.has_value());
+    data.WriteBit(stateChange.DriveCapabilityRecID.has_value());
     data.FlushBits();
 
     if (stateChange.MovementForce_)
@@ -1089,6 +1087,9 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Movement::MoveSetCompound
 
     if (stateChange.MovementInertiaLifetimeMs)
         data << uint32(*stateChange.MovementInertiaLifetimeMs);
+
+    if (stateChange.DriveCapabilityRecID)
+        data << int32(*stateChange.DriveCapabilityRecID);
 
     return data;
 }

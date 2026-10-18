@@ -222,6 +222,7 @@ namespace WorldPackets
             int32 Honor = 0;
             ObjectGuid Target;
             int32 Rank = 0;
+            bool Unk25 = false; // TODO(verify): meaning; 5.5.4 case 0x1406144AC reads a bit after the u8 rank
         };
 
         class BreakTarget final : public ServerPacket

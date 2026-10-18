@@ -178,9 +178,9 @@ namespace WorldPackets
 
         struct CTROptions
         {
-            uint32 ContentTuningConditionMask = 0;
-            int32 Unused901 = 0;
-            uint32 ExpansionLevelMask = 0;
+            std::vector<uint32> Conditions; // TODO(verify): meaning; 5.5.4 reader 0x1406EB970 reads a counted u32 list
+            uint8 FactionGroup = 0;
+            uint32 ChromieTimeExpansionMask = 0;
         };
 
         struct PartyMemberStats
@@ -499,8 +499,23 @@ namespace WorldPackets
             std::string Name;
         };
 
+        struct PartyLeaverInfo // names per WPP 5.5.0 (5.5.1+); client reader 0x140669CF0
+        {
+            ObjectGuid BnetAccountGUID;
+            float LeaveScore = 0.0f;
+            uint32 SeasonID = 0;
+            uint32 TotalLeaves = 0;
+            uint32 TotalSuccesses = 0;
+            int32 ConsecutiveSuccesses = 0;
+            int64 LastPenaltyTime = 0;
+            int64 LeaverExpirationTime = 0;
+            int32 Unknown_1120 = 0; // TODO(verify): meaning
+            bool LeaverStatus = false;
+        };
+
         struct PartyPlayerInfo
         {
+            PartyLeaverInfo LeaverInfo;
             ObjectGuid GUID;
             std::string Name;
             std::string VoiceStateID;   // same as bgs.protocol.club.v1.MemberVoiceState.id
@@ -542,6 +557,20 @@ namespace WorldPackets
             uint32 LegacyRaidDifficultyID = 0u;
         };
 
+        struct PartyChallengeModeInfo // names per WPP 5.5.0; client reads it at 0x1405AA7C0
+        {
+            int32 MapID = 0;
+            int32 InitialPlayerCount = 0;
+            uint64 InstanceID = 0;
+            int64 StartTime = 0;
+            ObjectGuid KeystoneOwnerGUID;
+            ObjectGuid LeaverGUID;
+            uint64 Unk176 = 0; // TODO(verify): meaning; 5.5.4 adds this u64 after LeaverGUID
+            bool IsActive = false;
+            bool HasRestrictions = false;
+            bool CanVoteAbandon = false;
+        };
+
         class PartyUpdate final : public ServerPacket
         {
         public:
@@ -567,6 +596,7 @@ namespace WorldPackets
             Optional<PartyLFGInfo> LfgInfos;
             Optional<PartyLootSettings> LootSettings;
             Optional<PartyDifficultySettings> DifficultySettings;
+            Optional<PartyChallengeModeInfo> ChallengeMode;
         };
 
         class SetEveryoneIsAssistant final : public ClientPacket

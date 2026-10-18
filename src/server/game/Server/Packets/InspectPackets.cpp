@@ -135,7 +135,7 @@ ByteBuffer& operator<<(ByteBuffer& data, PVPBracketData const& bracket)
     data << int32(bracket.PvpTierID);
     data << int32(bracket.WeeklyBestWinPvpTierID);
     data << int32(bracket.Unused1);
-    data << int32(bracket.Unused2);
+    data << uint8(bracket.Unused2);
     data << int32(bracket.RoundsSeasonPlayed);
     data << int32(bracket.RoundsSeasonWon);
     data << int32(bracket.RoundsWeeklyPlayed);
@@ -185,6 +185,8 @@ InspectItemData::InspectItemData(::Item const* item, uint8 index)
 WorldPacket const* InspectResult::Write()
 {
     _worldPacket << DisplayInfo;
+    _worldPacket << uint32(Glyphs.size());
+    _worldPacket << uint32(Talents.size());
     _worldPacket << uint32(PvpTalents.size());
     _worldPacket << int32(ItemLevel);
     _worldPacket << uint8(LifetimeMaxRank);
@@ -192,6 +194,12 @@ WorldPacket const* InspectResult::Write()
     _worldPacket << uint16(YesterdayHK);
     _worldPacket << uint32(LifetimeHK);
     _worldPacket << uint32(HonorLevel);
+
+    if (!Glyphs.empty())
+        _worldPacket.append(Glyphs.data(), Glyphs.size());
+
+    if (!Talents.empty())
+        _worldPacket.append(Talents.data(), Talents.size());
 
     if (!PvpTalents.empty())
         _worldPacket.append(PvpTalents.data(), PvpTalents.size());

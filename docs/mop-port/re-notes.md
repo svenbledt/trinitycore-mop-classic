@@ -229,3 +229,20 @@ Found by `tools/mop-re/pe/tc_layouts.py` (server tokens vs client tokens per opc
 | Small | ACCOUNT_HEIRLOOM_UPDATE u8; ENABLE_BARBER_SHOP u32; RAID_INSTANCE_MESSAGE string; LEARNED_SPELLS +u32 +bit; PLAY_SPELL_VISUAL u8 reasons; SPELL_INTERRUPT_LOG bit; BARBER_SHOP_RESULT bit; ALTER_APPEARANCE u8 races; warband/regionwide enum blocks | per results |
 
 Open: `UpdateTalentData::PrimarySpecialization` is not filled by Player (sent 0, Phase 4).
+
+### Batches L3/L4 (2026-10-18)
+| Packet / struct | Change |
+|---|---|
+| NEW_WORLD | raw payload (ctor 0x1405A1FC0 copies it whole); handler 0x1401FDF00 reads MapID +8, Pos +12, Reason +28, MovementOffset +32 |
+| MonsterMove spline structs | Face u8 after Flags, face data before bits, TurnData optional, anim tier i32/u8/u32/u32, StopUseFaceDirection bit |
+| MoveStateChange | 10th bit + optional DriveCapabilityRecID |
+| Quest giver details / request items / offer reward | 4 quest-flag u32s; QUEST_PUSH_RESULT Result u32 |
+| QUERY_QUEST_INFO_RESPONSE | FlagsEx3, one more u32 (position TODO(verify)), two int32 arrays, objective +2 u32 +1 bit |
+| QUERY_CREATURE / GAME_OBJECT | creature 3 flag u32s, Type/Classification u8; GO stats +int32 |
+| NAME_CACHE lookup | third optional block (GUID, 8-bit length, string) |
+| TRANSFER_PENDING | optional TaxiPathID |
+| PARTY_UPDATE / PARTY_MEMBER_FULL_STATE | LeaverInfo, ChallengeMode block, difficulty IDs u16, LFG Slot/MyFlags order; status u32, chromie block reshaped |
+| Gossip (ClientGossipText) | 4th QuestFlags u32; OptionNPC i32, OptionCost u64 |
+| INSPECT_RESULT | glyph + talent u16 arrays before PvP talents |
+| Small | ADDON_MESSAGE_TARGETED 9/8-bit lengths; SET_PARTY_ASSIGNMENT u32; WHO FactionGroup u8; TRAINER_LIST type u8; PET_STABLE_RESULT u32; PVP_CREDIT u8 + bit; COLLECTION_ITEM_SET_FAVORITE u8; DISPLAY_PLAYER_CHOICE 7 flag bits, no MawPower block |
+MovementInfo (both directions) was checked and matches.

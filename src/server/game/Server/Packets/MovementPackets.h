@@ -93,6 +93,13 @@ namespace WorldPackets
             uint32 Duration = 0;
         };
 
+        struct MonsterSplineTurnData
+        {
+            float StartFacing = 0.0f;
+            float TotalTurnRads = 0.0f;
+            float RadsPerSec = 0.0f;
+        };
+
         struct MonsterSplineAnimTierTransition
         {
             int32 TierTransitionID = 0;
@@ -118,6 +125,7 @@ namespace WorldPackets
             Optional<MonsterSplineFilter> SplineFilter;
             Optional<MonsterSplineSpellEffectExtraData> SpellEffectExtraData;
             Optional<MonsterSplineJumpExtraData> JumpExtraData;
+            Optional<MonsterSplineTurnData> TurnData;           // 5.5.4 client 0x14066CAE0; names from WPP 5.5.3
             Optional<MonsterSplineAnimTierTransition> AnimTierTransition;
             float FaceDirection         = 0.0f;
             ObjectGuid FaceGUID;
@@ -128,6 +136,7 @@ namespace WorldPackets
         {
             uint32 ID = 0;
             bool CrzTeleport = false;
+            bool StopUseFaceDirection = false;  // 5.5.4 client 0x1406F0F5C bit; TODO(verify): name from WPP only
             uint8 StopDistanceTolerance = 0;    // Determines how far from spline destination the mover is allowed to stop in place 0, 0, 3.0, 2.76, numeric_limits<float>::max, 1.1, float(INT_MAX); default before this field existed was distance 3.0 (index 2)
             MovementSpline Move;
         };
@@ -238,6 +247,7 @@ namespace WorldPackets
             TaggedPosition<Position::XYZ> OldMapPosition;
             Optional<ShipTransferPending> Ship;
             Optional<int32> TransferSpellID;
+            Optional<uint32> TaxiPathID;    // 5.5.4 client 0x1405A7D60; name from WPP 5.5.3
         };
 
         class TransferAborted final : public ServerPacket
@@ -679,6 +689,7 @@ namespace WorldPackets
                 Optional<ObjectGuid> MovementForceGUID;
                 Optional<int32> MovementInertiaID;
                 Optional<uint32> MovementInertiaLifetimeMs;
+                Optional<int32> DriveCapabilityRecID;   // 5.5.4 client 0x1406EFA60; name from WPP 5.5.3
             };
 
             MoveSetCompoundState() : ServerPacket(SMSG_MOVE_SET_COMPOUND_STATE, 4 + 1) { }

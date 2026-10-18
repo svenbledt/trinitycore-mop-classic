@@ -670,7 +670,7 @@ enum OpcodeClient : uint32
     CMSG_PET_BATTLE_REQUEST_PVP                        = 0x3E008D,
     CMSG_PET_BATTLE_REQUEST_UPDATE                     = 0x3E008E,
     CMSG_PET_BATTLE_REQUEST_WILD                       = 0x3E008B,
-    CMSG_PET_BATTLE_SCRIPT_ERROR_NOTIFY                = 0x3E0095, // TODO(verify): low-confidence match
+    CMSG_PET_BATTLE_SCRIPT_ERROR_NOTIFY                = 0x3E0095,
     CMSG_PET_CANCEL_AURA                               = 0x3F001A,
     CMSG_PET_CAST_SPELL                                = 0x3E015F,
     CMSG_PET_LEARN_TALENT                              = 0x3F00F0,
@@ -1208,7 +1208,7 @@ enum OpcodeServer : uint32
     SMSG_CHAT_IGNORED_ACCOUNT_MUTED                    = 0x4B0000,
     SMSG_CHAT_IS_DOWN                                  = 0x4B0015, // TODO(verify): low-confidence match
     SMSG_CHAT_NOT_IN_GUILD                             = 0x4B0023,
-    SMSG_CHAT_NOT_IN_PARTY                             = 0x4B0006, // TODO(verify): low-confidence match
+    SMSG_CHAT_NOT_IN_PARTY                             = 0x4B0006,
     SMSG_CHAT_PLAYER_AMBIGUOUS                         = 0x4B0004,
     SMSG_CHAT_PLAYER_NOTFOUND                          = 0x4B000D,
     SMSG_CHAT_RECONNECT                                = 0x4B0016,
@@ -1317,7 +1317,7 @@ enum OpcodeServer : uint32
     SMSG_DISPLAY_TOAST                                 = 0x4600CF,
     SMSG_DISPLAY_WORLD_TEXT                            = 0x4602A2,
     SMSG_DISPLAY_WORLD_TEXT_ON_TARGET                  = UNKNOWN_OPCODE,
-    SMSG_DONT_AUTO_PUSH_SPELLS_TO_ACTION_BAR           = 0x460085, // TODO(verify): low-confidence match
+    SMSG_DONT_AUTO_PUSH_SPELLS_TO_ACTION_BAR           = 0x460085,
     SMSG_DROP_NEW_CONNECTION                           = 0x4D0007,
     SMSG_DUEL_ARRANGED                                 = 0x4C001F,
     SMSG_DUEL_COMPLETE                                 = 0x4C0023,
@@ -1516,7 +1516,7 @@ enum OpcodeServer : uint32
     SMSG_GUILD_INVITE                                  = 0x520012,
     SMSG_GUILD_INVITE_DECLINED                         = 0x520030, // TODO(verify): low-confidence match
     SMSG_GUILD_INVITE_EXPIRED                          = 0x520031,
-    SMSG_GUILD_ITEM_LOOTED_NOTIFY                      = 0x52001C, // TODO(verify): low-confidence match
+    SMSG_GUILD_ITEM_LOOTED_NOTIFY                      = 0x52001C,
     SMSG_GUILD_KNOWN_RECIPES                           = 0x520006,
     SMSG_GUILD_MEMBERS_WITH_RECIPE                     = 0x520007,
     SMSG_GUILD_MEMBER_DAILY_RESET                      = 0x52002C,
@@ -2216,7 +2216,7 @@ enum OpcodeServer : uint32
     SMSG_SPECTATE_RESET                                = 0x460344, // TODO(verify): low-confidence match
     SMSG_SPEC_INVOLUNTARILY_CHANGED                    = 0x4601C7, // TODO(verify): low-confidence match
     SMSG_SPELL_ABSORB_LOG                              = 0x66000C,
-    SMSG_SPELL_CATEGORY_COOLDOWN                       = 0x660006, // TODO(verify): low-confidence match
+    SMSG_SPELL_CATEGORY_COOLDOWN                       = 0x660006,
     SMSG_SPELL_CHANNEL_START                           = 0x660023,
     SMSG_SPELL_CHANNEL_UPDATE                          = 0x660024,
     SMSG_SPELL_COOLDOWN                                = 0x660005,
@@ -2257,7 +2257,7 @@ enum OpcodeServer : uint32
     SMSG_STOP_SPEAKERBOT_SOUND                         = 0x46021F,
     SMSG_STOP_TIMER                                    = 0x46003F, // TODO(verify): low-confidence match
     SMSG_STREAMING_MOVIES                              = 0x46003D,
-    SMSG_SUGGEST_INVITE_INFORM                         = 0x46024B, // TODO(verify): low-confidence match
+    SMSG_SUGGEST_INVITE_INFORM                         = 0x46024B,
     SMSG_SUMMON_CANCEL                                 = 0x46015D,
     SMSG_SUMMON_RAID_MEMBER_VALIDATE_FAILED            = 0x460024,
     SMSG_SUMMON_REQUEST                                = 0x4601CF,

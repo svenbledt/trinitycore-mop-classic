@@ -83,7 +83,7 @@ namespace WorldPackets
             int32 CreatureDifficultyID = 0;
             int32 WidgetSetID = 0;
             int32 WidgetSetUnitConditionID = 0;
-            std::array<uint32, 2> Flags = { };
+            std::array<uint32, 3> Flags = { };  // 5.5.4 client 0x1406B4E50 reads 3; TODO(verify): Flags[2] source
             std::array<uint32, 2> ProxyCreatureID = { };
             std::array<std::string, 4> Name = { };
             std::array<std::string, 4> NameAlt = { };
@@ -138,12 +138,20 @@ namespace WorldPackets
             std::string_view Unused3;
         };
 
+        // 5.5.4 client 0x140635400: third optional block; TODO(verify): meaning of both fields
+        struct NameCacheUnk554
+        {
+            ObjectGuid Guid;
+            std::string_view Text;
+        };
+
         struct NameCacheLookupResult
         {
             ObjectGuid Player;
             uint8 Result = 0; // 0 - full packet, != 0 - only guid
             Optional<PlayerGuidLookupData> Data;
             Optional<NameCacheUnused920> Unused920;
+            Optional<NameCacheUnk554> Unk554;
         };
 
         class QueryPlayerNamesResponse final : public ServerPacket
@@ -235,6 +243,7 @@ namespace WorldPackets
             float Size = 0.0f;
             std::vector<int32> QuestItems;
             uint32 ContentTuningId = 0;
+            int32 Unk550 = 0;   // 5.5.4 client 0x1417C8600 reads it after ContentTuningId; TODO(verify): meaning unknown
         };
 
         class QueryGameObjectResponse final : public ServerPacket

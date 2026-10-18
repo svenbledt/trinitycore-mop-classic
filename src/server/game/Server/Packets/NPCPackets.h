@@ -34,12 +34,8 @@ namespace WorldPackets
 {
     namespace NPC
     {
-        // CMSG_BINDER_ACTIVATE
-        // CMSG_BINDER_CONFIRM
-        // CMSG_GOSSIP_HELLO
-        // CMSG_LIST_INVENTORY
-        // CMSG_TRAINER_LIST
-        // CMSG_BATTLEMASTER_HELLO
+        // CMSG_BINDER_ACTIVATE, CMSG_BINDER_CONFIRM, CMSG_GOSSIP_HELLO,
+        // CMSG_LIST_INVENTORY, CMSG_TRAINER_LIST, CMSG_BATTLEMASTER_HELLO
         class Hello final : public ClientPacket
         {
         public:
@@ -106,7 +102,7 @@ namespace WorldPackets
             bool Important = false;
             bool Meta = false;
             std::string QuestTitle;
-            std::array<int32, 3> QuestFlags = { };
+            std::array<int32, 4> QuestFlags = { }; // TODO(verify): [3] is a 4th flags u32 in 5.5.4 (FlagsEx3?)
         };
 
         ByteBuffer& operator<<(ByteBuffer& data, ClientGossipText const& gossipText);

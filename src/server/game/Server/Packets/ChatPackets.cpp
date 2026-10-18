@@ -100,8 +100,8 @@ void WorldPackets::Chat::ChatAddonMessageTargeted::Read()
     _worldPacket >> PlayerGUID;
     _worldPacket >> PlayerVirtualRealmAddress;
 
-    uint32 playerNameLength = _worldPacket.ReadBits(7);
-    uint32 channelNameLength = _worldPacket.ReadBits(7);
+    uint32 playerNameLength = _worldPacket.ReadBits(9);
+    uint32 channelNameLength = _worldPacket.ReadBits(8);
 
     if (playerNameLength > 1)
     {

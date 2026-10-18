@@ -99,9 +99,9 @@ WorldPacket const* QueryCreatureResponse::Write()
         }
 
         _worldPacket.append(Stats.Flags.data(), Stats.Flags.size());
-        _worldPacket << int32(Stats.CreatureType);
+        _worldPacket << uint8(Stats.CreatureType);
         _worldPacket << int32(Stats.CreatureFamily);
-        _worldPacket << int32(Stats.Classification);
+        _worldPacket << int8(Stats.Classification);
         _worldPacket << uint32(Stats.PetSpellDataID);
         _worldPacket.append(Stats.ProxyCreatureID.data(), Stats.ProxyCreatureID.size());
         _worldPacket << uint32(Stats.Display.CreatureDisplay.size());
@@ -236,12 +236,24 @@ ByteBuffer& operator<<(ByteBuffer& data, NameCacheUnused920 const& thing)
     return data;
 }
 
+ByteBuffer& operator<<(ByteBuffer& data, NameCacheUnk554 const& thing)
+{
+    data << thing.Guid;
+    data.WriteBits(thing.Text.length(), 8);
+    data.FlushBits();
+
+    data.WriteString(thing.Text);
+
+    return data;
+}
+
 ByteBuffer& operator<<(ByteBuffer& data, NameCacheLookupResult const& result)
 {
     data << uint8(result.Result);
     data << result.Player;
     data.WriteBit(result.Data.has_value());
     data.WriteBit(result.Unused920.has_value());
+    data.WriteBit(result.Unk554.has_value());
     data.FlushBits();
 
     if (result.Data)
@@ -249,6 +261,9 @@ ByteBuffer& operator<<(ByteBuffer& data, NameCacheLookupResult const& result)
 
     if (result.Unused920)
         data << *result.Unused920;
+
+    if (result.Unk554)
+        data << *result.Unk554;
 
     return data;
 }
@@ -357,6 +372,7 @@ WorldPacket const* QueryGameObjectResponse::Write()
             statsData.append(Stats.QuestItems.data(), Stats.QuestItems.size());
 
         statsData << int32(Stats.ContentTuningId);
+        statsData << int32(Stats.Unk550);
     }
 
     _worldPacket << uint32(statsData.size());

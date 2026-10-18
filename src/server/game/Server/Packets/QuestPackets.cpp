@@ -127,9 +127,11 @@ WorldPacket const* QueryQuestInfoResponse::Write()
         _worldPacket << float(Info.RewardArtifactXPMultiplier);
         _worldPacket << int32(Info.RewardArtifactCategoryID);
         _worldPacket << int32(Info.StartItem);
+        _worldPacket << int32(Info.Unk554);
         _worldPacket << uint32(Info.Flags);
         _worldPacket << uint32(Info.FlagsEx);
         _worldPacket << uint32(Info.FlagsEx2);
+        _worldPacket << uint32(Info.FlagsEx3);
 
         for (uint32 i = 0; i < QUEST_REWARD_ITEM_COUNT; ++i)
         {
@@ -192,12 +194,20 @@ WorldPacket const* QueryQuestInfoResponse::Write()
 
         _worldPacket << uint32(Info.ConditionalQuestDescription.size());
         _worldPacket << uint32(Info.ConditionalQuestCompletionLog.size());
+        _worldPacket << uint32(Info.Unk554IDs1.size());
+        _worldPacket << uint32(Info.Unk554IDs2.size());
 
         if (!Info.TreasurePickerID.empty())
             _worldPacket.append(Info.TreasurePickerID.data(), Info.TreasurePickerID.size());
 
         if (!Info.TreasurePickerID2.empty())
             _worldPacket.append(Info.TreasurePickerID2.data(), Info.TreasurePickerID2.size());
+
+        if (!Info.Unk554IDs1.empty())
+            _worldPacket.append(Info.Unk554IDs1.data(), Info.Unk554IDs1.size());
+
+        if (!Info.Unk554IDs2.empty())
+            _worldPacket.append(Info.Unk554IDs2.data(), Info.Unk554IDs2.size());
 
         _worldPacket << BitsSize<9>(Info.LogTitle);
         _worldPacket << BitsSize<12>(Info.LogDescription);
@@ -221,12 +231,15 @@ WorldPacket const* QueryQuestInfoResponse::Write()
             _worldPacket << uint32(questObjective.Flags);
             _worldPacket << uint32(questObjective.Flags2);
             _worldPacket << float(questObjective.ProgressBarWeight);
+            _worldPacket << uint32(0); // 5.5.4 client objective +32; TODO(verify): meaning
 
             _worldPacket << int32(questObjective.VisualEffects.size());
+            _worldPacket << uint32(0); // 5.5.4 client objective +320, read before the effects; TODO(verify)
             for (int32 visualEffect : questObjective.VisualEffects)
                 _worldPacket << int32(visualEffect);
 
             _worldPacket << BitsSize<8>(questObjective.Description);
+            _worldPacket << Bits<1>(false); // 5.5.4 client objective +324 flag; TODO(verify)
             _worldPacket.FlushBits();
 
             _worldPacket.WriteString(questObjective.Description);
@@ -369,6 +382,7 @@ ByteBuffer& operator<<(ByteBuffer& data, QuestGiverOfferReward const& offer)
     data << int32(offer.QuestFlags[0]); // Flags
     data << int32(offer.QuestFlags[1]); // FlagsEx
     data << int32(offer.QuestFlags[2]); // FlagsEx2
+    data << int32(offer.QuestFlags[3]); // FlagsEx3
     data << int32(offer.QuestGiverCreatureID);
     data << int32(offer.QuestID);
     data << int32(offer.SuggestedPartyMembers);
@@ -468,6 +482,7 @@ WorldPacket const* QuestGiverQuestDetails::Write()
     _worldPacket << uint32(QuestFlags[0]); // Flags
     _worldPacket << uint32(QuestFlags[1]); // FlagsEx
     _worldPacket << uint32(QuestFlags[2]); // FlagsEx
+    _worldPacket << uint32(QuestFlags[3]); // FlagsEx3
     _worldPacket << int32(SuggestedPartyMembers);
     _worldPacket << uint32(LearnSpells.size());
     _worldPacket << uint32(DescEmotes.size());
@@ -533,6 +548,7 @@ WorldPacket const* QuestGiverRequestItems::Write()
     _worldPacket << uint32(QuestFlags[0]);
     _worldPacket << uint32(QuestFlags[1]);
     _worldPacket << uint32(QuestFlags[2]);
+    _worldPacket << uint32(QuestFlags[3]);
     _worldPacket << int32(StatusFlags);
     _worldPacket << int32(QuestGiverCreatureID);
     _worldPacket << int32(QuestID);
@@ -647,7 +663,7 @@ void QuestConfirmAccept::Read()
 WorldPacket const* QuestPushResultResponse::Write()
 {
     _worldPacket << SenderGUID;
-    _worldPacket << uint8(Result);
+    _worldPacket << uint32(Result); // 5.5.4 client reads u32 (case 0x14063E9A8)
 
     _worldPacket.WriteBits(QuestTitle.size(), 9);
     _worldPacket.FlushBits();
@@ -799,8 +815,7 @@ ByteBuffer& operator<<(ByteBuffer& data, PlayerChoiceResponse const& playerChoic
     data.WriteBits(playerChoiceResponse.Confirmation.length(), 7);
     data.WriteBit(playerChoiceResponse.RewardQuestID.has_value());
     data.WriteBit(playerChoiceResponse.Reward.has_value());
-    data.WriteBit(playerChoiceResponse.MawPower.has_value());
-    data.FlushBits();
+    data.FlushBits(); // 5.5.4 client 0x1406668F0 has no MawPower bit or block
 
     if (playerChoiceResponse.Reward)
         data << *playerChoiceResponse.Reward;
@@ -814,9 +829,6 @@ ByteBuffer& operator<<(ByteBuffer& data, PlayerChoiceResponse const& playerChoic
 
     if (playerChoiceResponse.RewardQuestID)
         data << uint32(*playerChoiceResponse.RewardQuestID);
-
-    if (playerChoiceResponse.MawPower)
-        data << *playerChoiceResponse.MawPower;
 
     return data;
 }
@@ -836,6 +848,10 @@ WorldPacket const* DisplayPlayerChoice::Write()
     _worldPacket.WriteBit(CloseChoiceFrame);
     _worldPacket.WriteBit(HideWarboardHeader);
     _worldPacket.WriteBit(KeepOpenAfterChoice);
+    _worldPacket.WriteBit(ShowChoicesAsList);
+    _worldPacket.WriteBit(HasPowerChoice);
+    _worldPacket.WriteBit(Unk554_1);
+    _worldPacket.WriteBit(Unk554_2);
     _worldPacket.FlushBits();
 
     for (PlayerChoiceResponse const& response : Responses)

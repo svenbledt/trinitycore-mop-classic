@@ -184,9 +184,11 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Party::PartyMemberAuraSta
 
 ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Party::CTROptions const& ctrOptions)
 {
-    data << uint32(ctrOptions.ContentTuningConditionMask);
-    data << int32(ctrOptions.Unused901);
-    data << uint32(ctrOptions.ExpansionLevelMask);
+    data << uint32(ctrOptions.Conditions.size());
+    data << uint8(ctrOptions.FactionGroup);
+    data << uint32(ctrOptions.ChromieTimeExpansionMask);
+    for (uint32 condition : ctrOptions.Conditions)
+        data << uint32(condition);
 
     return data;
 }
@@ -213,7 +215,7 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Party::PartyMemberStats c
     for (uint32 i = 0; i < 2; i++)
         data << uint8(memberStats.PartyType[i]);
 
-    data << uint16(memberStats.Status);
+    data << uint32(memberStats.Status);
     data << uint8(memberStats.PowerType);
     data << uint16(memberStats.PowerDisplayID);
     data << int32(memberStats.CurrentHealth);
@@ -267,7 +269,7 @@ void WorldPackets::Party::SetPartyAssignment::Read()
 {
     bool hasPartyIndex = _worldPacket.ReadBit();
     Set = _worldPacket.ReadBit();
-    _worldPacket >> Assignment;
+    Assignment = uint8(_worldPacket.read<uint32>());
     _worldPacket >> Target;
     if (hasPartyIndex)
         _worldPacket >> PartyIndex.emplace();
@@ -451,6 +453,23 @@ WorldPacket const* WorldPackets::Party::GroupNewLeader::Write()
     return &_worldPacket;
 }
 
+ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Party::PartyLeaverInfo const& leaverInfo)
+{
+    data << leaverInfo.BnetAccountGUID;
+    data << float(leaverInfo.LeaveScore);
+    data << uint32(leaverInfo.SeasonID);
+    data << uint32(leaverInfo.TotalLeaves);
+    data << uint32(leaverInfo.TotalSuccesses);
+    data << int32(leaverInfo.ConsecutiveSuccesses);
+    data << int64(leaverInfo.LastPenaltyTime);
+    data << int64(leaverInfo.LeaverExpirationTime);
+    data << int32(leaverInfo.Unknown_1120);
+    data.WriteBit(leaverInfo.LeaverStatus);
+    data.FlushBits();
+
+    return data;
+}
+
 ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Party::PartyPlayerInfo const& playerInfo)
 {
     data.WriteBits(playerInfo.Name.size(), 6);
@@ -458,6 +477,8 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Party::PartyPlayerInfo co
     data.WriteBit(playerInfo.Connected);
     data.WriteBit(playerInfo.VoiceChatSilenced);
     data.WriteBit(playerInfo.FromSocialQueue);
+    data.FlushBits();
+    data << playerInfo.LeaverInfo;
     data << playerInfo.GUID;
     data << uint8(playerInfo.Subgroup);
     data << uint8(playerInfo.Flags);
@@ -473,8 +494,8 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Party::PartyPlayerInfo co
 
 ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Party::PartyLFGInfo const& lfgInfos)
 {
-    data << uint8(lfgInfos.MyFlags);
     data << uint32(lfgInfos.Slot);
+    data << uint8(lfgInfos.MyFlags);
     data << uint32(lfgInfos.MyRandomSlot);
     data << uint8(lfgInfos.MyPartialClear);
     data << float(lfgInfos.MyGearDiff);
@@ -499,9 +520,26 @@ ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Party::PartyLootSettings 
 
 ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Party::PartyDifficultySettings const& difficultySettings)
 {
-    data << uint32(difficultySettings.DungeonDifficultyID);
-    data << uint32(difficultySettings.RaidDifficultyID);
-    data << uint32(difficultySettings.LegacyRaidDifficultyID);
+    data << uint16(difficultySettings.DungeonDifficultyID);
+    data << uint16(difficultySettings.RaidDifficultyID);
+    data << uint16(difficultySettings.LegacyRaidDifficultyID);
+
+    return data;
+}
+
+ByteBuffer& operator<<(ByteBuffer& data, WorldPackets::Party::PartyChallengeModeInfo const& challengeMode)
+{
+    data << int32(challengeMode.MapID);
+    data << int32(challengeMode.InitialPlayerCount);
+    data << uint64(challengeMode.InstanceID);
+    data << int64(challengeMode.StartTime);
+    data << challengeMode.KeystoneOwnerGUID;
+    data << challengeMode.LeaverGUID;
+    data << uint64(challengeMode.Unk176);
+    data.WriteBit(challengeMode.IsActive);
+    data.WriteBit(challengeMode.HasRestrictions);
+    data.WriteBit(challengeMode.CanVoteAbandon);
+    data.FlushBits();
 
     return data;
 }
@@ -518,6 +556,7 @@ WorldPacket const* WorldPackets::Party::PartyUpdate::Write()
     _worldPacket << uint8(LeaderFactionGroup);
     _worldPacket << int32(PingRestriction);
     _worldPacket << uint32(PlayerList.size());
+    _worldPacket.WriteBit(ChallengeMode.has_value());
     _worldPacket.WriteBit(LfgInfos.has_value());
     _worldPacket.WriteBit(LootSettings.has_value());
     _worldPacket.WriteBit(DifficultySettings.has_value());
@@ -531,6 +570,9 @@ WorldPacket const* WorldPackets::Party::PartyUpdate::Write()
 
     if (DifficultySettings.has_value())
         _worldPacket << *DifficultySettings;
+
+    if (ChallengeMode.has_value())
+        _worldPacket << *ChallengeMode;
 
     if (LfgInfos.has_value())
         _worldPacket << *LfgInfos;
