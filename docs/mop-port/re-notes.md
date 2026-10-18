@@ -254,3 +254,14 @@ CALENDAR_SEND_CALENDAR RaidResets array + lockout u32/u16/u32/u64; PVPMatchPlaye
 Race/Class u8; CMSGs: BATTLEMASTER_JOIN_ARENA leading GUID, OFFER_PETITION +u32, TURN_IN_PETITION 5 emblem u32,
 CALENDAR_ADD_EVENT Flags u16, SUPPORT_TICKET_SUBMIT_COMPLAINT 10th presence bit + block. Retail-only Mythic+
 DungeonScoreMapSummary diff left as is.
+
+## Auth key capture, 5.5.4.70449 (2026-10-18)
+- **build_auth_key (70449) = `9EE19873C7BB34B9AAF127991D5F5755`**, verified by recomputing the client's digest.
+- Same no-debugger method as 70032: temporary `AUTHKEY_DEBUG` log on the failed digest in
+  `WorldSocket::HandleAuthSession` (prints build, KeyData, Local, Server, Digest; never commit it), placeholder key row
+  in the local DB, `authkey-capture stacks <dir>` while the user selects the realm, then
+  `bun tools/mop-re/authkey-capture/keyscan.mjs <log> <dir>` (8-aligned, non-pointer windows, deduplicated; the hit
+  was in the newest snapshot after 30k windows, so the key outlives the call on the stack).
+- 70449 addresses: digest function RVA `0x2DF5690` (70032 `0x2EB1AE0`); NetClient singleton RVA `0x3CC6E88`
+  (70032 `0x3D81E08`), CertStore field `+0x748` unchanged. The launcher (`burralis-launcher` `10af2c3`) now keeps a
+  per-build singleton table.
