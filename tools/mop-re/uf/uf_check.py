@@ -31,7 +31,8 @@ def header_types(h):
         mem = types.setdefault(m.group(1), {})
         for mm in re.finditer(r"^\s*(?:(?:Optional|Dynamic)?UpdateField(?:Array)?<([^,<>]+(?:<[^<>]*>)?)[^;]*>|([\w:<>]+))\s+(\w+)(?:\[\w+\])?;",
                               m.group(2), re.M):
-            mem[mm.group(3).lower()] = (mm.group(1) or mm.group(2)).strip()
+            t = (mm.group(1) or mm.group(2)).strip().replace("<::", "<")
+            mem[mm.group(3).lower()] = re.sub(r"^Optional<(.*)>$", r"\1", t)
     return types
 
 
@@ -46,7 +47,13 @@ def norm_cs(body):
         if not l or l in ("{", "}", "else") or l.startswith(("var data", "return data", "//", "var changesMask",
                                                              "var maskMask", "var noneChangesMask")):
             continue
-        if l.startswith("packet.ResetBitReader"):
+        if l.startswith(("packet.ResetBitReader", "packet.AddValue(")):
+            continue
+        # local read then assignment (e.g. timestamps that are also logged as a date)
+        m = re.match(r"(?:long|ulong|int|uint) (\w+) = packet\.Read(\w+)\(\);", l)
+        if m:
+            toks.append(f"RD {m.group(1).lower()} {CS_W.get(m.group(2), m.group(2))}"); continue
+        if re.match(r"data\.\w+ = \w+;$", l):
             continue
         if re.match(r"var raw\w*Mask = new int", l):
             continue
@@ -57,7 +64,7 @@ def norm_cs(body):
         if re.match(r"if \(\w+\)$", l):
             toks.append("IFPRESENT"); continue
         m = re.search(r"data\.(\w+)(?:\[[^\]]*\])*\s*=\s*Substructures\.\w+\.Read\w+\(", l) or \
-            re.search(r"Substructures\.\w+\.Read\w+\(packet, indexes, \"(\w+)\"", l)
+            re.search(r"(?:Substructures\.)?\w+Handler\.Read\w+\(packet, indexes, \"(\w+)\"", l)
         if m:
             toks.append(f"EXT {m.group(1).lower()}"); continue
         m = re.search(r"data\.(\w+)(?:\[[^\]]*\])*\s*=\s*packet\.ReadQuaternion\(", l)
@@ -70,9 +77,17 @@ def norm_cs(body):
         m = re.match(r"if \(data\.\w+(?:\[\w+\])*\.UpdateMask\[\w+\]\)", l)
         if m:
             toks.append("IFDYN"); continue
-        m = re.match(r"if \(data\.(\w+) == (\w+)\)", l)
+        m = re.match(r"if \(data\.(\w+) == \w+(?: \|\| data\.\1 == \w+)*\)$", l)
         if m:
-            toks.append(f"IFEQ {m.group(1).lower()} {m.group(2)}"); continue
+            toks.append(f"IFEQ {m.group(1).lower()} " + "|".join(re.findall(r"== (\w+)", l))); continue
+        # null-terminated string: length bits include the terminator
+        m = re.match(r"if \(data\.(\w+)\.Length > 1\)", l)
+        if m:
+            toks.append(f"IFNONEMPTY {m.group(1).lower()}"); continue
+        if l == "packet.ReadByte();":
+            toks.append("NUL"); continue
+        if re.match(r"data\.\w+ = string\.Empty;", l):
+            continue
         m = re.match(r"if \(\(flags & \(([^)]+)\)\)", l)
         if m:
             toks.append("IFFLAG " + "|".join(sorted(x.strip().split(".")[-1] for x in m.group(1).split("|")))); continue
@@ -143,9 +158,14 @@ def norm_cpp(body, members):
             toks.append("DYNMASK"); continue
         if re.match(r"if \(\w+(?:\[\w+\])*(?:->|\.)HasChanged\(\w+\) \|\| ignore\w*\)", l):
             toks.append("IFDYN"); continue
-        m = re.match(r"if \((\w+) == (\w+)\)", l)
+        m = re.match(r"if \((\w+) == \w+(?: \|\| \1 == \w+)*\)$", l)
         if m:
-            toks.append(f"IFEQ {m.group(1).lower()} {m.group(2)}"); continue
+            toks.append(f"IFEQ {m.group(1).lower()} " + "|".join(re.findall(r"== (\w+)", l))); continue
+        m = re.match(r"if \(!(\w+)(?:->|\.)empty\(\)\)", l)
+        if m:
+            toks.append(f"IFNONEMPTY {m.group(1).lower()}"); continue
+        if l == "data << uint8(0);":
+            toks.append("NUL"); continue
         m = re.match(r"if \(fieldVisibilityFlags\.HasFlag\(([^)]+\|[^)]+)\)\)", l)
         if m:
             toks.append("IFFLAG " + "|".join(sorted(x.strip().split("::")[-1] for x in m.group(1).split("|")))); continue

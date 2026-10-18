@@ -618,8 +618,7 @@ typedef std::map<uint32, QuestSaveType> QuestStatusSaveMap;
 // Size of client completed quests bit map
 enum PlayerQuestCompletedConstants
 {
-    QUESTS_COMPLETED_BITS_SIZE      = UF::size<decltype(UF::ActivePlayerData::QuestCompleted)>(),
-    QUESTS_COMPLETED_BITS_PER_BLOCK = UF::size_of_value_type<decltype(UF::ActivePlayerData::QuestCompleted)>() * 8
+    QUESTS_COMPLETED_BITS_PER_BLOCK = sizeof(uint64) * 8                         // MoP Classic only has BitVectors[PLAYER_DATA_FLAG_CHARACTER_QUEST_COMPLETED_INDEX]
 };
 
 enum PlayerQuestLogConstants

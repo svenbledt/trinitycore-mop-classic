@@ -18,8 +18,10 @@ Goal: SMSG_UPDATE_OBJECT create/update blocks that the 70449 client parses, so a
    (WriteCreate / WriteUpdate / ClearChangesMask, HasChangesMask sizes, UpdateField<T, block, bit>, visibility flags).
    Validate by converting WPP 4.4.2 and diffing against our current file; every difference must be explained.
 2. Generate 5.5.3; keep TC-only parts (ViewerDependentValues hooks, owner/receiver params) exactly as today.
-3. **5.5.4 deltas:** locate the client's per-struct create readers, tokenize, compare with the 5.5.3 tokens; patch the
-   converter input (not the output) for each proven difference.
+3. **5.5.4 deltas:** the client does not read update fields through the packet primitives (no function calling the
+   u64 reader starts like UnitData), and it has no field-name metadata; it uses the "Jam mirror" system
+   (`JamMirrorBaseHandlersWrapper<...CGUnit_C...>` change callbacks). So: live-test the 5.5.3 layout first and use the
+   crash stack to locate the struct reader that differs, then compare that reader with 5.5.3.
 4. Compile the game code against the new fields (new fields default to 0; no gameplay values yet), build, ctest.
 5. Live test enter-world; fix by crash/stack as before.
 
