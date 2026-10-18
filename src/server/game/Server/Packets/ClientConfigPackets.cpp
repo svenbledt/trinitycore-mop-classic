@@ -27,6 +27,15 @@ WorldPacket const* WorldPackets::ClientConfig::AccountDataTimes::Write()
     return &_worldPacket;
 }
 
+WorldPacket const* WorldPackets::ClientConfig::UpdateAccountDataComplete::Write()
+{
+    _worldPacket << Player;
+    _worldPacket << int32(DataType);
+    _worldPacket << int32(Result);
+
+    return &_worldPacket;
+}
+
 WorldPacket const* WorldPackets::ClientConfig::ClientCacheVersion::Write()
 {
     _worldPacket << uint32(CacheVersion);

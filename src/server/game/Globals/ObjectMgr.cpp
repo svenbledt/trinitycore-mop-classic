@@ -344,24 +344,7 @@ void ObjectMgr::LoadCreatureTemplates()
 {
     uint32 oldMSTime = getMSTime();
 
-    //                                               0      1            2            3     4           5
-    //                                       "SELECT entry, KillCredit1, KillCredit2, name, femaleName, subname, "
-    //                                        6         7         8                  9
-    //                                       "TitleAlt, IconName, RequiredExpansion, VignetteID, "
-    //                                        10       11       12          13         14      15     16         17              18               19            20
-    //                                       "faction, npcflag, speed_walk, speed_run, scale, `rank`, dmgschool, BaseAttackTime, RangeAttackTime, BaseVariance, RangeVariance, "
-    //                                        21          22          23           24
-    //                                       "unit_class, unit_flags, unit_flags2, unit_flags3, "
-    //                                        25      26             27    28              29         30      31
-    //                                       "family, trainer_class, type, PetSpellDataId, VehicleId, AIName, MovementType, "
-    //                                        32                         33         34          35                         36
-    //                                       "ctm.HoverInitiallyEnabled, ctm.Chase, ctm.Random, ctm.InteractionPauseTimer, ExperienceModifier, "
-    //                                        37        38            39          40           41                        42
-    //                                       "Civilian, RacialLeader, movementId, WidgetSetID, WidgetSetUnitConditionID, RegenHealth, "
-    //                                        43                    44
-    //                                       "CreatureImmunitiesId, flags_extra, "
-    //                                        45          46
-    //                                       "ScriptName, StringId FROM creature_template WHERE entry = ? OR 1 = ?");
+    // creature_template SELECT column legend: docs/mop-port/upstream-comments.md "ObjectMgr::LoadCreatureTemplates"
 
     WorldDatabasePreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_SEL_CREATURE_TEMPLATE);
     stmt->setUInt32(0, 0);
@@ -3863,10 +3846,7 @@ void ObjectMgr::LoadPlayerInfo()
                                     playerInfo->customSpells.push_back(spellId);
                                     ++count;
                                 }
-                                // We need something better here, the check is not accounting for spells used by multiple races/classes but not all of them.
-                                // Either split the masks per class, or per race, which kind of kills the point yet.
-                                // else if (raceMask != 0 && classMask != 0)
-                                //     TC_LOG_ERROR("sql.sql", "Racemask/classmask ({}/{}) combination was found containing an invalid race/class combination ({}/{}) in `{}` (Spell {}), ignoring.", raceMask, classMask, raceIndex, classIndex, tableName, spellId);
+                                // mixed race/class masks are not validated per pair (docs/mop-port/upstream-comments.md "LoadPlayerInfo")
                             }
                         }
                     }
@@ -4099,6 +4079,9 @@ void ObjectMgr::LoadPlayerInfo()
 
                 // skip expansion races if not playing with expansion
                 if (sWorld->getIntConfig(CONFIG_EXPANSION) < EXPANSION_CATACLYSM && (race == RACE_GOBLIN || race == RACE_WORGEN))
+                    continue;
+
+                if (sWorld->getIntConfig(CONFIG_EXPANSION) < EXPANSION_MISTS_OF_PANDARIA && (race == RACE_PANDAREN_NEUTRAL || race == RACE_PANDAREN_ALLIANCE || race == RACE_PANDAREN_HORDE || class_ == CLASS_MONK))
                     continue;
 
                 if (sWorld->getIntConfig(CONFIG_EXPANSION) < EXPANSION_LEGION && class_ == CLASS_DEMON_HUNTER)
@@ -4356,9 +4339,7 @@ void ObjectMgr::LoadQuests()
 
     _questTemplates.reserve(result->GetRowCount());
 
-    // create multimap previous quest for each existed quest
-    // some quests can have many previous maps set by NextQuestId in previous quest
-    // for example set of race quests can lead to single not race specific quest
+    // map each quest to its previous quests; several race quests can lead to one shared quest
     do
     {
         Field* fields = result->Fetch();
@@ -6620,13 +6601,7 @@ WorldSafeLocsEntry const* ObjectMgr::GetClosestGraveyardInZone(WorldLocation con
     location.GetPosition(x, y, z);
     uint32 MapId = location.GetMapId();
 
-    // Simulate std. algorithm:
-    //   found some graveyard associated to (ghost_zone, ghost_map)
-    //
-    //   if mapId == graveyard.mapId (ghost in plain zone or city or battleground) and search graveyard at same map
-    //     then check faction
-    //   if mapId != graveyard.mapId (ghost in instance) and search any graveyard associated
-    //     then check faction
+    // same-map graveyards win, else any associated one; both check faction (docs/mop-port/upstream-comments.md "GetClosestGraveyard")
     GraveyardMapBounds range = GraveyardStore.equal_range(zoneId);
     MapEntry const* mapEntry = sMapStore.LookupEntry(MapId);
 

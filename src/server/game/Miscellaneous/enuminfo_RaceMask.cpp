@@ -43,12 +43,15 @@ TC_API_EXPORT EnumText EnumUtils<Races>::ToString(Races value)
         case RACE_BLOODELF: return { "RACE_BLOODELF", "Blood Elf", "" };
         case RACE_DRAENEI: return { "RACE_DRAENEI", "Draenei", "" };
         case RACE_WORGEN: return { "RACE_WORGEN", "Worgen", "" };
+        case RACE_PANDAREN_NEUTRAL: return { "RACE_PANDAREN_NEUTRAL", "Pandaren", "Pandaren (Neutral)" };
+        case RACE_PANDAREN_ALLIANCE: return { "RACE_PANDAREN_ALLIANCE", "Pandaren", "Pandaren (Alliance)" };
+        case RACE_PANDAREN_HORDE: return { "RACE_PANDAREN_HORDE", "Pandaren", "Pandaren (Horde)" };
         default: throw std::out_of_range("value");
     }
 }
 
 template <>
-TC_API_EXPORT size_t EnumUtils<Races>::Count() { return 29; }
+TC_API_EXPORT size_t EnumUtils<Races>::Count() { return 15; }
 
 template <>
 TC_API_EXPORT Races EnumUtils<Races>::FromIndex(size_t index)
@@ -67,6 +70,9 @@ TC_API_EXPORT Races EnumUtils<Races>::FromIndex(size_t index)
         case 9: return RACE_BLOODELF;
         case 10: return RACE_DRAENEI;
         case 11: return RACE_WORGEN;
+        case 12: return RACE_PANDAREN_NEUTRAL;
+        case 13: return RACE_PANDAREN_ALLIANCE;
+        case 14: return RACE_PANDAREN_HORDE;
         default: throw std::out_of_range("index");
     }
 }
@@ -88,6 +94,9 @@ TC_API_EXPORT size_t EnumUtils<Races>::ToIndex(Races value)
         case RACE_BLOODELF: return 9;
         case RACE_DRAENEI: return 10;
         case RACE_WORGEN: return 11;
+        case RACE_PANDAREN_NEUTRAL: return 12;
+        case RACE_PANDAREN_ALLIANCE: return 13;
+        case RACE_PANDAREN_HORDE: return 14;
         default: throw std::out_of_range("value");
     }
 }

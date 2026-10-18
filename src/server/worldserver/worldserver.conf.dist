@@ -709,7 +709,7 @@ DeclinedNames = 0
 #    Expansion
 #        Description: Allow server to use content from expansions. Checks for expansion-related
 #                     map files, client compatibility and class/race character creation.
-#        Default:     3 - (Expansion 3)
+#        Default:     4 - (Expansion 4, Mists of Pandaria; retail 5.5.4 sends ActiveExpansionLevel 4)
 #                     10 - (Expansion 10)
 #                     9 - (Expansion 9)
 #                     8 - (Expansion 8)
@@ -722,7 +722,7 @@ DeclinedNames = 0
 #                     1 - (Expansion 1)
 #                     0 - (Disabled, Ignore and disable expansion content (maps, races, classes)
 
-Expansion = 3
+Expansion = 4
 
 #
 #    MinPlayerName

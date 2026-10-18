@@ -702,6 +702,7 @@ void WorldSession::HandleUpdateAccountData(WorldPackets::ClientConfig::UserClien
     if (packet.Size == 0)                               // erase
     {
         SetAccountData(AccountDataType(packet.DataType), 0, "");
+        SendUpdateAccountDataComplete(packet.PlayerGuid, packet.DataType);
         return;
     }
 
@@ -722,6 +723,17 @@ void WorldSession::HandleUpdateAccountData(WorldPackets::ClientConfig::UserClien
     }
 
     SetAccountData(AccountDataType(packet.DataType), packet.Time, dest);
+    SendUpdateAccountDataComplete(packet.PlayerGuid, packet.DataType);
+}
+
+// 5.5.4 client waits for this after each upload (retail sniffs; as TC master)
+void WorldSession::SendUpdateAccountDataComplete(ObjectGuid const& player, int32 dataType)
+{
+    WorldPackets::ClientConfig::UpdateAccountDataComplete updateAccountDataComplete;
+    updateAccountDataComplete.Player = player;
+    updateAccountDataComplete.DataType = dataType;
+    updateAccountDataComplete.Result = 0;
+    SendPacket(updateAccountDataComplete.Write());
 }
 
 void WorldSession::HandleRequestAccountData(WorldPackets::ClientConfig::RequestAccountData& request)

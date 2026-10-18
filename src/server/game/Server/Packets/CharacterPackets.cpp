@@ -891,5 +891,19 @@ WorldPacket const* SendAccountCharacterList::Write()
     return &_worldPacket;
 }
 
+void NeutralPlayerSelectFaction::Read()
+{
+    _worldPacket >> Faction;
+}
+
+WorldPacket const* NeutralPlayerFactionSelectResult::Write()
+{
+    _worldPacket.WriteBit(Success);
+    _worldPacket.FlushBits();
+    _worldPacket << uint8(NewRaceID);
+
+    return &_worldPacket;
+}
+
 }
 }

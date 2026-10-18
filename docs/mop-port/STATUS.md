@@ -9,6 +9,9 @@ Last updated: 2026-10-18
 | Current phase | **2b done: a character enters the world on 5.5.4.70449 (2026-10-18)** |
 | Next | Phase 3/4: DB2 layout hashes, gameplay baseline; keep checking new sniffs with `tools/mop-re/sniffcheck` |
 
+## Pandaren + Monk character create (2026-10-18)
+- Phase 3/4 step 2 code and data done (not committed, not yet client-tested): see `phase3-4-plan.md` "Step 2 status".
+
 ## Enter world reached (2026-10-18)
 - Client 70449 logs in, enters Northshire, moves, teleports; all 302 UPDATE_OBJECTs of the session parse with the WPP 554 reader, every other packet type matches `sniffcheck`.
 - Sources: 16 real 5.5.4 sniffs (ymir; 68077, 70268, 70449), list in `sniff-wishlist.md`. Update fields: `uf554-deltas.md`. Packet layouts: `tools/mop-re/sniffcheck` (244 opcodes, 239 matched, 5 fixed).

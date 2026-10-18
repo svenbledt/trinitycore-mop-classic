@@ -608,13 +608,7 @@ void WorldSession::HandleCharCreateOpcode(WorldPackets::Character::CreateCharact
         return;
     }
 
-    //if (raceExpansionRequirement->AchievementId && !)
-    //{
-    //    TC_LOG_ERROR("entities.player.cheat", "Expansion {} account:[{}] tried to Create character without achievement {} race ({})",
-    //        GetAccountExpansion(), GetAccountId(), raceExpansionRequirement->AchievementId, charCreate.CreateInfo->Race);
-    //    SendCharCreate(CHAR_CREATE_ALLIED_RACE_ACHIEVEMENT);
-    //    return;
-    //}
+    // allied-race achievement check is disabled upstream (docs/mop-port/upstream-comments.md "HandleCharCreateOpcode")
 
     // prevent character creating Expansion class without Expansion account
     if (ClassAvailability const* raceClassExpansionRequirement = sObjectMgr->GetClassExpansionRequirement(charCreate.CreateInfo->Race, charCreate.CreateInfo->Class))
@@ -1343,9 +1337,7 @@ void WorldSession::SendFeatureSystemStatus()
     features.VoiceEnabled = false;
     features.BrowserEnabled = false; // Has to be false, otherwise client will crash if "Customer Support" is opened
 
-    // Enable guilds only.
-    // This is required to restore old guild channel behavior for GMs.
-    // The new club streams do not support sending messages through the guild channel when you are not in a guild.
+    // guilds only: restores the GM guild channel, which club streams cannot send to without a guild
     features.CommunitiesEnabled = true;
     features.BnetGroupsEnabled = false;
     features.CharacterCommunitiesEnabled = false;
@@ -1642,9 +1634,7 @@ void WorldSession::HandleAlterAppearance(WorldPackets::Character::AlterApperance
 
     int64 cost = _player->GetBarberShopCost(customizations);
 
-    // 0 - ok
-    // 1, 3 - not enough money
-    // 2 - you have to sit on barber chair
+    // result: 0 ok, 1/3 not enough money, 2 must sit on the barber chair
     if (!_player->HasEnoughMoney(cost))
     {
         SendPacket(WorldPackets::Character::BarberShopResult(WorldPackets::Character::BarberShopResult::ResultEnum::NoMoney).Write());
@@ -2187,6 +2177,11 @@ void WorldSession::HandleCharRaceOrFactionChangeCallback(std::shared_ptr<WorldPa
                     break;
                 case RACE_GOBLIN:
                     stmt->setUInt16(1, 792);
+                    break;
+                case RACE_PANDAREN_NEUTRAL:
+                case RACE_PANDAREN_ALLIANCE:
+                case RACE_PANDAREN_HORDE:
+                    stmt->setUInt16(1, 905);
                     break;
                 default:
                     TC_LOG_ERROR("entities.player", "Could not find language data for race ({}).", factionChangeInfo->RaceID);
@@ -2827,4 +2822,40 @@ void WorldSession::SendAccountCharacterList(PreparedQueryResult result, uint32 t
     }
 
     SendPacket(response.Write());
+}
+
+void WorldSession::HandleNeutralPlayerSelectFaction(WorldPackets::Character::NeutralPlayerSelectFaction& selectFaction)
+{
+    Player* player = GetPlayer();
+    if (player->GetRace() != RACE_PANDAREN_NEUTRAL)
+        return;
+
+    // TODO(verify): 0 = Horde, 1 = Alliance per SkyFire 5.4.8 and the client's faction group index; no sniff of the choice yet
+    uint8 newRace;
+    switch (selectFaction.Faction)
+    {
+        case 0:
+            newRace = RACE_PANDAREN_HORDE;
+            break;
+        case 1:
+            newRace = RACE_PANDAREN_ALLIANCE;
+            break;
+        default:
+            TC_LOG_ERROR("network", "HandleNeutralPlayerSelectFaction: {} sent invalid faction {}", player->GetGUID().ToString(), selectFaction.Faction);
+            return;
+    }
+
+    player->SetRace(newRace);
+    player->SetFactionForRace(newRace);
+    player->InitDisplayIds();
+    player->InitTaxiNodesForLevel();
+    player->LearnDefaultSkills();
+    player->SaveToDB();
+
+    sCharacterCache->UpdateCharacterData(player->GetGUID(), player->GetName(), {}, newRace);
+
+    WorldPackets::Character::NeutralPlayerFactionSelectResult result;
+    result.Success = true;
+    result.NewRaceID = newRace;
+    SendPacket(result.Write());
 }

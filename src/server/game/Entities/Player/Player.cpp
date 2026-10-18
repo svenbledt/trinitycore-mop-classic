@@ -15521,6 +15521,14 @@ int32 Player::GetQuestObjectiveData(uint32 questId, uint32 objectiveId) const
 
 void Player::SetQuestSlot(uint16 slot, uint32 quest_id)
 {
+    // 5.5.4 client looks up quest log slots through this map (retail sniffs: quest id -> slot)
+    std::map<int32, int32> questIdToIndex = *m_playerData->QuestLogQuestIdToIndex;
+    if (uint32 oldQuestId = m_playerData->QuestLog[slot].QuestID)
+        questIdToIndex.erase(int32(oldQuestId));
+    if (quest_id)
+        questIdToIndex[int32(quest_id)] = int32(slot);
+    SetUpdateFieldValue(m_values.ModifyValue(&Player::m_playerData).ModifyValue(&UF::PlayerData::QuestLogQuestIdToIndex), std::move(questIdToIndex));
+
     auto questLogField = m_values.ModifyValue(&Player::m_playerData).ModifyValue(&UF::PlayerData::QuestLog, slot);
     SetUpdateFieldValue(questLogField.ModifyValue(&UF::QuestLog::QuestID), quest_id);
     SetUpdateFieldValue(questLogField.ModifyValue(&UF::QuestLog::StateFlags), 0);
@@ -18811,6 +18819,9 @@ bool Player::_LoadHomeBind(PreparedQueryResult result)
     if (!ok)
     {
         WorldSafeLocsEntry const* loc = sObjectMgr->GetDefaultGraveyard(GetTeam());
+        if (!loc && GetRace() == RACE_PANDAREN_NEUTRAL)
+            loc = sObjectMgr->GetWorldSafeLoc(3295); // The Wandering Isle, Starting Area GY
+
         ASSERT(loc, "Missing fallback graveyard location for faction %u", uint32(GetTeamId()));
 
         m_homebind.WorldRelocate(loc->Loc);

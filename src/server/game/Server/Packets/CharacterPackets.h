@@ -918,6 +918,36 @@ namespace WorldPackets
             std::vector<AccountCharacterData> Characters;
             bool ConsoleCommand = false;
         };
+
+        // MoP Classic: Pandaren faction choice; layouts from the 5.5.4 client handlers (re-notes.md "Pandaren faction choice")
+        class NeutralPlayerSelectFaction final : public ClientPacket
+        {
+        public:
+            NeutralPlayerSelectFaction(WorldPacket&& packet) : ClientPacket(CMSG_NEUTRAL_PLAYER_SELECT_FACTION, std::move(packet)) { }
+
+            void Read() override;
+
+            uint8 Faction = 0;
+        };
+
+        class NeutralPlayerFactionSelectResult final : public ServerPacket
+        {
+        public:
+            NeutralPlayerFactionSelectResult() : ServerPacket(SMSG_NEUTRAL_PLAYER_FACTION_SELECT_RESULT, 1 + 1) { }
+
+            WorldPacket const* Write() override;
+
+            bool Success = false;
+            uint8 NewRaceID = 0;
+        };
+
+        class ShowNeutralPlayerFactionSelectUI final : public ServerPacket
+        {
+        public:
+            ShowNeutralPlayerFactionSelectUI() : ServerPacket(SMSG_SHOW_NEUTRAL_PLAYER_FACTION_SELECT_UI, 0) { }
+
+            WorldPacket const* Write() override { return &_worldPacket; }
+        };
     }
 }
 

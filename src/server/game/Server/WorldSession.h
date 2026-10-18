@@ -255,6 +255,7 @@ namespace WorldPackets
         class SetFactionInactive;
         class SetWatchedFaction;
         class SetPlayerDeclinedNames;
+        class NeutralPlayerSelectFaction;
         class GetAccountCharacterList;
 
         enum class LoginFailureReason : uint8;
@@ -811,14 +812,17 @@ enum AccountDataType
     GLOBAL_EDIT_MODE_CACHE              = 13,
     PER_CHARACTER_EDIT_MODE_CACHE       = 14,
     GLOBAL_FRONTEND_CHAT_SETTINGS       = 15,
-    GLOBAL_CHARACTER_LIST_ORDER         = 16
+    GLOBAL_CHARACTER_LIST_ORDER         = 16,
+    GLOBAL_COOLDOWN_MANAGER             = 17, // TODO(verify): 17-19 names/scope from TC master; 5.5.4 sends 20 times
+    PER_CHARACTER_COOLDOWN_MANAGER2     = 18,
+    GLOBAL_SHOP2_PENDING_ORDERS         = 19
 };
 
-#define NUM_ACCOUNT_DATA_TYPES        17
+#define NUM_ACCOUNT_DATA_TYPES        20
 
-#define ALL_ACCOUNT_DATA_CACHE_MASK 0x0001FFFFu
-#define GLOBAL_CACHE_MASK           0x0001A515u
-#define PER_CHARACTER_CACHE_MASK    0x00005AEAu
+#define ALL_ACCOUNT_DATA_CACHE_MASK 0x000FFFFFu
+#define GLOBAL_CACHE_MASK           0x000BA515u
+#define PER_CHARACTER_CACHE_MASK    0x00045AEAu
 
 struct AccountData
 {
@@ -1153,6 +1157,7 @@ class TC_GAME_API WorldSession
         void HandleCharRenameOpcode(WorldPackets::Character::CharacterRenameRequest& request);
         void HandleCharRenameCallBack(std::shared_ptr<WorldPackets::Character::CharacterRenameInfo> renameInfo, PreparedQueryResult result);
         void HandleSetPlayerDeclinedNames(WorldPackets::Character::SetPlayerDeclinedNames& packet);
+        void HandleNeutralPlayerSelectFaction(WorldPackets::Character::NeutralPlayerSelectFaction& selectFaction);
         void HandleAlterAppearance(WorldPackets::Character::AlterApperance& packet);
         void HandleCharCustomizeOpcode(WorldPackets::Character::CharCustomize& packet);
         void HandleCharCustomizeCallback(std::shared_ptr<WorldPackets::Character::CharCustomizeInfo> customizeInfo, PreparedQueryResult result);
@@ -1252,6 +1257,7 @@ class TC_GAME_API WorldSession
         void HandleSetFactionInactiveOpcode(WorldPackets::Character::SetFactionInactive& packet);
 
         void HandleUpdateAccountData(WorldPackets::ClientConfig::UserClientUpdateAccountData& packet);
+        void SendUpdateAccountDataComplete(ObjectGuid const& player, int32 dataType);
         void HandleRequestAccountData(WorldPackets::ClientConfig::RequestAccountData& request);
         void HandleSetAdvancedCombatLogging(WorldPackets::ClientConfig::SetAdvancedCombatLogging& setAdvancedCombatLogging);
         void HandleSetActionButtonOpcode(WorldPackets::Spells::SetActionButton& packet);

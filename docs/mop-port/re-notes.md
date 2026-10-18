@@ -265,3 +265,16 @@ DungeonScoreMapSummary diff left as is.
 - 70449 addresses: digest function RVA `0x2DF5690` (70032 `0x2EB1AE0`); NetClient singleton RVA `0x3CC6E88`
   (70032 `0x3D81E08`), CertStore field `+0x748` unchanged. The launcher (`burralis-launcher` `10af2c3`) now keeps a
   per-build singleton table.
+
+## Pandaren faction choice (2026-10-18)
+Opcodes and layouts proven from the 70032 client (verifier results `s02`, `s12`, `r01`; same values on 70449) and matching WPP `V5_5_0_61735`:
+
+| Packet | Value | Layout | Client evidence |
+|---|---|---|---|
+| CMSG_NEUTRAL_PLAYER_SELECT_FACTION | 0x3E0085 | `u8 Faction` | builder 0x141EB3D30 = Lua `NeutralPlayerSelectFaction` |
+| SMSG_SHOW_NEUTRAL_PLAYER_FACTION_SELECT_UI | 0x46007F | empty | handler 0x1418B2820 fires `SHOW_FACTION_SELECT_UI` |
+| SMSG_NEUTRAL_PLAYER_FACTION_SELECT_RESULT | 0x460080 | `bit Success, u8 NewRaceID` | handler 0x1418B2850 sets the player faction byte, fires `NEUTRAL_FACTION_SELECT_RESULT` |
+
+- Faction value: **unverified**. The server maps 0 to Horde (race 26) and 1 to Alliance (race 25), as SkyFire 5.4.8 does (`HandleSelectFactionOpcode`) and as the Lua faction-group index does. No sniff of the choice exists yet.
+- TC master leaves the CMSG on `Handle_NULL`. Our handler (`WorldSession::HandleNeutralPlayerSelectFaction`) changes the race and faction, re-inits display, taxi nodes and default skills (adds Common or Orcish plus the faction Pandaren language from SkillRaceClassInfo), saves, and sends the result. It does not teleport or give quest credit: on retail the follow-up quests do that (Wandering Isle step 4).
+- Retail AUTH_RESPONSE (sniff `u2.pkt` #7, 70449) sends `ActiveExpansionLevel 4` and a 15-race class list identical to CharBaseInfo, with every expansion level 0; hence `Expansion = 4` in `worldserver.conf.dist`.
