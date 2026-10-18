@@ -125,6 +125,12 @@ Every imported row and script stays reproducible from `tools/mop-content/`, with
   unit_flags/unit_flags3 values the cata core strips (50 warnings), 9 spellclick flags without spells, 4 SpellFocus 5705760 GOs,
   menus 13036/14617/14670/14671 without text (not in the sniffs), health scaling expansion 4 clamped to 0.
 
+## Next: class specializations and MoP spell scripts (user decision 2026-10-19)
+- Port specializations (spec choice, spec spells, talents 6-tier) and MoP class spell scripts from SkyFire 5.4.8 first,
+  rewritten in TC style, then fix what doesn't work against sniffs and the 5.5.4 DB2s.
+- MoP Classic-only additions (e.g. group revival spells) need their own work; check them against the 5.5.4 client.
+- Seen in the log: CMSG_SET_PET_SPECIALIZATION is unhandled (hunter pet specs); part of this workstream.
+
 ## Not in M1
 The MoP talent/spec system (6 tiers, spec choice at 10) for all classes, other classes' MoP changes, Pandaria zones beyond the island,
 pet battles, scenarios, challenge modes, and the full Monk spec kits (Brewmaster/Mistweaver/Windwalker beyond the basics).
