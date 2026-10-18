@@ -567,15 +567,18 @@ struct TC_GAME_API CreatureTemplate
     ~CreatureTemplate();
 };
 
+// Client game tables cover expansions 0-3; MoP (4) comes from creature_classlevelstats_mop
+constexpr std::size_t MAX_CREATURE_BASE_STATS_EXPANSIONS = EXPANSION_MISTS_OF_PANDARIA + 1;
+
 // Defines base stats for creatures (used to calculate HP/mana/armor/attackpower/rangedattackpower/all damage).
 struct TC_GAME_API CreatureBaseStats
 {
-    std::array<uint32, MAX_CLASSIC_EXPANSIONS> BaseHealth;
+    std::array<uint32, MAX_CREATURE_BASE_STATS_EXPANSIONS> BaseHealth;
     uint32 BaseMana = 0;
     uint32 BaseArmor = 0;
     uint32 AttackPower = 0;
     uint32 RangedAttackPower = 0;
-    std::array<float, MAX_CLASSIC_EXPANSIONS> BaseDamage;
+    std::array<float, MAX_CREATURE_BASE_STATS_EXPANSIONS> BaseDamage;
 
     // Helpers
 

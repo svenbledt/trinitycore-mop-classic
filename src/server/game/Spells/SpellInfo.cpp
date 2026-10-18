@@ -715,7 +715,7 @@ SpellEffectValue SpellEffectInfo::CalcBaseValue(WorldObject const* caster, Unit 
             if (Creature const* creatureCaster = Object::ToCreature(caster))
             {
                 uint8 casterClass = creatureCaster->GetClass();
-                uint8 expansion = creatureCaster->GetCreatureDifficulty()->GetHealthScalingExpansion();
+                uint8 expansion = std::min<uint8>(creatureCaster->GetCreatureDifficulty()->GetHealthScalingExpansion(), EXPANSION_CATACLYSM);
 
                 float spellDamage = GetGameTableColumnForClass(sNpcDamageByClassGameTable[expansion].GetRow(_spellInfo->SpellLevel), casterClass);
                 float creatureDamage = GetGameTableColumnForClass(sNpcDamageByClassGameTable[expansion].GetRow(creatureCaster->GetLevel()), casterClass);

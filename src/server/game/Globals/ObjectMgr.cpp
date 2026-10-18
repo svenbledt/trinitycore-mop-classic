@@ -976,7 +976,7 @@ void ObjectMgr::LoadCreatureTemplateDifficulty()
             creatureDifficulty.MinLevel = creatureDifficulty.MaxLevel;
         }
 
-        if (creatureDifficulty.HealthScalingExpansion < EXPANSION_LEVEL_CURRENT || creatureDifficulty.HealthScalingExpansion > CURRENT_EXPANSION)
+        if (creatureDifficulty.HealthScalingExpansion < EXPANSION_LEVEL_CURRENT || creatureDifficulty.HealthScalingExpansion > EXPANSION_MISTS_OF_PANDARIA)
         {
             TC_LOG_ERROR("sql.sql", "Table `creature_template_difficulty` lists creature (ID: {}) with invalid `HealthScalingExpansion` {}. Ignored and set to 0.",
                 entry, creatureDifficulty.HealthScalingExpansion);
@@ -9810,6 +9810,10 @@ void ObjectMgr::LoadCreatureClassLevelStats()
             }
         }
 
+        // Filled from creature_classlevelstats_mop below; Cata values until then
+        stats.BaseHealth[EXPANSION_MISTS_OF_PANDARIA] = stats.BaseHealth[EXPANSION_CATACLYSM];
+        stats.BaseDamage[EXPANSION_MISTS_OF_PANDARIA] = stats.BaseDamage[EXPANSION_CATACLYSM];
+
         stats.BaseMana = fields[2].GetUInt32();
         stats.BaseArmor = fields[3].GetUInt32();
 
@@ -9821,6 +9825,25 @@ void ObjectMgr::LoadCreatureClassLevelStats()
         ++count;
     }
     while (result->NextRow());
+
+    //                                    0      1      2       3
+    if (QueryResult mopResult = WorldDatabase.Query("SELECT level, class, basehp, basedamage FROM creature_classlevelstats_mop"))
+    {
+        do
+        {
+            Field* fields = mopResult->Fetch();
+            auto itr = _creatureBaseStatsStore.find(MAKE_PAIR16(fields[0].GetUInt8(), fields[1].GetUInt8()));
+            if (itr == _creatureBaseStatsStore.end())
+            {
+                TC_LOG_ERROR("sql.sql", "Table `creature_classlevelstats_mop` has level {} class {} without a `creature_classlevelstats` row, ignored.",
+                    fields[0].GetUInt8(), fields[1].GetUInt8());
+                continue;
+            }
+
+            itr->second.BaseHealth[EXPANSION_MISTS_OF_PANDARIA] = fields[2].GetUInt32();
+            itr->second.BaseDamage[EXPANSION_MISTS_OF_PANDARIA] = std::max(fields[3].GetFloat(), 0.0f);
+        } while (mopResult->NextRow());
+    }
 
     for (uint8 unitLevel = 1; unitLevel <= DEFAULT_MAX_LEVEL + 3; ++unitLevel)
     {
