@@ -18,6 +18,8 @@ CMSG_BATTLE_PET_REQUEST_JOURNAL_LOCK 0x44004D. SMSG_PLAY_TIME_WARNING (ours 0x46
 Friend 70449 sniff (216k packets) adds SMSG_MOVE_UPDATE_KNOCK_BACK 0x5E0010, SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA 0x460194.
 Duel/death sniffs (u4, u5): SMSG_CLEAR_RESURRECT 0x460013 seen; duel, corpse, reforge, transmog-outfit and role packets seen
 with our values. No unnamed packet appears during the duels.
+Battleground sniffs (u7, u8; 340k packets, 22k UPDATE_OBJECT): SMSG_GROUP_DESTROYED 0x460248 seen; all UPDATE_OBJECT parse,
+all 212 packet types match TC. PvP spell modifiers and DR start still not seen.
 
 ## Next sniff: please
 - **Build 5.5.4.70449** (current live), so nothing has to be mapped across builds.
@@ -58,7 +60,7 @@ with our values. No unnamed packet appears during the duels.
 | SMSG_CHAIN_MISSILE_BOUNCE | 0x46006C | Chain Lightning / bouncing spell |
 | SMSG_TOTEM_DURATION_CHANGED | 0x460177 | shaman totem extended |
 | SMSG_RESTART_GLOBAL_COOLDOWN | 0x660052 | GCD reset effect |
-| SMSG_UNIT_DIMINISHING_RETURN_START | 0x460374 | not sent during duels (2 duels with CC sniffed); try arena/BG |
+| SMSG_UNIT_DIMINISHING_RETURN_START | 0x460374 | not sent in duels or a battleground (sniffed 2026-10-18); maybe arena only |
 | SMSG_SET_FLAT_SPELL_PVP_MODIFIER | 0x660027 | enter BG/arena with PvP-modified spells |
 | SMSG_SET_PCT_SPELL_PVP_MODIFIER | 0x660028 | same |
 | SMSG_REMOVE_SPELL_FROM_ACTION_BAR | 0x660043 | unlearn/spec change removing a spell |
@@ -70,7 +72,7 @@ with our values. No unnamed packet appears during the duels.
 ## Group / PvP / instances
 | Opcode | Ours | Trigger |
 |---|---|---|
-| SMSG_GROUP_DESTROYED | 0x460248 | disband a party |
+| ~~SMSG_GROUP_DESTROYED~~ | 0x460248 | seen in sniff |
 | SMSG_GROUP_AUTO_KICK | 0x460249 | vote-kick in LFG |
 | SMSG_SET_INSTANCE_LEAVER | 0x46036C | leave an LFG dungeon early |
 | SMSG_UNSET_INSTANCE_LEAVER | 0x46036D | deserter wears off |

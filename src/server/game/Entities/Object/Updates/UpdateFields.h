@@ -789,46 +789,54 @@ struct BankTabSettings : public IsUpdateFieldStructureTag, public HasChangesMask
     void ClearChangesMask();
 };
 
-struct TransmogOutfitDataInfo : public IsUpdateFieldStructureTag
+struct TransmogOutfitDataInfo : public IsUpdateFieldStructureTag, public HasChangesMask<4>
 {
-    uint8 SetType = 0;
-    uint32 Icon = 0;
-    std::string Name;
-    bool SituationsEnabled = false;
+    UpdateField<bool, -1, 0> SituationsEnabled;
+    UpdateField<uint8, -1, 1> SetType;
+    UpdateField<std::string, -1, 2> Name;
+    UpdateField<uint32, -1, 3> Icon;
 
     void WriteCreate(ByteBuffer& data, Player const* owner, Player const* receiver) const;
+    void WriteUpdate(ByteBuffer& data, bool ignoreChangesMask, Player const* owner, Player const* receiver) const;
+    void ClearChangesMask();
 };
-struct TransmogOutfitSituationInfo : public IsUpdateFieldStructureTag
+struct TransmogOutfitSituationInfo : public IsUpdateFieldStructureTag, public HasChangesMask<4>
 {
-    uint32 SituationID = 0;
-    uint32 SpecID = 0;
-    uint32 LoadoutID = 0;
-    uint32 EquipmentSetID = 0;
+    UpdateField<uint32, -1, 0> SituationID; // TODO(verify): 5.5.4 update path never seen in sniffs (retail 12.1 layout)
+    UpdateField<uint32, -1, 1> SpecID;
+    UpdateField<uint32, -1, 2> LoadoutID;
+    UpdateField<uint32, -1, 3> EquipmentSetID;
 
     void WriteCreate(ByteBuffer& data, Player const* owner, Player const* receiver) const;
+    void WriteUpdate(ByteBuffer& data, bool ignoreChangesMask, Player const* owner, Player const* receiver) const;
+    void ClearChangesMask();
 };
-struct TransmogOutfitSlotData : public IsUpdateFieldStructureTag
+struct TransmogOutfitSlotData : public IsUpdateFieldStructureTag, public HasChangesMask<11>
 {
-    int8 Slot = 0;
-    uint8 SlotOption = 0;
-    uint8 SheatheCategory = 0;
-    uint32 ItemModifiedAppearanceID = 0;
-    uint8 AppearanceDisplayType = 0;
-    uint32 SpellItemEnchantmentID = 0;
-    uint8 IllusionDisplayType = 0;
-    uint32 Flags = 0;
+    UpdateField<int8, 0, 1> Slot;
+    UpdateField<uint8, 0, 2> SlotOption;
+    UpdateField<uint8, 0, 3> SheatheCategory;
+    UpdateField<uint32, 4, 5> ItemModifiedAppearanceID;
+    UpdateField<uint8, 4, 6> AppearanceDisplayType;
+    UpdateField<uint32, 4, 7> SpellItemEnchantmentID;
+    UpdateField<uint8, 8, 9> IllusionDisplayType;
+    UpdateField<uint32, 8, 10> Flags;
 
     void WriteCreate(ByteBuffer& data, Player const* owner, Player const* receiver) const;
+    void WriteUpdate(ByteBuffer& data, bool ignoreChangesMask, Player const* owner, Player const* receiver) const;
+    void ClearChangesMask();
 };
-struct TransmogOutfitData : public IsUpdateFieldStructureTag
+struct TransmogOutfitData : public IsUpdateFieldStructureTag, public HasChangesMask<5>
 {
-    uint32 Id = 0;
-    std::vector<UF::TransmogOutfitSituationInfo> Situations;
-    std::vector<UF::TransmogOutfitSlotData> Slots;
-    uint32 Flags = 0;
-    UF::TransmogOutfitDataInfo OutfitInfo;
+    DynamicUpdateField<UF::TransmogOutfitSituationInfo, -1, 0> Situations;
+    DynamicUpdateField<UF::TransmogOutfitSlotData, -1, 1> Slots;
+    UpdateField<uint32, -1, 2> Id;
+    UpdateField<UF::TransmogOutfitDataInfo, -1, 3> OutfitInfo;
+    UpdateField<uint32, -1, 4> Flags;
 
     void WriteCreate(ByteBuffer& data, Player const* owner, Player const* receiver) const;
+    void WriteUpdate(ByteBuffer& data, bool ignoreChangesMask, Player const* owner, Player const* receiver) const;
+    void ClearChangesMask();
 };
 struct TransmogOutfitMetadata : public IsUpdateFieldStructureTag
 {
@@ -840,22 +848,22 @@ struct TransmogOutfitMetadata : public IsUpdateFieldStructureTag
     bool Locked = false;
 
     void WriteCreate(ByteBuffer& data, Player const* owner, Player const* receiver) const;
+    void WriteUpdate(ByteBuffer& data, bool ignoreChangesMask, Player const* owner, Player const* receiver) const;
 };
 struct ActivePlayerData : public IsUpdateFieldStructureTag, public HasChangesMask<454>
 {
     UpdateField<bool, 0, 1> SortBagsRightToLeft;
     UpdateField<bool, 0, 2> InsertItemsLeftToRight;
-    UpdateFieldArray<DynamicUpdateFieldBase<uint16>, 1, 25, 26> ResearchSites;
-    UpdateFieldArray<DynamicUpdateFieldBase<uint32>, 1, 27, 28> ResearchSiteProgress;
-    UpdateFieldArray<DynamicUpdateFieldBase<UF::Research>, 1, 29, 30> Research;
+    UpdateFieldArray<DynamicUpdateFieldBase<uint16>, 1, 34, 35> ResearchSites;
+    UpdateFieldArray<DynamicUpdateFieldBase<uint32>, 1, 36, 37> ResearchSiteProgress;
+    UpdateFieldArray<DynamicUpdateFieldBase<UF::Research>, 1, 38, 39> Research;
     DynamicUpdateField<uint64, 0, 3> KnownTitles;
     DynamicUpdateField<int32, 0, 6> DailyQuestsCompleted;
     DynamicUpdateField<int32, 0, 8> AvailableQuestLineXQuestIDs;
     DynamicUpdateField<int32, 0, 7> Field_1000;
-    DynamicUpdateField<int32, 0, 9> Heirlooms;
-    DynamicUpdateField<uint32, 0, 10> HeirloomFlags;
-    DynamicUpdateField<int32, 0, 11> Toys;
-    DynamicUpdateField<uint32, 0, 12> ToyFlags; // TODO(verify): not in the 5.5.4 create block; 5.5.3 update bit kept, likely wrong
+    DynamicUpdateField<int32, 0, 10> Heirlooms;
+    DynamicUpdateField<uint32, 0, 11> HeirloomFlags;
+    DynamicUpdateField<int32, 0, 12> Toys;
     DynamicUpdateField<uint32, 0, 13> Transmog;
     DynamicUpdateField<int32, 0, 14> ConditionalTransmog;
     DynamicUpdateField<int32, 0, 15> SelfResSpells;
@@ -863,13 +871,12 @@ struct ActivePlayerData : public IsUpdateFieldStructureTag, public HasChangesMas
     DynamicUpdateField<UF::SpellPctModByLabel, 0, 18> SpellPctModByLabel;
     DynamicUpdateField<UF::SpellFlatModByLabel, 0, 19> SpellFlatModByLabel;
     DynamicUpdateField<UF::QuestLog, 0, 20> TaskQuests;
-    DynamicUpdateField<UF::CategoryCooldownMod, 0, 22> CategoryCooldownMods;
-    DynamicUpdateField<UF::WeeklySpellUse, 0, 23> WeeklySpellUses;
+    DynamicUpdateField<UF::CategoryCooldownMod, 0, 30> CategoryCooldownMods;
+    DynamicUpdateField<UF::WeeklySpellUse, 0, 31> WeeklySpellUses;
     DynamicUpdateField<UF::PlayerDataElement, 0, 4> CharacterDataElements;
     DynamicUpdateField<UF::PlayerDataElement, 0, 5> AccountDataElements;
     DynamicUpdateField<UF::CharacterRestriction, 0, 17> CharacterRestrictions;
-    DynamicUpdateField<UF::TraitConfig, 0, 21> TraitConfigs; // TODO(verify): 5.5.4 create sends a map keyed by ID; 5.5.3 update bit kept, likely wrong
-    DynamicUpdateField<UF::BankTabSettings, 0, 24> AccountBankTabSettings;
+    DynamicUpdateField<UF::BankTabSettings, 32, 33> AccountBankTabSettings;
     UpdateField<ObjectGuid, 32, 40> FarsightObject;
     UpdateField<ObjectGuid, 32, 41> SummonedBattlePetGUID;
     UpdateField<uint64, 32, 42> Coinage;
@@ -969,9 +976,13 @@ struct ActivePlayerData : public IsUpdateFieldStructureTag, public HasChangesMas
     UpdateField<uint32, 134, 139> ActiveCombatTraitConfigID;
     UpdateField<uint16, 134, 140> GlyphsEnabled;
     UpdateField<uint8, 134, 141> LfgRoles;
+    UpdateField<std::map<int32, UF::TraitConfig>, 134, 142> TraitConfigs; // TODO(verify): 5.5.4 bit inferred, never set in sniffs
     OptionalUpdateField<UF::StableInfo, 134, 143> PetStable;
     UpdateField<uint8, 134, 144> NumStableSlots;
-    UpdateField<int32, 134, 148> Field_17B8;
+    UpdateField<int32, 134, 145> Field_17B8; // TODO(verify): 5.5.4 bit position only inferred
+    UpdateField<std::map<uint32, UF::TransmogOutfitData>, 134, 146> TransmogOutfits;
+    UpdateField<UF::TransmogOutfitData, 134, 147> ViewedOutfit;
+    UpdateField<UF::TransmogOutfitMetadata, 134, 148> TransmogMetadata;
     UpdateFieldArray<ObjectGuid, 146, 149, 150> InvSlots;
     UpdateFieldArray<uint32, 2, 296, 297> TrackResourceMask;
     UpdateFieldArray<float, 7, 299, 300> SpellCritPercentage;
@@ -993,7 +1004,7 @@ struct ActivePlayerData : public IsUpdateFieldStructureTag, public HasChangesMas
     UpdateFieldArray<uint32, 6, 427, 434> Glyphs;
     UpdateFieldArray<uint64, 13, 440, 441> Field_4348;
 
-    // TODO(verify): 5.5.4 create-only fields; update bits unknown (31, 33-39, 142, 145-147), names guessed.
+    // TODO(verify): 5.5.4 create-only fields; names guessed, update bits unknown (dynamic bits 9, 21-29 unused).
     // Sniffs always show Unk554_Arr = {1,2,3}; we send it empty. See docs/mop-port/uf554-deltas.md F/G
     uint32 Unk554_A = 0;
     uint32 Unk554_B = 0;
@@ -1002,9 +1013,6 @@ struct ActivePlayerData : public IsUpdateFieldStructureTag, public HasChangesMas
     uint32 Unk554_E = 0;
     uint32 Unk554_F = 0;
     uint32 Unk554_G = 0;
-    std::map<uint32, UF::TransmogOutfitData> TransmogOutfits;
-    UF::TransmogOutfitData ViewedOutfit;
-    UF::TransmogOutfitMetadata TransmogMetadata;
 
     void WriteCreate(ByteBuffer& data, EnumFlag<UpdateFieldFlag> fieldVisibilityFlags, Player const* owner, Player const* receiver) const;
     void WriteUpdate(ByteBuffer& data, EnumFlag<UpdateFieldFlag> fieldVisibilityFlags, Player const* owner, Player const* receiver) const;

@@ -2,14 +2,16 @@
 
 Where the evidence comes from: 11 ymir sniffs (s1 = 5.5.4.68077, s2..s11 = 5.5.4.70268) plus **u2 = 5.5.4.70449**
 (target build, 14 MB, 4 logins, combat/quests/pets/flights; it outranks the others where they conflict). All are
-relabelled to 5.5.3.67509 with `to553.mjs`. A further 70449 sniff, **u3** (38 MB, 13427 UPDATE_OBJECT), was added in v3.
-After the changes below, all 18569 UPDATE_OBJECT packets parse with 0 exceptions and 0 "not fully read"
-(17735 creates, 60351 value updates).
+relabelled to 5.5.3.67509 with `to553.mjs`. Further 70449 sniffs: **u3** (38 MB, 13427 UPDATE_OBJECT), added in v3, and **u4/u5** (duels) plus **u6** (battleground
+queue/entry), added in v4. After the changes below, all 21111 UPDATE_OBJECT packets parse with 0 exceptions and 0
+"not fully read" (27960 creates, 70954 value updates).
 
 **v2 (70449 pass)** changed: ItemModList (H), QuestLog update (E2), ActivePlayerData update (G, rewritten). It also
 verified the SkillInfo update and the QuestLogQuestIdToIndex delta update. Items tagged **[70449]** are new in v2.
 
-**v3 (u3 pass)** changed only AreaTriggerData create and VisualAnim; see section I. u3 has no other failure classes. File/packet numbers point to the relabelled `wpp554/sN.pkt`, which keeps the same
+**v3 (u3 pass)** changed only AreaTriggerData create and VisualAnim; see section I. u3 has no other failure classes.
+
+**v4 (u4/u5/u6 pass)** changed only the ActivePlayerData update: the dynamic-block bit numbers, and the late scalar/struct bits 142 and 145..148. It added the TransmogOutfit update readers. See the G v4 notes. File/packet numbers point to the relabelled `wpp554/sN.pkt`, which keeps the same
 packet order as the original sniff after filtering to UPDATE_OBJECT.
 
 Every UF blob is size-prefixed and each read must use it up exactly. That checks the total size and the order of
@@ -207,6 +209,29 @@ Bits 142 and 145..147 print a warning if set; none fired. Their order relative t
 
 **Bit 455:** seen set 3× in u2, with no payload. It lies past Field_4348; its meaning is unknown and the reader ignores it.
 
+**v4 corrections (70449 u4/u5/u6):**
+
+- **Dynamic block remapped** (553 → 554):
+  - Bits 1–8 are unchanged.
+  - Heirlooms 9→10, HeirloomFlags 10→11, Toys 11→12.
+  - **ToyFlags (553 bit 12) removed.**
+  - Transmog … TaskQuests stay at 13–20.
+  - **TraitConfigs (553 bit 21) removed** from the dynamic block.
+  - **CategoryCooldownMods 22→30 ✓**: u6 pkt 97, size 1 + mask + {SpellCategoryID 1176, ModCooldown 900000}. This was the cause of the u6 failure; the scalar bits around Expertise/Parry/Mastery were already right.
+  - WeeklySpellUses 23→31, AccountBankTabSettings 24→33.
+  - Research groups 25/27/29 → 34/36/38, with elements 26/28/30 → 35/37/39.
+  - The new dynamic fields take bits **9 and 21..29**, in create order: Unk554_A, then Unk554_B, ArrCount, C[4], E, F, G. The block's group gate is `changesMask[0] || changesMask[32]`.
+  - Identities and positions follow create order; only bit 30 is verified. The new bits print `UNVERIFIED554` if set, which never happened.
+- **Late bits:**
+  - 142 = TraitConfigs map (UNVERIFIED, by create order).
+  - 145 = Field_17B8 (UNVERIFIED; v3 had 148).
+  - **146 = TransmogOutfits map ✓**: byte updateType; delta form = u16 count, {u32 key, u8 changeType (3 seen), TransmogOutfitData update}.
+  - **147 = ViewedOutfit ✓** (TransmogOutfitData update).
+  - **148 = TransmogMetadata ✓** (create form).
+  - All of these are read in the group-134 struct block **after** ResetBitReader + HasPetStable bit and after PetStable. Order: FrozenPerks 135, DungeonScore 138, TraitConfigs 142, PetStable 143, TransmogOutfits 146, ViewedOutfit 147, TransmogMetadata 148.
+  - Evidence: u4 pkt 338 (bits 134, 146, 147, 148) consumes exactly. It holds an outfit update for key 2 with 22 slot entries (ItemModifiedAppearanceID 77344), a ViewedOutfit slot update, and metadata {SituationTrigger 2, OutfitID 2, StampedOptionMainHand 2, CostMod 1.0}.
+- **TransmogOutfitData update readers** (TransmogOutfitData 5 bits, SituationInfo 4, SlotData 11, DataInfo 4) are copied verbatim from retail `UpdateFieldsHandler1210`. The Data and SlotData paths are verified by u4. SituationInfo and DataInfo are UNVERIFIED (not set).
+
 **Create-vs-update dword mismatch: resolved by count, identities still UNVERIFIED.** v1 had 9 non-scalar create dwords against 8 new update bits. 70449 adds 4 more bits in the late scalar/struct area (142, 145–147). One consistent model:
 
 - **TraitConfigs** left the dynamic block. It is now a map, and in create it is read with the struct members.
@@ -266,6 +291,9 @@ u3 has all 37 AT creates: SphereShape, PathType 2, radius 2/3/5/10/45. They were
 | s11 | 70268 | 1295 | 585 / 2614 | 0 |
 | **u2** | **70449** | 1643 | 3856 / 7080 | 0 |
 | **u3** | **70449** | 13427 | 11792 / 47583 | 0 |
+| **u4** | **70449** | 1060 | 3388 / 3618 | 0 |
+| **u5** | **70449** | 1372 | 5702 / 5905 | 0 |
+| **u6** | **70449** | 110 | 1135 / 1080 | 0 |
 
 Every file has 0 exceptions, 0 "Updatefields not fully read" and 0 `UNVERIFIED554` warnings.
 

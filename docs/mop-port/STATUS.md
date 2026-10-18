@@ -16,7 +16,7 @@ Last updated: 2026-10-18
 - Unknown server opcodes 0x46022E/0x460059/0x460052: client handler slot never set, so the client ignores them (no need to send).
 
 ## Update fields 5.5.4 (2026-10-18)
-- UPDATE_OBJECT update fields ported to the sniff-derived 5.5.4 layout (uf_check: 0 diffs vs WPP 554 v3); see `update-fields-plan.md` "5.5.4 deltas ported".
+- UPDATE_OBJECT update fields ported to the sniff-derived 5.5.4 layout (uf_check: 0 diffs vs WPP 554 v4); see `update-fields-plan.md` "5.5.4 deltas ported".
 
 ## Opcode round 4 + layout pass (2026-10-18)
 - REA now runs **attached** to the user's IDA GUI database (no re-analysis); see `tools/mop-re/verify/AGENT.rea.md`.

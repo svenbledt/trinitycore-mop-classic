@@ -292,6 +292,11 @@ def main(cpp_path, cs_path, *args):
             continue
         a = norm_cpp(fc[key], types.get(key[0], {}))
         b = norm_cs(fs[key])
+        # WPP reader that only forwards to another one (e.g. ReadUpdateX -> ReadCreateX): compare with the target
+        if len(b) == 1 and b[0].startswith("ALIAS "):
+            m = re.match(r"ALIAS (Create|Update)(\w+)", b[0])
+            if m and (m.group(2), m.group(1)) in fs:
+                b = norm_cs(fs[(m.group(2), m.group(1))])
         if a != b:
             d = [l for l in difflib.unified_diff(a, b, "TC", "WPP", lineterm="", n=1) if not l.startswith(("---", "+++"))]
             differing += 1
