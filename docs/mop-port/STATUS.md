@@ -12,6 +12,12 @@ Last updated: 2026-10-18
 ## Edit Mode layout save fix (2026-10-18)
 - ChrSpecialization.db2 store ported from TC master (layout DAB4CA4B, 48 rows). SMSG_UPDATE_TALENT_DATA and PlayerData::CurrentSpecID now carry the class's initial spec (OrderIndex 4, e.g. Hunter 1448); without a ChrSpecialization ID, C_EditMode.SetActiveLayout (0x141C43830) refuses to save. Chosen specs come with the MoP talent rework.
 
+## Monk basics (2026-10-18)
+- Phase 3/4 step 3 code and data done (not committed, not yet client-tested): Chi/Energy are DB2-driven already; Jab/Roll/Provoke scripts, stance at first login. See `phase3-4-plan.md` "Step 3 status".
+
+## Wandering Isle (2026-10-18)
+- Phase 3/4 step 4 code and data done (not committed, not yet client-tested): see `phase3-4-plan.md` "Step 4 status".
+
 ## Pandaren + Monk character create (2026-10-18)
 - Phase 3/4 step 2 code and data done (not committed, not yet client-tested): see `phase3-4-plan.md` "Step 2 status".
 

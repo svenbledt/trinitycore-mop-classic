@@ -2854,6 +2854,12 @@ void WorldSession::HandleNeutralPlayerSelectFaction(WorldPackets::Character::Neu
 
     sCharacterCache->UpdateCharacterData(player->GetGUID(), player->GetName(), {}, newRace);
 
+    // Objective of quest 31450 "A New Fate" (Faction Chosen Credit), credited here as SkyFire 5.4.8 does
+    static constexpr uint32 QUEST_A_NEW_FATE = 31450;
+    static constexpr uint32 NPC_FACTION_CHOSEN_CREDIT = 64594;
+    if (player->GetQuestStatus(QUEST_A_NEW_FATE) == QUEST_STATUS_INCOMPLETE)
+        player->KilledMonsterCredit(NPC_FACTION_CHOSEN_CREDIT);
+
     WorldPackets::Character::NeutralPlayerFactionSelectResult result;
     result.Success = true;
     result.NewRaceID = newRace;

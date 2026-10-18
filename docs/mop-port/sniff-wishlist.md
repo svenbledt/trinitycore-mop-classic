@@ -20,6 +20,7 @@ Duel/death sniffs (u4, u5): SMSG_CLEAR_RESURRECT 0x460013 seen; duel, corpse, re
 with our values. No unnamed packet appears during the duels.
 Battleground sniffs (u7, u8; 340k packets, 22k UPDATE_OBJECT): SMSG_GROUP_DESTROYED 0x460248 seen; all UPDATE_OBJECT parse,
 all 212 packet types match TC. PvP spell modifiers and DR start still not seen.
+Pandaren Monk island sniff (m1, 2026-10-18): create + first map-860 login + 14 quests; SMSG_OPEN_CONTAINER 0x670006 seen.
 
 ## Next sniff: please
 - **Build 5.5.4.70449** (current live), so nothing has to be mapped across builds.
@@ -102,7 +103,7 @@ all 212 packet types match TC. PvP spell modifiers and DR start still not seen.
 | SMSG_QUEST_NON_LOG_UPDATE_COMPLETE | 0x640008 | world quest / bonus objective |
 | SMSG_PLAYER_TUTORIAL_HIGHLIGHT_SPELL / UNHIGHLIGHT | 0x630016 / 0x630015 | new character tutorial |
 | SMSG_GAME_OBJECT_UI_LINK | 0x4601C9 | click a GO that opens a UI |
-| SMSG_OPEN_CONTAINER | 0x670006 | open a lockbox/container item |
+| ~~SMSG_OPEN_CONTAINER~~ | 0x670006 | seen in sniff |
 | SMSG_VOID_STORAGE_FAILED / SMSG_VOID_TRANSFER_RESULT | 0x670000 / 0x670003 | use void storage |
 | SMSG_PLAY_TIME_WARNING | 0x4601AB | rare; skip |
 | SMSG_AREA_TRIGGER_PLAY_SPELL_VISUAL | 0x470002 | area-trigger spells |
