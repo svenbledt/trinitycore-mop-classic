@@ -91,6 +91,7 @@ TC_GAME_API extern DB2Storage<GameObjectArtKitEntry>                sGameObjectA
 TC_GAME_API extern DB2Storage<GameObjectDisplayInfoEntry>           sGameObjectDisplayInfoStore;
 TC_GAME_API extern DB2Storage<GameObjectsEntry>                     sGameObjectsStore;
 TC_GAME_API extern DB2Storage<GemPropertiesEntry>                   sGemPropertiesStore;
+TC_GAME_API extern DB2Storage<GlobalCurveEntry>                     sGlobalCurveStore;
 TC_GAME_API extern DB2Storage<GlyphSlotEntry>                       sGlyphSlotStore;
 TC_GAME_API extern DB2Storage<GlyphPropertiesEntry>                 sGlyphPropertiesStore;
 TC_GAME_API extern DB2Storage<GossipNPCOptionEntry>                 sGossipNPCOptionStore;
@@ -227,9 +228,15 @@ TC_GAME_API extern DB2Storage<TaxiNodesEntry>                       sTaxiNodesSt
 TC_GAME_API extern DB2Storage<TaxiPathEntry>                        sTaxiPathStore;
 TC_GAME_API extern DB2Storage<TaxiPathNodeEntry>                    sTaxiPathNodeStore;
 TC_GAME_API extern DB2Storage<TransmogHolidayEntry>                 sTransmogHolidayStore;
+TC_GAME_API extern DB2Storage<TransmogOutfitEntryEntry>             sTransmogOutfitEntryStore;
+TC_GAME_API extern DB2Storage<TransmogOutfitSlotInfoEntry>          sTransmogOutfitSlotInfoStore;
+TC_GAME_API extern DB2Storage<TransmogOutfitSlotOptionEntry>        sTransmogOutfitSlotOptionInfoStore;
 TC_GAME_API extern DB2Storage<TransmogSetEntry>                     sTransmogSetStore;
 TC_GAME_API extern DB2Storage<TransmogSetGroupEntry>                sTransmogSetGroupStore;
 TC_GAME_API extern DB2Storage<TransmogSetItemEntry>                 sTransmogSetItemStore;
+TC_GAME_API extern DB2Storage<TransmogSituationEntry>               sTransmogSituationStore;
+TC_GAME_API extern DB2Storage<TransmogSituationGroupEntry>          sTransmogSituationGroupStore;
+TC_GAME_API extern DB2Storage<TransmogSituationTriggerEntry>        sTransmogSituationTriggerStore;
 TC_GAME_API extern DB2Storage<TransportAnimationEntry>              sTransportAnimationStore;
 TC_GAME_API extern DB2Storage<TransportRotationEntry>               sTransportRotationStore;
 TC_GAME_API extern DB2Storage<UiMapEntry>                           sUiMapStore;

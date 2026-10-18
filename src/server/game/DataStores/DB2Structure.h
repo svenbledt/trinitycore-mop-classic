@@ -1472,6 +1472,14 @@ struct GemPropertiesEntry
     uint16 MinItemLevel;
 };
 
+// structure for GlobalCurve.db2
+struct GlobalCurveEntry
+{
+    uint32 ID;
+    int32 CurveID;
+    int32 Type;
+};
+
 // structure for GlyphBindableSpell.db2
 struct GlyphBindableSpellEntry
 {
@@ -3888,6 +3896,61 @@ struct TransmogHolidayEntry
     int32 RequiredTransmogHoliday;
 };
 
+// structure for TransmogOutfitEntry.db2
+struct TransmogOutfitEntryEntry
+{
+    uint64 Cost;
+    LocalizedString Name;
+    uint32 ID;
+    int32 OrderIndex;
+    uint8 Source;
+    int32 Flags;
+    uint8 SetType;
+    float OverrideCostModifier;
+    int32 OutfitIndex;
+
+    TransmogOutfitEntrySource GetSource() const { return static_cast<TransmogOutfitEntrySource>(Source); }
+    bool HasFlag(TransmogOutfitEntryFlags flag) const { return EnumFlag(static_cast<TransmogOutfitEntryFlags>(Flags)).HasFlag(flag); }
+    TransmogOutfitSetType GetSetType() const { return static_cast<TransmogOutfitSetType>(SetType); }
+};
+
+// structure for TransmogOutfitSlotInfo.db2
+struct TransmogOutfitSlotInfoEntry
+{
+    char const* InventorySlotName;
+    uint32 ID;
+    int8 TransmogOutfitSlotEnum;
+    int32 InventorySlotEnum;
+    int32 Flags;
+    uint8 Unused1200;
+    uint8 TransmogCollectionType;
+    int32 SecondarySlotID;
+    int32 InventorySlotID;
+    int32 UnassignedAtlasID;
+    int32 UnassignedDisplayAtlasID;
+    float ItemCostMultiplier;
+    float IllusionCostMultiplier;
+
+    TransmogOutfitSlot GetSlot() const { return static_cast<TransmogOutfitSlot>(TransmogOutfitSlotEnum); }
+    bool HasFlag(TransmogOutfitSlotFlags flag) const { return EnumFlag(static_cast<TransmogOutfitSlotFlags>(Flags)).HasFlag(flag); }
+};
+
+// structure for TransmogOutfitSlotOption.db2
+struct TransmogOutfitSlotOptionEntry
+{
+    uint32 ID;
+    LocalizedString Name;
+    uint8 OptionEnum;
+    uint32 TransmogOutfitSlotInfoID;
+    int32 Flags;
+    int32 SecondaryOptionID;
+    float ItemCostMultiplier;
+    float IllusionCostMultiplier;
+
+    TransmogOutfitSlotOption GetOption() const { return static_cast<TransmogOutfitSlotOption>(OptionEnum); }
+    bool HasFlag(TransmogOutfitSlotOptionFlags flag) const { return EnumFlag(static_cast<TransmogOutfitSlotOptionFlags>(Flags)).HasFlag(flag); }
+};
+
 // structure for TransmogSet.db2
 struct TransmogSetEntry
 {
@@ -3920,6 +3983,42 @@ struct TransmogSetItemEntry
     uint32 TransmogSetID;
     uint32 ItemModifiedAppearanceID;
     int32 Flags;
+};
+
+// structure for TransmogSituation.db2
+struct TransmogSituationEntry
+{
+    LocalizedString Name;
+    uint32 ID;
+    int8 SituationEnum;
+    int32 Flags;
+    uint32 TransmogSituationGroupID;
+    int32 OrderIndex;
+
+    TransmogSituation GetSituation() const { return static_cast<TransmogSituation>(SituationEnum); }
+    bool HasFlag(TransmogSituationFlags flag) const { return EnumFlag(static_cast<TransmogSituationFlags>(Flags)).HasFlag(flag); }
+};
+
+// structure for TransmogSituationGroup.db2
+struct TransmogSituationGroupEntry
+{
+    uint32 ID;
+    uint32 TransmogSituationTriggerID;
+    int32 OrderIndex;
+    int32 Flags;
+};
+
+// structure for TransmogSituationTrigger.db2
+struct TransmogSituationTriggerEntry
+{
+    LocalizedString Name;
+    LocalizedString Description;
+    uint32 ID;
+    uint8 TriggerEnum;
+    int32 Flags;
+
+    TransmogSituationTrigger GetTrigger() const { return static_cast<TransmogSituationTrigger>(TriggerEnum); }
+    bool HasFlag(TransmogSituationTriggerFlags flag) const { return EnumFlag(static_cast<TransmogSituationTriggerFlags>(Flags)).HasFlag(flag); }
 };
 
 // structure for TransportAnimation.db2

@@ -4608,6 +4608,17 @@ struct GlobalPlayerConditionSetMeta
     static constexpr DB2Meta Instance{ 4082839, 0, 2, 2, 0xF00A7AB4, Fields, -1 };
 };
 
+struct GlobalCurveMeta
+{
+    static constexpr DB2MetaField Fields[2] =
+    {
+        { FT_INT, 1, true },
+        { FT_INT, 1, true },
+    };
+
+    static constexpr DB2Meta Instance{ 3752002, -1, 2, 2, 0xBED3B583, Fields, -1 };
+};
+
 struct GlobalStringsMeta
 {
     static constexpr DB2MetaField Fields[3] =
@@ -11136,6 +11147,62 @@ struct TransmogHolidayMeta
     static constexpr DB2Meta Instance{ 1589454, 0, 2, 2, 0x1CF0A074, Fields, -1 };
 };
 
+struct TransmogOutfitEntryMeta
+{
+    static constexpr DB2MetaField Fields[9] =
+    {
+        { FT_LONG, 1, false },
+        { FT_STRING, 1, true },
+        { FT_INT, 1, false },
+        { FT_INT, 1, true },
+        { FT_BYTE, 1, false },
+        { FT_INT, 1, true },
+        { FT_BYTE, 1, false },
+        { FT_FLOAT, 1, true },
+        { FT_INT, 1, true },
+    };
+
+    static constexpr DB2Meta Instance{ 7320164, 2, 9, 9, 0x91D51304, Fields, -1 };
+};
+
+struct TransmogOutfitSlotInfoMeta
+{
+    static constexpr DB2MetaField Fields[13] =
+    {
+        { FT_STRING_NOT_LOCALIZED, 1, true },
+        { FT_INT, 1, false },
+        { FT_BYTE, 1, true },
+        { FT_INT, 1, true },
+        { FT_INT, 1, true },
+        { FT_BYTE, 1, false },
+        { FT_BYTE, 1, false },
+        { FT_INT, 1, true },
+        { FT_INT, 1, true },
+        { FT_INT, 1, true },
+        { FT_INT, 1, true },
+        { FT_FLOAT, 1, true },
+        { FT_FLOAT, 1, true },
+    };
+
+    static constexpr DB2Meta Instance{ 7300046, 1, 13, 13, 0xC034B46F, Fields, -1 };
+};
+
+struct TransmogOutfitSlotOptionMeta
+{
+    static constexpr DB2MetaField Fields[7] =
+    {
+        { FT_STRING, 1, true },
+        { FT_BYTE, 1, false },
+        { FT_INT, 1, true },
+        { FT_INT, 1, true },
+        { FT_INT, 1, true },
+        { FT_FLOAT, 1, true },
+        { FT_FLOAT, 1, true },
+    };
+
+    static constexpr DB2Meta Instance{ 7299793, -1, 7, 7, 0x8C80370F, Fields, 2 };
+};
+
 struct TransmogSetMeta
 {
     static constexpr DB2MetaField Fields[13] =
@@ -11180,6 +11247,48 @@ struct TransmogSetItemMeta
     };
 
     static constexpr DB2Meta Instance{ 1376212, 0, 4, 4, 0x1330B84D, Fields, 1 };
+};
+
+struct TransmogSituationMeta
+{
+    static constexpr DB2MetaField Fields[6] =
+    {
+        { FT_STRING, 1, true },
+        { FT_INT, 1, false },
+        { FT_BYTE, 1, true },
+        { FT_INT, 1, true },
+        { FT_INT, 1, true },
+        { FT_INT, 1, true },
+    };
+
+    static constexpr DB2Meta Instance{ 7211446, 1, 6, 6, 0xFA6B434F, Fields, 4 };
+};
+
+struct TransmogSituationGroupMeta
+{
+    static constexpr DB2MetaField Fields[4] =
+    {
+        { FT_INT, 1, false },
+        { FT_INT, 1, true },
+        { FT_INT, 1, true },
+        { FT_INT, 1, true },
+    };
+
+    static constexpr DB2Meta Instance{ 7212733, 0, 4, 4, 0x6AEE6456, Fields, 1 };
+};
+
+struct TransmogSituationTriggerMeta
+{
+    static constexpr DB2MetaField Fields[5] =
+    {
+        { FT_STRING, 1, true },
+        { FT_STRING, 1, true },
+        { FT_INT, 1, false },
+        { FT_BYTE, 1, false },
+        { FT_INT, 1, true },
+    };
+
+    static constexpr DB2Meta Instance{ 7210468, 2, 5, 5, 0x7833CAB8, Fields, -1 };
 };
 
 struct TransportAnimationMeta

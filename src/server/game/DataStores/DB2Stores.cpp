@@ -113,6 +113,7 @@ DB2Storage<GameObjectArtKitEntry>               sGameObjectArtKitStore("GameObje
 DB2Storage<GameObjectDisplayInfoEntry>          sGameObjectDisplayInfoStore("GameObjectDisplayInfo.db2", &GameobjectDisplayInfoLoadInfo::Instance);
 DB2Storage<GameObjectsEntry>                    sGameObjectsStore("GameObjects.db2", &GameobjectsLoadInfo::Instance);
 DB2Storage<GemPropertiesEntry>                  sGemPropertiesStore("GemProperties.db2", &GemPropertiesLoadInfo::Instance);
+DB2Storage<GlobalCurveEntry>                    sGlobalCurveStore("GlobalCurve.db2", &GlobalCurveLoadInfo::Instance);
 DB2Storage<GlyphBindableSpellEntry>             sGlyphBindableSpellStore("GlyphBindableSpell.db2", &GlyphBindableSpellLoadInfo::Instance);
 DB2Storage<GlyphSlotEntry>                      sGlyphSlotStore("GlyphSlot.db2", &GlyphSlotLoadInfo::Instance);
 DB2Storage<GlyphPropertiesEntry>                sGlyphPropertiesStore("GlyphProperties.db2", &GlyphPropertiesLoadInfo::Instance);
@@ -286,9 +287,15 @@ DB2Storage<TaxiPathNodeEntry>                   sTaxiPathNodeStore("TaxiPathNode
 DB2Storage<TotemCategoryEntry>                  sTotemCategoryStore("TotemCategory.db2", &TotemCategoryLoadInfo::Instance);
 DB2Storage<ToyEntry>                            sToyStore("Toy.db2", &ToyLoadInfo::Instance);
 DB2Storage<TransmogHolidayEntry>                sTransmogHolidayStore("TransmogHoliday.db2", &TransmogHolidayLoadInfo::Instance);
+DB2Storage<TransmogOutfitEntryEntry>            sTransmogOutfitEntryStore("TransmogOutfitEntry.db2", &TransmogOutfitEntryLoadInfo::Instance);
+DB2Storage<TransmogOutfitSlotInfoEntry>         sTransmogOutfitSlotInfoStore("TransmogOutfitSlotInfo.db2", &TransmogOutfitSlotInfoLoadInfo::Instance);
+DB2Storage<TransmogOutfitSlotOptionEntry>       sTransmogOutfitSlotOptionInfoStore("TransmogOutfitSlotOption.db2", &TransmogOutfitSlotOptionLoadInfo::Instance);
 DB2Storage<TransmogSetEntry>                    sTransmogSetStore("TransmogSet.db2", &TransmogSetLoadInfo::Instance);
 DB2Storage<TransmogSetGroupEntry>               sTransmogSetGroupStore("TransmogSetGroup.db2", &TransmogSetGroupLoadInfo::Instance);
 DB2Storage<TransmogSetItemEntry>                sTransmogSetItemStore("TransmogSetItem.db2", &TransmogSetItemLoadInfo::Instance);
+DB2Storage<TransmogSituationEntry>              sTransmogSituationStore("TransmogSituation.db2", &TransmogSituationLoadInfo::Instance);
+DB2Storage<TransmogSituationGroupEntry>         sTransmogSituationGroupStore("TransmogSituationGroup.db2", &TransmogSituationGroupLoadInfo::Instance);
+DB2Storage<TransmogSituationTriggerEntry>       sTransmogSituationTriggerStore("TransmogSituationTrigger.db2", &TransmogSituationTriggerLoadInfo::Instance);
 DB2Storage<TransportAnimationEntry>             sTransportAnimationStore("TransportAnimation.db2", &TransportAnimationLoadInfo::Instance);
 DB2Storage<TransportRotationEntry>              sTransportRotationStore("TransportRotation.db2", &TransportRotationLoadInfo::Instance);
 DB2Storage<UiMapEntry>                          sUiMapStore("UiMap.db2", &UiMapLoadInfo::Instance);
@@ -623,6 +630,7 @@ uint32 DB2Manager::LoadStores(std::string const& dataPath, LocaleConstant defaul
     LOAD_DB2(sGameObjectArtKitStore);
     LOAD_DB2(sGameObjectDisplayInfoStore);
     LOAD_DB2(sGemPropertiesStore);
+    LOAD_DB2(sGlobalCurveStore);
     LOAD_DB2(sGlyphBindableSpellStore);
     LOAD_DB2(sGlyphSlotStore);
     LOAD_DB2(sGlyphPropertiesStore);
@@ -796,9 +804,15 @@ uint32 DB2Manager::LoadStores(std::string const& dataPath, LocaleConstant defaul
     LOAD_DB2(sTotemCategoryStore);
     LOAD_DB2(sToyStore);
     LOAD_DB2(sTransmogHolidayStore);
+    LOAD_DB2(sTransmogOutfitEntryStore);
+    LOAD_DB2(sTransmogOutfitSlotInfoStore);
+    LOAD_DB2(sTransmogOutfitSlotOptionInfoStore);
     LOAD_DB2(sTransmogSetStore);
     LOAD_DB2(sTransmogSetGroupStore);
     LOAD_DB2(sTransmogSetItemStore);
+    LOAD_DB2(sTransmogSituationStore);
+    LOAD_DB2(sTransmogSituationGroupStore);
+    LOAD_DB2(sTransmogSituationTriggerStore);
     LOAD_DB2(sTransportAnimationStore);
     LOAD_DB2(sTransportRotationStore);
     LOAD_DB2(sUiMapStore);
@@ -2030,8 +2044,12 @@ DB2Manager::FriendshipRepReactionSet const* DB2Manager::GetFriendshipRepReaction
     return Trinity::Containers::MapGetValuePtr(_friendshipRepReactions, friendshipRepID);
 }
 
-uint32 DB2Manager::GetGlobalCurveId(GlobalCurve /*globalCurveType*/) const
+uint32 DB2Manager::GetGlobalCurveId(GlobalCurve globalCurveType) const
 {
+    for (GlobalCurveEntry const* globalCurveEntry : sGlobalCurveStore)
+        if (GlobalCurve(globalCurveEntry->Type) == globalCurveType)
+            return globalCurveEntry->CurveID;
+
     return 0;
 }
 

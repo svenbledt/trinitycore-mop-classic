@@ -1570,6 +1570,18 @@ struct GemPropertiesLoadInfo
     static constexpr DB2LoadInfo Instance{ Fields, 4, &GemPropertiesMeta::Instance, HOTFIX_SEL_GEM_PROPERTIES };
 };
 
+struct GlobalCurveLoadInfo
+{
+    static constexpr DB2FieldMeta Fields[3] =
+    {
+        { false, FT_INT, "ID" },
+        { true, FT_INT, "CurveID" },
+        { true, FT_INT, "Type" },
+    };
+
+    static constexpr DB2LoadInfo Instance{ Fields, 3, &GlobalCurveMeta::Instance, HOTFIX_SEL_GLOBAL_CURVE };
+};
+
 struct GlyphBindableSpellLoadInfo
 {
     static constexpr DB2FieldMeta Fields[3] =
@@ -5170,6 +5182,63 @@ struct TransmogHolidayLoadInfo
     static constexpr DB2LoadInfo Instance{ Fields, 2, &TransmogHolidayMeta::Instance, HOTFIX_SEL_TRANSMOG_HOLIDAY };
 };
 
+struct TransmogOutfitEntryLoadInfo
+{
+    static constexpr DB2FieldMeta Fields[9] =
+    {
+        { false, FT_LONG, "Cost" },
+        { false, FT_STRING, "Name" },
+        { false, FT_INT, "ID" },
+        { true, FT_INT, "OrderIndex" },
+        { false, FT_BYTE, "Source" },
+        { true, FT_INT, "Flags" },
+        { false, FT_BYTE, "SetType" },
+        { false, FT_FLOAT, "OverrideCostModifier" },
+        { true, FT_INT, "OutfitIndex" },
+    };
+
+    static constexpr DB2LoadInfo Instance{ Fields, 9, &TransmogOutfitEntryMeta::Instance, HOTFIX_SEL_TRANSMOG_OUTFIT_ENTRY };
+};
+
+struct TransmogOutfitSlotInfoLoadInfo
+{
+    static constexpr DB2FieldMeta Fields[13] =
+    {
+        { false, FT_STRING_NOT_LOCALIZED, "InventorySlotName" },
+        { false, FT_INT, "ID" },
+        { true, FT_BYTE, "TransmogOutfitSlotEnum" },
+        { true, FT_INT, "InventorySlotEnum" },
+        { true, FT_INT, "Flags" },
+        { false, FT_BYTE, "Unused1200" },
+        { false, FT_BYTE, "TransmogCollectionType" },
+        { true, FT_INT, "SecondarySlotID" },
+        { true, FT_INT, "InventorySlotID" },
+        { true, FT_INT, "UnassignedAtlasID" },
+        { true, FT_INT, "UnassignedDisplayAtlasID" },
+        { false, FT_FLOAT, "ItemCostMultiplier" },
+        { false, FT_FLOAT, "IllusionCostMultiplier" },
+    };
+
+    static constexpr DB2LoadInfo Instance{ Fields, 13, &TransmogOutfitSlotInfoMeta::Instance, HOTFIX_SEL_TRANSMOG_OUTFIT_SLOT_INFO };
+};
+
+struct TransmogOutfitSlotOptionLoadInfo
+{
+    static constexpr DB2FieldMeta Fields[8] =
+    {
+        { false, FT_INT, "ID" },
+        { false, FT_STRING, "Name" },
+        { false, FT_BYTE, "OptionEnum" },
+        { false, FT_INT, "TransmogOutfitSlotInfoID" },
+        { true, FT_INT, "Flags" },
+        { true, FT_INT, "SecondaryOptionID" },
+        { false, FT_FLOAT, "ItemCostMultiplier" },
+        { false, FT_FLOAT, "IllusionCostMultiplier" },
+    };
+
+    static constexpr DB2LoadInfo Instance{ Fields, 8, &TransmogOutfitSlotOptionMeta::Instance, HOTFIX_SEL_TRANSMOG_OUTFIT_SLOT_OPTION };
+};
+
 struct TransmogSetLoadInfo
 {
     static constexpr DB2FieldMeta Fields[13] =
@@ -5214,6 +5283,48 @@ struct TransmogSetItemLoadInfo
     };
 
     static constexpr DB2LoadInfo Instance{ Fields, 4, &TransmogSetItemMeta::Instance, HOTFIX_SEL_TRANSMOG_SET_ITEM };
+};
+
+struct TransmogSituationLoadInfo
+{
+    static constexpr DB2FieldMeta Fields[6] =
+    {
+        { false, FT_STRING, "Name" },
+        { false, FT_INT, "ID" },
+        { true, FT_BYTE, "SituationEnum" },
+        { true, FT_INT, "Flags" },
+        { false, FT_INT, "TransmogSituationGroupID" },
+        { true, FT_INT, "OrderIndex" },
+    };
+
+    static constexpr DB2LoadInfo Instance{ Fields, 6, &TransmogSituationMeta::Instance, HOTFIX_SEL_TRANSMOG_SITUATION };
+};
+
+struct TransmogSituationGroupLoadInfo
+{
+    static constexpr DB2FieldMeta Fields[4] =
+    {
+        { false, FT_INT, "ID" },
+        { false, FT_INT, "TransmogSituationTriggerID" },
+        { true, FT_INT, "OrderIndex" },
+        { true, FT_INT, "Flags" },
+    };
+
+    static constexpr DB2LoadInfo Instance{ Fields, 4, &TransmogSituationGroupMeta::Instance, HOTFIX_SEL_TRANSMOG_SITUATION_GROUP };
+};
+
+struct TransmogSituationTriggerLoadInfo
+{
+    static constexpr DB2FieldMeta Fields[5] =
+    {
+        { false, FT_STRING, "Name" },
+        { false, FT_STRING, "Description" },
+        { false, FT_INT, "ID" },
+        { false, FT_BYTE, "TriggerEnum" },
+        { true, FT_INT, "Flags" },
+    };
+
+    static constexpr DB2LoadInfo Instance{ Fields, 5, &TransmogSituationTriggerMeta::Instance, HOTFIX_SEL_TRANSMOG_SITUATION_TRIGGER };
 };
 
 struct TransportAnimationLoadInfo
