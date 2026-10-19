@@ -2386,6 +2386,7 @@ DEFINE_ENUM_FLAG(SummonPropertiesFlags);
 
 #define MAX_TALENT_TIERS 11
 #define MAX_TALENT_COLUMNS 4
+#define MAX_MOP_TALENT_COLUMNS 3 // 5.5.4 Talent.db2 column 3 only holds "Dummy 5.0 Talent" rows
 
 enum class TaxiNodeFlags : int32
 {

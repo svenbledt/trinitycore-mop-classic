@@ -127,6 +127,28 @@ void SetPrimaryTalentTree::Read()
     _worldPacket >> TabIndex;
 }
 
+void SetSpecialization::Read()
+{
+    _worldPacket >> SpecID;
+}
+
+void LearnTalents::Read()
+{
+    Talents.resize(_worldPacket.ReadBits(6));
+    for (uint16& talent : Talents)
+        _worldPacket >> talent;
+}
+
+void RemoveGlyph::Read()
+{
+    _worldPacket >> GlyphSlot;
+}
+
+void SetLootSpecialization::Read()
+{
+    _worldPacket >> SpecID;
+}
+
 ByteBuffer& operator<<(ByteBuffer& data, TalentInfoUpdate const& talentInfoUpdate)
 {
     data << uint32(talentInfoUpdate.UnspentTalentPoints);

@@ -3193,6 +3193,17 @@ struct SoundKitEntry
     uint32 SoundMixGroupID;
 };
 
+// structure for SpecializationSpells.db2
+struct SpecializationSpellsEntry
+{
+    LocalizedString Description;
+    uint32 ID;
+    uint16 SpecID;
+    int32 SpellID;
+    int32 OverridesSpellID;
+    uint8 DisplayOrder;
+};
+
 // structure for SpellAuraOptions.db2
 struct SpellAuraOptionsEntry
 {

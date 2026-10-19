@@ -701,6 +701,10 @@ namespace WorldPackets
         class LearnPreviewTalents;
         class ConfirmRespecWipe;
         class SetPrimaryTalentTree;
+        class SetSpecialization;
+        class LearnTalents;
+        class RemoveGlyph;
+        class SetLootSpecialization;
     }
 
     namespace Taxi
@@ -1478,6 +1482,10 @@ class TC_GAME_API WorldSession
         void HandleLearnTalentOpcode(WorldPackets::Talent::LearnTalent& packet);
         void HandleLearnPreviewTalentsOpcode(WorldPackets::Talent::LearnPreviewTalents& packet);
         void HandleSetPrimaryTalentTreeOpcode(WorldPackets::Talent::SetPrimaryTalentTree& packet);
+        void HandleSetSpecializationOpcode(WorldPackets::Talent::SetSpecialization& packet);
+        void HandleLearnTalentsOpcode(WorldPackets::Talent::LearnTalents& packet);
+        void HandleRemoveGlyphOpcode(WorldPackets::Talent::RemoveGlyph& packet);
+        void HandleSetLootSpecializationOpcode(WorldPackets::Talent::SetLootSpecialization& packet);
         void HandleConfirmRespecWipeOpcode(WorldPackets::Talent::ConfirmRespecWipe& confirmRespecWipe);
         void HandleUnlearnSkillOpcode(WorldPackets::Spells::UnlearnSkill& packet);
 

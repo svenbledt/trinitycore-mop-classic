@@ -129,7 +129,8 @@ Every imported row and script stays reproducible from `tools/mop-content/`, with
 - Port specializations (spec choice, spec spells, talents 6-tier) and MoP class spell scripts from SkyFire 5.4.8 first,
   rewritten in TC style, then fix what doesn't work against sniffs and the 5.5.4 DB2s.
 - MoP Classic-only additions (e.g. group revival spells) need their own work; check them against the 5.5.4 client.
-- Seen in the log: CMSG_SET_PET_SPECIALIZATION is unhandled (hunter pet specs); part of this workstream.
+- The "CMSG_SET_PET_SPECIALIZATION" in the log was the player spec choice (0x3E0015, now CMSG_SET_SPECIALIZATION);
+  pet specs use CMSG_LEARN_PET_SPECIALIZATION_GROUP (0x3E0016, still unhandled). Status: `re-notes.md` "Specializations".
 
 ## Not in M1
 The MoP talent/spec system (6 tiers, spec choice at 10) for all classes, other classes' MoP changes, Pandaria zones beyond the island,

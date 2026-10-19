@@ -100,6 +100,46 @@ namespace WorldPackets
             int32 TabIndex = 0;
         };
 
+        class LearnTalents final : public ClientPacket
+        {
+        public:
+            LearnTalents(WorldPacket&& packet) : ClientPacket(CMSG_LEARN_TALENTS, std::move(packet)) { }
+
+            void Read() override;
+
+            Array<uint16, 64> Talents; // client writer 0x14065EC60: Bits<6> count, then u16 Talent IDs
+        };
+
+        class RemoveGlyph final : public ClientPacket
+        {
+        public:
+            RemoveGlyph(WorldPacket&& packet) : ClientPacket(CMSG_REMOVE_GLYPH, std::move(packet)) { }
+
+            void Read() override;
+
+            uint8 GlyphSlot = 0; // 0-based socket index (Lua RemoveGlyphFromSocket 0x141C7FCC0, < 6)
+        };
+
+        class SetLootSpecialization final : public ClientPacket
+        {
+        public:
+            SetLootSpecialization(WorldPacket&& packet) : ClientPacket(CMSG_SET_LOOT_SPECIALIZATION, std::move(packet)) { }
+
+            void Read() override;
+
+            int32 SpecID = 0; // ChrSpecialization ID, 0 = current spec (writer 0x140584D10, u32)
+        };
+
+        class SetSpecialization final : public ClientPacket
+        {
+        public:
+            SetSpecialization(WorldPacket&& packet) : ClientPacket(CMSG_SET_SPECIALIZATION, std::move(packet)) { }
+
+            void Read() override;
+
+            int32 SpecID = 0; // ChrSpecialization ID, not the spec index (retail sniff: 269 for Windwalker)
+        };
+
         class RespecWipeConfirm final : public ServerPacket
         {
         public:

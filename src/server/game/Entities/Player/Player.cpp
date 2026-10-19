@@ -2039,6 +2039,7 @@ void Player::GiveLevel(uint8 level)
 
     UpdateSkillsForLevel();
     LearnDefaultSkills();
+    LearnSpecializationSpells();
 
     // save base values (bonuses already included in stored stats
     for (uint8 i = STAT_STRENGTH; i < MAX_STATS; ++i)
@@ -3160,6 +3161,13 @@ bool Player::ResetTalents(bool involuntarily /*= false*/)
                 continue;
 
             RemoveSpell(spellId, false, false);
+        }
+
+        if (talentInfo->SpellID)
+        {
+            RemoveSpell(talentInfo->SpellID, false, false);
+            if (talentInfo->OverridesSpellID)
+                RemoveOverrideSpell(talentInfo->OverridesSpellID, talentInfo->SpellID);
         }
     }
 
@@ -17378,16 +17386,15 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder const& hol
 
     SetNumRespecs(fields.numRespecs);
 
-    //uint32 lootSpecId = fields.lootSpecId;
+    if (ChrSpecializationEntry const* lootSpec = sChrSpecializationStore.LookupEntry(fields.lootSpecId))
+        if (lootSpec->ClassID == GetClass() && lootSpec->OrderIndex < INITIAL_SPECIALIZATION_INDEX)
+            SetLootSpecId(lootSpec->ID);
 
     RegisterPowerTypes();
     UpdateDisplayPower();
     _LoadTalents(holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_TALENT_GROUPS), holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_TALENTS));
     _LoadGlyphs(holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_GLYPHS));
     SetActiveTalentGroup(HasTalentGroupUnlocked(fields.activeTalentGroup) ? fields.activeTalentGroup : 0, false, true);
-    // TODO(verify): class default spec (OrderIndex 4) until the MoP talent rework stores chosen specs
-    if (ChrSpecializationEntry const* defaultSpec = sDB2Manager.GetDefaultChrSpecializationForClass(GetClass()))
-        SetPrimarySpecialization(defaultSpec->ID);
 
     // before inventory: visible items read the viewed outfit (TC master 0c51d8353d)
     _LoadTransmogOutfitData(holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_TRANSMOG_OUTFIT),
@@ -17424,6 +17431,7 @@ bool Player::LoadFromDB(ObjectGuid guid, CharacterDatabaseQueryHolder const& hol
     InitGlyphsForLevel();
     UpdateAvailableTalentPoints();
     LearnDefaultSkills();
+    LearnSpecializationSpells();
     LearnCustomSpells();
 
     // must be before inventory (some items required reputation check)
@@ -25986,25 +25994,30 @@ bool Player::ModifierTreeSatisfied(uint32 modifierTreeId) const
 
 void Player::InitGlyphsForLevel()
 {
-    uint8 slotIndex = 0;
+    // Retail 5.5.4 order is 22,21,23,24,25,26: by Tooltip, minor (Type 1) before major; Cata prime slots unused.
+    std::vector<GlyphSlotEntry const*> glyphSlots;
     for (GlyphSlotEntry const* glyphSlot : sGlyphSlotStore)
+        if (glyphSlot->Type != GLYPH_SLOT_PRIME)
+            glyphSlots.push_back(glyphSlot);
+
+    std::ranges::sort(glyphSlots, [](GlyphSlotEntry const* a, GlyphSlotEntry const* b)
     {
-        if (slotIndex >= m_activePlayerData->Glyphs.size())
-            break;
+        return std::make_tuple(a->Tooltip, -int32(a->Type)) < std::make_tuple(b->Tooltip, -int32(b->Type));
+    });
 
-        SetGlyphSlot(slotIndex, glyphSlot->ID);
-        ++slotIndex;
-    }
+    for (uint8 slotIndex = 0; slotIndex < glyphSlots.size() && slotIndex < m_activePlayerData->Glyphs.size(); ++slotIndex)
+        SetGlyphSlot(slotIndex, glyphSlots[slotIndex]->ID);
 
+    // One minor + one major per step (SkyFire 5.4.8); retail max-level sniffs show 0x3F.
     uint8 level = GetLevel();
     uint32 slotMask = 0;
 
     if (level >= 25)
-        slotMask |= 0x01 | 0x02 | 0x40;
+        slotMask |= 0x01 | 0x02;
     if (level >= 50)
-        slotMask |= 0x04 | 0x08 | 0x80;
+        slotMask |= 0x04 | 0x08;
     if (level >= 75)
-        slotMask |= 0x10 | 0x20 | 0x100;
+        slotMask |= 0x10 | 0x20;
 
     SetGlyphsEnabled(slotMask);
 }
@@ -26216,22 +26229,26 @@ void Player::SendTalentsInfoData()
     packet.Info.IsPetTalents = false;
     packet.Info.UnspentTalentPoints = m_activePlayerData->CharacterPoints;
     packet.Info.ActiveGroup = GetActiveTalentGroup();
-    // Client needs a ChrSpecialization ID here (not a TalentTab ID) or C_EditMode.SetActiveLayout fails.
-    // TODO(verify): per-group chosen specs come with the MoP talent rework; every group uses CurrentSpecID for now.
-    packet.PrimarySpecialization = GetPrimarySpecialization();
+    // ChrSpecialization IDs (not TalentTab IDs) or C_EditMode.SetActiveLayout fails; retail sends group 0's spec here.
+    packet.PrimarySpecialization = GetTalentGroupSpecializationOrDefault(0);
 
-    for (TalentGroupInfo const& talentGroup : _talentGroups)
+    for (uint8 groupIndex = 0; groupIndex < _talentGroups.size(); ++groupIndex)
     {
+        TalentGroupInfo const& talentGroup = _talentGroups[groupIndex];
         WorldPackets::Talent::TalentGroupInfo& talentGroupInfo = packet.Info.TalentGroups.emplace_back();
-        talentGroupInfo.PrimarySpecialization = GetPrimarySpecialization();
+        talentGroupInfo.PrimarySpecialization = GetTalentGroupSpecializationOrDefault(groupIndex);
         if (_talentGroups.size() > 1)
             talentGroupInfo.SpecID = _talentGroups.size();
 
         for (auto const& talentPair : talentGroup.Talents)
             talentGroupInfo.Talents.push_back({ talentPair.first, talentPair.second });
 
-        for (uint16 glyph : talentGroup.Glyphs)
-            talentGroupInfo.Glyphs.push_back(glyph);
+        // Retail 5.5.4 always sends four empty {0, slot} entries here (every sniffed UPDATE_TALENT_DATA).
+        for (uint8 slot = 0; slot < 4; ++slot)
+            talentGroupInfo.PvPTalents.push_back({ 0, slot });
+
+        for (std::size_t i = 0; i < talentGroup.Glyphs.size() && i < m_activePlayerData->Glyphs.size(); ++i)
+            talentGroupInfo.Glyphs.push_back(talentGroup.Glyphs[i]);
     }
 
     SendDirectMessage(packet.Write());
@@ -26514,11 +26531,11 @@ void Player::_LoadTalents(PreparedQueryResult talentGroupResult, PreparedQueryRe
             Field* fields = talentGroupResult->Fetch();
 
             TalentGroupInfo& talentGroup = _talentGroups.emplace_back();
-            uint32 talentTabId = fields[1].GetUInt32();
 
-            TalentTabEntry const* talentTab = sTalentTabStore.LookupEntry(talentTabId);
-            if (talentTab && (talentTab->RaceMask & GetRaceMask()))
-                talentGroup.PrimaryTalentTabID = talentTabId;
+            // MoP: the talentTabId column holds the group's chosen ChrSpecialization ID
+            ChrSpecializationEntry const* spec = sChrSpecializationStore.LookupEntry(fields[1].GetUInt32());
+            if (spec && spec->ClassID == GetClass() && spec->OrderIndex < INITIAL_SPECIALIZATION_INDEX)
+                talentGroup.SpecializationID = spec->ID;
 
         } while (talentGroupResult->NextRow());
     }
@@ -26542,10 +26559,7 @@ void Player::_LoadTalents(PreparedQueryResult talentGroupResult, PreparedQueryRe
             if (!talentInfo)
                 continue;
 
-            if (talentRank >= talentInfo->SpellRank.size())
-                continue;
-
-            uint32 spellId = talentInfo->SpellRank[talentRank];
+            uint32 spellId = GetTalentSpellId(talentInfo, talentRank);
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId, DIFFICULTY_NONE);
             if (!spellInfo || !SpellMgr::IsSpellValid(spellInfo, this, false))
                 continue;
@@ -26572,7 +26586,7 @@ void Player::_SaveTalents(CharacterDatabaseTransaction trans)
         stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_CHAR_TALENT_GROUP);
         stmt->setUInt64(0, GetGUID().GetCounter());
         stmt->setUInt8(1, talentGroupIndex);
-        stmt->setUInt32(2, talentGroup.PrimaryTalentTabID);
+        stmt->setUInt32(2, talentGroup.SpecializationID);
         trans->Append(stmt);
 
         for (auto const& talentPair : talentGroup.Talents)
@@ -27851,6 +27865,9 @@ void Player::SetActiveTalentGroup(uint8 group, bool withUpdate /*= true*/, bool 
         if (oldTalentTabId != newTalentTabId)
             UnlearnTalentTreePrimarySpells();
 
+        if (GetTalentGroupSpecialization(_activeTalentGroup) != GetTalentGroupSpecialization(group))
+            RemoveSpecializationSpells();
+
         for (uint16 glyphId : _talentGroups[_activeTalentGroup].Glyphs)
             if (glyphId)
                 RemoveAurasDueToSpell(sGlyphPropertiesStore.AssertEntry(glyphId)->SpellID);
@@ -27910,6 +27927,13 @@ void Player::SetActiveTalentGroup(uint8 group, bool withUpdate /*= true*/, bool 
 
                 RemoveSpell(spellId, false, false);
             }
+
+            if (talentInfo->SpellID)
+            {
+                RemoveSpell(talentInfo->SpellID, false, false);
+                if (talentInfo->OverridesSpellID)
+                    RemoveOverrideSpell(talentInfo->OverridesSpellID, talentInfo->SpellID);
+            }
         }
     }
 
@@ -27918,9 +27942,20 @@ void Player::SetActiveTalentGroup(uint8 group, bool withUpdate /*= true*/, bool 
     {
         // Perform post switch actions - resetting powers, loading action bars, updating shapeshifting auras
         SetPrimaryTalentTree(newTalentTabId);
+        SetPrimarySpecialization(GetTalentGroupSpecializationOrDefault(group));
+        if (!loading)
+            LearnSpecializationSpells();
 
         for (auto const& talentPair : _talentGroups[_activeTalentGroup].Talents)
-            LearnSpell(sTalentStore.AssertEntry(talentPair.first)->SpellRank[talentPair.second], true);
+        {
+            TalentEntry const* talentInfo = sTalentStore.AssertEntry(talentPair.first);
+            if (uint32 spellId = GetTalentSpellId(talentInfo, talentPair.second))
+            {
+                LearnSpell(spellId, true);
+                if (talentInfo->OverridesSpellID)
+                    AddOverrideSpell(talentInfo->OverridesSpellID, spellId);
+            }
+        }
 
         uint8 glyphSlot = 0;
         for (uint16 glyphId : _talentGroups[_activeTalentGroup].Glyphs)
@@ -27996,55 +28031,176 @@ uint32 Player::GetPrimaryTalentTree() const
     return _talentGroups[_activeTalentGroup].PrimaryTalentTabID;
 }
 
+uint32 Player::GetTalentGroupSpecialization(uint8 group) const
+{
+    return group < _talentGroups.size() ? _talentGroups[group].SpecializationID : 0;
+}
+
+uint32 Player::GetTalentGroupSpecializationOrDefault(uint8 group) const
+{
+    if (uint32 specId = GetTalentGroupSpecialization(group))
+        return specId;
+
+    // Before a spec is chosen retail reports the class initial spec (OrderIndex 4, e.g. Monk 1450).
+    ChrSpecializationEntry const* defaultSpec = sDB2Manager.GetDefaultChrSpecializationForClass(GetClass());
+    return defaultSpec ? defaultSpec->ID : 0;
+}
+
+void Player::SetSpecialization(ChrSpecializationEntry const* spec)
+{
+    _talentGroups[_activeTalentGroup].SpecializationID = spec->ID;
+    SetPrimarySpecialization(spec->ID);
+
+    // Retail order (sniff m2 #45273+): LEARNED_SPELLS, UPDATE_TALENT_DATA, then the passive auras and mods.
+    LearnSpecializationSpells(true);
+}
+
+void Player::LearnSpecializationSpells(bool sendTalentData /*= false*/)
+{
+    uint32 specId = GetTalentGroupSpecialization(_activeTalentGroup);
+    std::vector<std::pair<uint32 /*spellId*/, uint32 /*overridesSpellId*/>> spells;
+    auto addIfLearnable = [&](uint32 spellId, uint32 overridesSpellId)
+    {
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId, DIFFICULTY_NONE);
+        if (spellInfo && spellInfo->SpellLevel <= GetLevel() && !HasSpell(spellId))
+            spells.emplace_back(spellId, overridesSpellId);
+    };
+
+    if (std::vector<SpecializationSpellsEntry const*> const* specSpells = sDB2Manager.GetSpecializationSpells(specId))
+        for (SpecializationSpellsEntry const* specSpell : *specSpells)
+            addIfLearnable(specSpell->SpellID, specSpell->OverridesSpellID);
+
+    // TODO(verify): Cata learned the TalentTab mastery once Mastery is known; MoP may cast it instead.
+    if (ChrSpecializationEntry const* spec = sChrSpecializationStore.LookupEntry(specId); spec && CanUseMastery())
+        for (int32 masterySpellId : spec->MasterySpellID)
+            if (masterySpellId)
+                addIfLearnable(masterySpellId, 0);
+
+    // One LEARNED_SPELLS carrying the spec ID, as retail sends it (m2 #45273: 4 spells, SpecializationID 269).
+    if (IsInWorld() && !spells.empty())
+    {
+        WorldPackets::Spells::LearnedSpells learnedSpells;
+        learnedSpells.SpecializationID = specId;
+        for (auto const& [spellId, _] : spells)
+            learnedSpells.ClientLearnedSpellData.emplace_back().SpellID = spellId;
+
+        SendDirectMessage(learnedSpells.Write());
+    }
+
+    if (sendTalentData)
+        SendTalentsInfoData();
+
+    for (auto const& [spellId, overridesSpellId] : spells)
+    {
+        AddSpell(spellId, true, true, true, false);
+        if (overridesSpellId)
+            AddOverrideSpell(overridesSpellId, spellId);
+
+        UpdateQuestObjectiveProgress(QUEST_OBJECTIVE_LEARNSPELL, spellId, 1);
+    }
+}
+
+void Player::RemoveSpecializationSpells()
+{
+    for (uint32 i = 0; i < MAX_SPECIALIZATIONS; ++i)
+    {
+        ChrSpecializationEntry const* specialization = sDB2Manager.GetChrSpecializationByIndex(GetClass(), i);
+        if (!specialization)
+            continue;
+
+        if (std::vector<SpecializationSpellsEntry const*> const* specSpells = sDB2Manager.GetSpecializationSpells(specialization->ID))
+        {
+            for (SpecializationSpellsEntry const* specSpell : *specSpells)
+            {
+                RemoveSpell(specSpell->SpellID, true);
+                if (specSpell->OverridesSpellID)
+                    RemoveOverrideSpell(specSpell->OverridesSpellID, specSpell->SpellID);
+            }
+        }
+
+        for (int32 masterySpellId : specialization->MasterySpellID)
+            if (masterySpellId)
+                RemoveSpell(masterySpellId, true);
+    }
+}
+
+uint32 Player::GetTalentSpellId(TalentEntry const* talentInfo, uint8 rank)
+{
+    // 5.5.4 Talent.db2 rows carry the MoP spell in SpellID; the Cata SpellRank array is mostly empty
+    if (talentInfo->SpellID)
+        return rank == 0 ? talentInfo->SpellID : 0;
+
+    return rank < talentInfo->SpellRank.size() ? talentInfo->SpellRank[rank] : 0;
+}
+
 bool Player::LearnTalent(uint32 talentId, uint8 rank)
 {
+    // MoP: one talent per tier, no ranks; unlocked tiers come from NumTalentsAtLevel.db2 (MaxTalentTiers)
     TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
-    if (!talentInfo)
+    if (!talentInfo || rank != 0 || talentInfo->ClassID != GetClass())
         return false;
 
-    // Ensure that the talent belongs to the player's class
-    TalentTabEntry const* talentTab = sTalentTabStore.LookupEntry(talentInfo->TabID);
-    if (!talentTab || !(talentTab->ClassMask & GetClassMask()))
+    // Column 3 rows are all "Dummy 5.0 Talent" (102052) placeholders in the 5.5.4 file.
+    if (talentInfo->ColumnIndex >= MAX_MOP_TALENT_COLUMNS || talentInfo->TierID >= uint32(*m_activePlayerData->MaxTalentTiers))
         return false;
 
-    // Cheating protection
-    if (rank >= talentInfo->SpellRank.size())
+    if (talentInfo->SpecID && talentInfo->SpecID != GetTalentGroupSpecialization(_activeTalentGroup))
         return false;
 
-    uint32 spellId = talentInfo->SpellRank[rank];
+    uint32 spellId = GetTalentSpellId(talentInfo, 0);
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId, DIFFICULTY_NONE);
     if (!spellInfo || !SpellMgr::IsSpellValid(spellInfo, this, false))
         return false;
 
-    uint32 requiredTalentPoints = 0;
-
     TalentGroupInfo& talentGroup = _talentGroups[_activeTalentGroup];
-    auto itr = talentGroup.Talents.find(talentInfo->ID);
-    if (itr != talentGroup.Talents.end())
-    {
-        // The talent is known already. Check if we are attempting to learn a higher rank
-        if (itr->second >= rank)
-            return false;
+    for (auto const& [knownTalentId, _] : talentGroup.Talents)
+        if (TalentEntry const* knownTalent = sTalentStore.LookupEntry(knownTalentId))
+            if (knownTalent->TierID == talentInfo->TierID)
+                return false;
 
-        requiredTalentPoints += rank - itr->second + 1;
-    }
-    else
-        requiredTalentPoints += rank + 1;
-
-    // Not enough talent points to learn the talent at this rank
-    if (requiredTalentPoints > static_cast<uint32>(m_activePlayerData->CharacterPoints))
-        return false;
-
-    if (itr != talentGroup.Talents.end())
-        itr->second = rank;
-    else
-        talentGroup.Talents.try_emplace(talentInfo->ID, rank);
+    talentGroup.Talents.try_emplace(talentInfo->ID, 0);
 
     LearnSpell(spellId, true);
+    if (talentInfo->OverridesSpellID)
+        AddOverrideSpell(talentInfo->OverridesSpellID, spellId);
+
     RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2::ChangeTalent);
 
     UpdateAvailableTalentPoints();
     return true;
+}
+
+void Player::RemoveTalent(TalentEntry const* talentInfo)
+{
+    TalentGroupInfo& talentGroup = _talentGroups[_activeTalentGroup];
+    auto itr = talentGroup.Talents.find(talentInfo->ID);
+    if (itr == talentGroup.Talents.end())
+        return;
+
+    if (uint32 spellId = GetTalentSpellId(talentInfo, itr->second))
+    {
+        RemoveSpell(spellId, false, false);
+        if (talentInfo->OverridesSpellID)
+            RemoveOverrideSpell(talentInfo->OverridesSpellID, spellId);
+    }
+
+    talentGroup.Talents.erase(itr);
+    RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2::ChangeTalent);
+    UpdateAvailableTalentPoints();
+}
+
+void Player::ResetSpecialization()
+{
+    RemoveSpecializationSpells();
+    _talentGroups[_activeTalentGroup].SpecializationID = 0;
+    SetPrimarySpecialization(GetTalentGroupSpecializationOrDefault(_activeTalentGroup));
+
+    CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+    _SaveTalents(trans);
+    _SaveSpells(trans);
+    CharacterDatabase.CommitTransaction(trans);
+
+    SendTalentsInfoData();
 }
 
 void Player::UpdateAvailableTalentPoints()
@@ -28067,6 +28223,8 @@ void Player::UpdateAvailableTalentPoints()
     }
 
     SetUpdateFieldValue(m_values.ModifyValue(&Player::m_activePlayerData).ModifyValue(&UF::ActivePlayerData::CharacterPoints), points - spentPoints);
+    SetUpdateFieldValue(m_values.ModifyValue(&Player::m_activePlayerData).ModifyValue(&UF::ActivePlayerData::MaxTalentTiers),
+        sDB2Manager.GetNumTalentsAtLevel(GetLevel(), Classes(GetClass())));
 }
 
 void Player::SendRaidGroupOnlyMessage(RaidGroupReason reason, int32 delay) const

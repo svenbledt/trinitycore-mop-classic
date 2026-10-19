@@ -27,6 +27,7 @@ constexpr uint8 MAX_GLYPHS = 9;
 struct TC_GAME_API TalentGroupInfo
 {
     uint32 PrimaryTalentTabID = 0;
+    uint32 SpecializationID = 0; // MoP: chosen ChrSpecialization; 0 = class initial spec
     std::unordered_map<uint32, uint8> Talents;
     std::array<uint16, MAX_GLYPHS> Glyphs = { };
 };

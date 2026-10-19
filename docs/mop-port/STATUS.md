@@ -15,6 +15,15 @@ Last updated: 2026-10-18
   only QUERY_GUILD_INFO is in sniffcheck so far. Unhandled in TC: CMSG_GUILD_QUERY_RECIPES and the CLUB_FINDER_* requests/responses;
   communities go through bnet ClubService (84 CMSG_BATTLENET_REQUEST). User: "just note it, not do anything for now".
 
+## Pandaria world import (2026-10-19, not committed)
+Map 870 populated from SkyFire 5.4.8 + TC master: 30,272 creature / 8,340 GO spawns, 3,756 creature / 1,980 GO templates, 1,594 quests,
+vendors, loot, SmartAI, gossip, `.tele` targets; plus item-side loot and battle pet breeds. Files `2026_10_19_20..26_world.sql`,
+applied without SQL errors. Rules, GUID ranges and gaps (creature/node loot missing in both sources): `pandaria-import.md`.
+
+## Specializations (2026-10-19, not committed)
+- Spec selection works server-side (built, 51/51 tests, worldserver restarted): 0x3E0015 renamed CMSG_SET_SPECIALIZATION (u32 ChrSpecialization ID, sniff m2 #45272); reply = one LEARNED_SPELLS with SpecializationID, UPDATE_TALENT_DATA, passive auras, CurrentSpecID UF. SpecializationSpells.db2 store added; chosen spec persists per group in `character_talent_group.talentTabId`. Not client-tested yet.
+- Second step (built, 51/51, restarted): MoP talents via CMSG_LEARN_TALENTS (one per tier, MaxTalentTiers from NumTalentsAtLevel), RemoveTalent spell effect, dual-spec switch swaps spec spells, spec reset at the trainer, glyph slots in retail order + CMSG_REMOVE_GLYPH, CMSG_SET_LOOT_SPECIALIZATION + lootSpecId load. Evidence and open items: `re-notes.md` "Specializations, talents, glyphs".
+
 ## Transmog outfits + collection burst (2026-10-18)
 - Outfit UF, 6 TransmogOutfit/Situation DB2 stores + GlobalCurve, CMSG_TRANSMOG_OUTFIT_NEW/UPDATE_INFO/UPDATE_SITUATIONS/UPDATE_SLOTS with replies, persistence in `character_transmog_outfit*`, VisibleItems from the viewed outfit, SMSG_DISMOUNT, ACCOUNT_TRANSMOG_SET_FAVORITES_UPDATE, ACCOUNT_ITEM_COLLECTION_DATA. Not client-tested yet. Evidence and open items: `re-notes.md` "Transmog outfits and collection burst".
 
@@ -26,6 +35,8 @@ Last updated: 2026-10-18
 
 ## Wandering Isle (2026-10-18)
 - Phase 3/4 step 4 code and data done (not committed, not yet client-tested): see `phase3-4-plan.md` "Step 4 status".
+- 2026-10-19 sniff audit (loot, conditions, patrols, speeds, spawn state, AT greetings): `wandering-isle-sniff-diff.md` "Audit".
+- Mount creature templates for 117 SPELL_AURA_MOUNTED entries world lacked (`gen_mount_creatures.ts`, `2026_10_19_11_world.sql`).
 
 ## Pandaren + Monk character create (2026-10-18)
 - Phase 3/4 step 2 code and data done (not committed, not yet client-tested): see `phase3-4-plan.md` "Step 2 status".

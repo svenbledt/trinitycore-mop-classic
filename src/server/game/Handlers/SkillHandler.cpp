@@ -54,12 +54,74 @@ void WorldSession::HandleSetPrimaryTalentTreeOpcode(WorldPackets::Talent::SetPri
         _player->SetPrimaryTalentTree(talentTab->ID, true);
 }
 
+void WorldSession::HandleSetSpecializationOpcode(WorldPackets::Talent::SetSpecialization& packet)
+{
+    ChrSpecializationEntry const* spec = sChrSpecializationStore.LookupEntry(packet.SpecID);
+    if (!spec || spec->IsPetSpecialization() || spec->ClassID != _player->GetClass() || spec->OrderIndex >= INITIAL_SPECIALIZATION_INDEX)
+        return;
+
+    // Client sends this only while the active group still has the initial spec (0x14180DB50); changing needs a respec.
+    if (_player->GetTalentGroupSpecialization(_player->GetActiveTalentGroup()) || _player->GetLevel() < MIN_SPECIALIZATION_LEVEL)
+        return;
+
+    if (_player->IsInCombat() || _player->IsNonMeleeSpellCast(false))
+        return;
+
+    _player->SetSpecialization(spec);
+}
+
+void WorldSession::HandleLearnTalentsOpcode(WorldPackets::Talent::LearnTalents& packet)
+{
+    if (_player->IsInCombat())
+        return;
+
+    bool anythingLearned = false;
+    for (uint16 talentId : packet.Talents)
+        if (_player->LearnTalent(talentId, 0))
+            anythingLearned = true;
+
+    if (anythingLearned)
+        _player->SendTalentsInfoData();
+}
+
+void WorldSession::HandleRemoveGlyphOpcode(WorldPackets::Talent::RemoveGlyph& packet)
+{
+    if (_player->IsInCombat())
+        return;
+
+    _player->RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2::ChangeGlyph);
+    _player->RemoveGlyph(packet.GlyphSlot);
+}
+
+void WorldSession::HandleSetLootSpecializationOpcode(WorldPackets::Talent::SetLootSpecialization& packet)
+{
+    if (packet.SpecID)
+    {
+        ChrSpecializationEntry const* spec = sChrSpecializationStore.LookupEntry(packet.SpecID);
+        if (!spec || spec->ClassID != _player->GetClass() || spec->OrderIndex >= INITIAL_SPECIALIZATION_INDEX)
+            return;
+    }
+
+    _player->SetLootSpecId(packet.SpecID);
+}
+
 void WorldSession::HandleConfirmRespecWipeOpcode(WorldPackets::Talent::ConfirmRespecWipe& confirmRespecWipe)
 {
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(confirmRespecWipe.RespecMaster, UNIT_NPC_FLAG_TRAINER, UNIT_NPC_FLAG_2_NONE);
     if (!unit)
     {
         TC_LOG_DEBUG("network", "WORLD: HandleConfirmRespecWipeOpcode - {} not found or you can't interact with him.", confirmRespecWipe.RespecMaster);
+        return;
+    }
+
+    if (confirmRespecWipe.RespecType == SPEC_RESET_SPECIALIZATION)
+    {
+        // TODO(verify): SpecializationMaster gossip offers this for free (cost 0); SkyFire charges a separate fee.
+        if (!_player->GetTalentGroupSpecialization(_player->GetActiveTalentGroup()) || _player->IsInCombat())
+            return;
+
+        _player->ResetSpecialization();
+        unit->CastSpell(_player, 14867 /*SPELL_UNTALENT_VISUAL_EFFECT*/, true);
         return;
     }
 

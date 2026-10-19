@@ -44,6 +44,7 @@ struct BarberShopStyleEntry;
 struct BattlegroundTemplate;
 struct CharTitlesEntry;
 struct ChatChannelsEntry;
+struct ChrSpecializationEntry;
 struct CreatureTemplate;
 struct CurrencyTypesEntry;
 struct FactionEntry;
@@ -1886,8 +1887,16 @@ class TC_GAME_API Player final : public Unit, public GridObject<Player>
         void SetPrimaryTalentTree(uint32 talentTabId, bool withUpdate = false);
         uint32 GetPrimarySpecialization() const { return *m_playerData->CurrentSpecID; }
         void SetPrimarySpecialization(uint32 spec) { SetUpdateFieldValue(m_values.ModifyValue(&Player::m_playerData).ModifyValue(&UF::PlayerData::CurrentSpecID), spec); }
+        uint32 GetTalentGroupSpecialization(uint8 group) const;
+        uint32 GetTalentGroupSpecializationOrDefault(uint8 group) const;
+        void SetSpecialization(ChrSpecializationEntry const* spec);
+        void LearnSpecializationSpells(bool sendTalentData = false);
+        void RemoveSpecializationSpells();
         uint32 GetPrimaryTalentTree() const;
         bool LearnTalent(uint32 talentId, uint8 rank);
+        void RemoveTalent(TalentEntry const* talentInfo);
+        void ResetSpecialization();
+        static uint32 GetTalentSpellId(TalentEntry const* talentInfo, uint8 rank);
         void UpdateAvailableTalentPoints();
 
         bool ResetTalents(bool noCost = false);

@@ -396,9 +396,8 @@ constexpr SpellSchoolMask GetMaskForSchool(SpellSchools school)
 
 inline SpellSchools GetFirstSchoolInMask(SpellSchoolMask mask)
 {
-    // Do not use EnumUtils to iterate
-    // this can cause some compilers to instantiate Trinity::Impl::EnumUtils<SpellSchools>
-    // when compiling enuminfo_SharedDefines before their explicit specializations in that file
+    // No EnumUtils here: some compilers would instantiate Trinity::Impl::EnumUtils<SpellSchools>
+    // while compiling enuminfo_SharedDefines, before its explicit specializations
     for (uint16 i = 0; i < MAX_SPELL_SCHOOL; ++i)
         if (mask & (1 << i))
             return SpellSchools(i);
@@ -455,9 +454,7 @@ uint32 constexpr QuestDifficultyColors[MAX_QUEST_DIFFICULTY] =
     0xffff2020
 };
 
-// ***********************************
 // Spell Attributes definitions
-// ***********************************
 
 // EnumUtils: DESCRIBE THIS
 enum SpellAttr0 : uint32
@@ -1055,6 +1052,7 @@ enum SpellAttr15 : uint32
 #define MAX_SPECIALIZATIONS         5
 #define PET_SPEC_OVERRIDE_CLASS_INDEX MAX_CLASSES
 #define INITIAL_SPECIALIZATION_INDEX 4
+#define MIN_SPECIALIZATION_LEVEL    10 // TODO(verify): retail sniff picks a spec at 10; client-side gate not located
 
 // Custom values
 enum SpellClickUserTypes
@@ -2825,10 +2823,8 @@ enum DispelType
 
 #define DISPEL_ALL_MASK ((1<<DISPEL_MAGIC) | (1<<DISPEL_CURSE) | (1<<DISPEL_DISEASE) | (1<<DISPEL_POISON))
 
-//To all Immune system, if target has immunes,
-//some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,
-//some spell_effects that related to ImmuneToEffect<effect>(only this effect in the spell) can't cast to it,
-//some aura(related to Mechanics or ImmuneToState<aura>) can't apply to it.
+// Immunities: spells/effects matching ImmuneToDispel/School/Damage/Effect can't be cast on an immune target,
+// and auras matching Mechanics or ImmuneToState can't be applied to it.
 enum SpellImmunity
 {
     IMMUNITY_EFFECT                = 0,                     // enum SpellEffects

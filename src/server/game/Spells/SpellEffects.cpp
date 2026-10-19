@@ -853,13 +853,8 @@ void Spell::EffectForceCast2()
         return;
     }
 
-    // Start the cast during next update tick
-    // This is neccessary to preserve proper SMSG_SPELL_START and SMSG_SPELL_GO packet sequence
-    // (if packet sequence is not preserved then client cast bar in UI bugs and doesn't stop when the spell is interrupted)
-    // Triggered spells from effects handled during launch phase (such as SPELL_EFFECT_TRIGGER_SPELL)
-    // normally have their SMSG_SPELL_GO sent before parent spell SMSG_SPELL_GO
-    // SPELL_EFFECT_FORCE_CAST_2 requires these packets to be sent after parent spell
-    // but also needs to be handled during launch phase as well
+    // Cast next tick so SPELL_START/SPELL_GO stay ordered after the parent's (else the client cast bar sticks);
+    // SPELL_EFFECT_FORCE_CAST_2 is handled at launch but must send its packets after the parent spell.
     unitTarget->m_Events.AddEventAtOffset([triggered_spell_id, target = CastSpellTargetArg(m_caster), caster = unitTarget]() mutable
     {
         if (!target.Targets)
@@ -1183,10 +1178,8 @@ void Spell::EffectSendEvent()
     }
     else // if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT)
     {
-        // let's prevent executing effect handler twice in case when spell effect is capable of targeting an object
-        // this check was requested by scripters, but it has some downsides:
-        // now it's impossible to script (using sEventScripts) a cast which misses all targets
-        // or to have an ability to script the moment spell hits dest (in a case when there are object targets present)
+        // Don't run the handler twice when the effect can also target objects (scripter request); downside: event
+        // scripts can't catch a cast that misses all targets, nor the dest hit when object targets exist.
         if (effectInfo->GetProvidedTargetMask() & (TARGET_FLAG_UNIT_MASK | TARGET_FLAG_GAMEOBJECT_MASK))
             return;
         // some spells have no target entries in dbc and they use focus target
@@ -1900,10 +1893,8 @@ void Spell::EffectSummonType()
     // determine how many units should be summoned
     uint32 numSummons;
 
-    // some spells need to summon many units, for those spells number of summons is stored in effect value
-    // however so far noone found a generic check to find all of those (there's no related data in summonproperties.dbc
-    // and in spell attributes, possibly we need to add a table for those)
-    // so here's a list of MiscValueB values, which is currently most generic check
+    // Some spells summon several units (count = effect value); no DB2 field marks them, so the most generic
+    // check known is this list of MiscValueB values.
     switch (effectInfo->MiscValueB)
     {
         case 64:
@@ -2405,9 +2396,7 @@ void Spell::EffectTradeSkill()
 
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
-    // uint32 skillid =  m_spellInfo->Effects[i].MiscValue;
-    // uint16 skillmax = unitTarget->ToPlayer()->(skillid);
-    // m_caster->ToPlayer()->SetSkill(skillid, skillval?skillval:1, skillmax+75);
+    // NYI: raise the skill in MiscValue by 75 points of max value
 }
 
 void Spell::EffectEnchantItemPerm()
@@ -2683,9 +2672,6 @@ void Spell::EffectSummonPet()
             owner->GetClosePoint(px, py, pz, OldSummon->GetCombatReach());
 
             OldSummon->NearTeleportTo(px, py, pz, OldSummon->GetOrientation());
-            //OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
-            //OldSummon->SetMap(owner->GetMap());
-            //owner->GetMap()->Add(OldSummon->ToCreature());
 
             if (owner->GetTypeId() == TYPEID_PLAYER && OldSummon->isControlled())
                 owner->ToPlayer()->PetSpellInitialize();
@@ -2809,9 +2795,7 @@ void Spell::EffectWeaponDmg()
     if (!unitTarget || !unitTarget->IsAlive())
         return;
 
-    // multiple weapon dmg effect workaround
-    // execute only the last weapon damage
-    // and handle all effects at once
+    // multiple weapon dmg effect workaround: execute only the last weapon damage and handle all effects at once
     uint32 effectMask = std::ranges::find(m_UniqueTargetInfo, unitTarget->GetGUID(), &TargetInfo::TargetGUID)->EffectMask;
     for (size_t j = effectInfo->EffectIndex + 1; j < m_spellInfo->GetEffects().size(); ++j)
     {
@@ -3485,9 +3469,8 @@ void Spell::EffectInebriate()
     if (drunkMod == 0)
         return;
 
-    // drunkMod may contain values that are guaranteed to cause uint8 overflow/underflow (examples: 29690, 46874)
-    // In addition, we would not want currentDrunk to become more than 100.
-    // So before adding the values, let's check that everything is fine.
+    // drunkMod can overflow/underflow uint8 (e.g. 29690, 46874) and currentDrunk must stay <= 100,
+    // so clamp before adding.
     if (drunkMod > static_cast<int32>(100 - currentDrunk))
         currentDrunk = 100;
     else if (drunkMod < static_cast<int32>(0 - currentDrunk))
@@ -4714,9 +4697,8 @@ void Spell::EffectStealBeneficialBuff()
             if (!chance)
                 continue;
 
-            // The charges / stack amounts don't count towards the total number of auras that can be dispelled.
-            // Ie: A dispel on a target with 5 stacks of Winters Chill and a Polymorph has 1 / (1 + 1) -> 50% chance to dispell
-            // Polymorph instead of 1 / (5 + 1) -> 16%.
+            // Charges/stacks don't add dispel weight: 5x Winter's Chill + Polymorph gives Polymorph 1/(1+1) = 50%,
+            // not 1/(5+1).
             bool dispelCharges = aura->GetSpellInfo()->HasAttribute(SPELL_ATTR7_DISPEL_REMOVES_CHARGES);
             uint8 charges = dispelCharges ? aura->GetCharges() : aura->GetStackAmount();
             if (charges > 0)
@@ -5393,7 +5375,7 @@ void Spell::EffectRemoveTalent()
     if (!player)
         return;
 
-    //player->RemoveTalent(talent);
+    player->RemoveTalent(talent);
     player->SendTalentsInfoData();
 }
 
