@@ -22,6 +22,7 @@
  */
 
 #include "ScriptMgr.h"
+#include "SpellAuraEffects.h"
 #include "SpellScript.h"
 #include "SpellInfo.h"
 #include "Unit.h"
@@ -37,7 +38,9 @@ namespace Scripts::Spells::Druid
         SPELL_DRUID_ECLIPSE_SOLAR                       = 48517,
         SPELL_DRUID_ECLIPSE_LUNAR                       = 48518,
         SPELL_DRUID_ECLIPSE_SOLAR_OVERRIDE_ACTION_BAR   = 94338,
-        SPELL_DRUID_SUNFIRE                             = 93402
+        SPELL_DRUID_SUNFIRE                             = 93402,
+        SPELL_DRUID_LIFEBLOOM_FINAL_HEAL                = 33778,
+        SPELL_DRUID_GLYPH_OF_BLOOMING                   = 121840
     };
 
     namespace EclipseHelper
@@ -207,6 +210,51 @@ namespace Scripts::Spells::Druid
             AfterProc += AuraProcFn(spell_dru_eclipse_mastery_driver_passive::HandleEclipseRemoval);
         }
     };
+
+    // 33763, 94447 - Lifebloom
+    // 5.5.4 tooltip: blooms for ($m2 + SP * 0.752), x1.5 with Glyph of Blooming; 33778 adds the done-pct mods (SkyFire 5.4.8 base)
+    class spell_dru_lifebloom : public AuraScript
+    {
+        bool Validate(SpellInfo const* spellInfo) override
+        {
+            return ValidateSpellInfo({ SPELL_DRUID_LIFEBLOOM_FINAL_HEAL }) && ValidateSpellEffect({ { spellInfo->Id, EFFECT_1 } });
+        }
+
+        void Bloom(AuraEffect const* aurEff, uint8 stacks) const
+        {
+            Unit* caster = GetCaster();
+            if (!caster)
+                return;
+
+            float spellPower = caster->SpellBaseHealingBonusDone(GetSpellInfo()->GetSchoolMask()) * aurEff->GetSpellEffectInfo().BonusCoefficient;
+            float heal = aurEff->GetAmount() / std::max<uint8>(GetStackAmount(), 1) * stacks + spellPower * stacks;
+            if (caster->HasAura(SPELL_DRUID_GLYPH_OF_BLOOMING))
+                heal *= 1.5f;
+
+            CastSpellExtraArgs args(aurEff);
+            args.OriginalCaster = caster->GetGUID();
+            args.AddSpellBP0(int32(heal));
+            caster->CastSpell(GetUnitOwner(), SPELL_DRUID_LIFEBLOOM_FINAL_HEAL, args);
+        }
+
+        void HandleRemove(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/) const
+        {
+            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+                Bloom(aurEff, GetStackAmount());
+        }
+
+        void HandleDispel(DispelInfo* dispelInfo) const
+        {
+            if (AuraEffect const* aurEff = GetEffect(EFFECT_1))
+                Bloom(aurEff, dispelInfo->GetRemovedCharges());
+        }
+
+        void Register() override
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_dru_lifebloom::HandleRemove, EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+            AfterDispel += AuraDispelFn(spell_dru_lifebloom::HandleDispel);
+        }
+    };
 }
 
 void AddSC_druid_spell_scripts()
@@ -218,4 +266,5 @@ void AddSC_druid_spell_scripts()
     RegisterSpellScript(spell_dru_eclipse_solar);
     RegisterSpellScript(spell_dru_eclipse_lunar);
     RegisterSpellScript(spell_dru_eclipse_mastery_driver_passive);
+    RegisterSpellScript(spell_dru_lifebloom);
 }
