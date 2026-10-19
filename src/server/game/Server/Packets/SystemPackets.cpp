@@ -103,22 +103,27 @@ WorldPacket const* FeatureSystemStatus::Write()
         _worldPacket << gameRuleValue;
 
     // byte 1: bit 6 = EuropaTicketSystemStatus, bit 3 = SessionAlert (other bits not yet identified)
+    // TODO(verify): unnamed bits are copied from the retail 70449 sniff (flag bytes e1 70 e9 59 56 60 00 40)
     _worldPacket << Bits<1>(VoiceEnabled);
     _worldPacket << OptionalInit(EuropaTicketSystemStatus);
-    _worldPacket << Bits<2>(0);
+    _worldPacket << Bits<2>(0b10);
     _worldPacket << OptionalInit(SessionAlert);
-    _worldPacket << Bits<3>(0);
+    _worldPacket << Bits<3>(0b001);
 
-    _worldPacket << Bits<24>(0); // TODO(verify): 3 bytes of feature flags not yet mapped to names
+    // ClubFinderEnabled is client field +131, read by C_ClubFinder.IsEnabled (0x140B03990)
+    _worldPacket << Bits<2>(0b01);
+    _worldPacket << Bits<1>(ClubFinderEnabled);
+    _worldPacket << Bits<5>(0b10000);
+    _worldPacket << Bits<16>(0xE959);
 
     // 70449 reader 0x1405A5F00: 8 flag bytes in total, RaceClassExpansionLevels is bit 5 of the 5th
-    _worldPacket << Bits<2>(0);
+    _worldPacket << Bits<2>(0b01);
     _worldPacket << OptionalInit(RaceClassExpansionLevels);
-    _worldPacket << Bits<5>(0);
+    _worldPacket << Bits<5>(0b10110);
 
-    _worldPacket << Bits<3>(0);
+    _worldPacket << Bits<3>(0b011);
     _worldPacket << BitsSize<10>(Unknown1027);
-    _worldPacket << Bits<7>(0);
+    _worldPacket << Bits<7>(0b0000100);
     _worldPacket.FlushBits();
 
     {

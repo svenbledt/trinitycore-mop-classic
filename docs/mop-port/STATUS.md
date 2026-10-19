@@ -14,6 +14,9 @@ Last updated: 2026-10-18
 - Guild / guild bank / bank tabs / calendar / community finder: retail sniff `g1` (2026-10-18, 20.7k packets). Opcodes all at our values;
   only QUERY_GUILD_INFO is in sniffcheck so far. Unhandled in TC: CMSG_GUILD_QUERY_RECIPES and the CLUB_FINDER_* requests/responses;
   communities go through bnet ClubService (84 CMSG_BATTLENET_REQUEST). User: "just note it, not do anything for now".
+- Guild finder (2026-10-19): FEATURE_SYSTEM_STATUS flag bytes now copy retail, ClubFinderEnabled = field +131 (C_ClubFinder.IsEnabled).
+  Untested in the client. Next: answer CMSG_CLUB_FINDER_REQUEST_PENDING_CLUBS_LIST / _CLUBS_DATA / _SUBSCRIBED_CLUB_POSTING_IDS
+  (0x440157-59) with the empty SMSG_CLUB_FINDER_* responses seen in the g1 sniff (dump_..._2026-10-18_21-47-16.pkt).
 
 ## Pandaria world import (2026-10-19, not committed)
 Map 870 populated from SkyFire 5.4.8 + TC master: 30,272 creature / 8,340 GO spawns, 3,756 creature / 1,980 GO templates, 1,594 quests,

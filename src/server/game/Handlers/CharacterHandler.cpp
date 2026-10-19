@@ -1355,6 +1355,7 @@ void WorldSession::SendFeatureSystemStatus()
     features.CharacterCommunitiesEnabled = false;
     features.ClubPresenceAllowSubscribeAll = true;
     features.ClubPresenceUnsubscribeDelay = 60000;
+    features.ClubFinderEnabled = true; // gates the guild finder UI
 
     features.EuropaTicketSystemStatus.emplace();
     features.EuropaTicketSystemStatus->ThrottleState.MaxTries = 10;
