@@ -1429,10 +1429,7 @@ struct npc_li_fei_combat : public ScriptedAI
             _defeatTriggered = true;
             me->HandleEmoteCommand(EMOTE_ONESHOT_SALUTE);
 
-            Creature* liFei = me->FindNearestCreatureWithOptions(15.0f, { .CreatureId = Creatures::MasterLiFei, .IgnorePhases = true });
-            if (!liFei)
-                return;
-
+            // The shrine Li Fei stands 15.7 yd from this spawn; credit and phase removal must not depend on finding her
             for (ObjectGuid const& guid : me->GetTapList())
             {
                 Player* player = ObjectAccessor::GetPlayer(*me, guid);
@@ -1445,7 +1442,8 @@ struct npc_li_fei_combat : public ScriptedAI
                 player->RemoveAurasDueToSpell(Spells::FireCrashPhaseShift);
             }
 
-            liFei->AI()->Talk(Talks::LiFeiDefeat, attacker);
+            if (Creature* liFei = me->FindNearestCreatureWithOptions(30.0f, { .CreatureId = Creatures::MasterLiFei, .IgnorePhases = true }))
+                liFei->AI()->Talk(Talks::LiFeiDefeat, attacker);
 
             EnterEvadeMode();
         }
