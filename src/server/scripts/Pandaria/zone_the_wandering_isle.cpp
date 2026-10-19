@@ -1372,7 +1372,14 @@ struct npc_li_fei : public ScriptedAI
 {
     npc_li_fei(Creature* creature) : ScriptedAI(creature) {}
 
-    // Retail casts Fire Crash Cover from gossip option 0 of menu 13050, not on quest accept (sniff m2 #4301)
+    // Retail casts Fire Crash Cover right after accepting 29421 (sniff 2026-10-18 18-43-54 #4211)
+    void OnQuestAccept(Player* player, Quest const* quest) override
+    {
+        if (quest->GetQuestId() == Quests::OnlyTheWorthyShallPass)
+            player->CastSpell(player, Spells::FireCrashCover, true);
+    }
+
+    // Gossip option 0 of menu 13050 ("I am ready to face you") casts it again to retry the duel
     bool OnGossipSelect(Player* player, uint32 menuId, uint32 gossipListId) override
     {
         if (menuId != Menus::LiFeiBraziers || gossipListId != 0)
@@ -1396,7 +1403,8 @@ class spell_fire_crash : public SpellScript
 
     void Register() override
     {
-        OnDestinationTargetSelect += SpellDestinationTargetSelectFn(spell_fire_crash::SetDest, EFFECT_0, TARGET_DEST_NEARBY_ENTRY);
+        // EFFECT_1 is the missile that applies the phase 504 aura 102515 on landing; it needs the same destination
+        OnDestinationTargetSelect += SpellDestinationTargetSelectFn(spell_fire_crash::SetDest, EFFECT_ALL, TARGET_DEST_NEARBY_ENTRY);
     }
 };
 
