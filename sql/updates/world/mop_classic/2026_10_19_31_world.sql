@@ -1,0 +1,25 @@
+-- MoP Classic: Monk spells whose 5.5.4 effect value is a placeholder; damage/healing comes from the tooltip formula.
+DELETE FROM `spell_script_names` WHERE `ScriptName` IN ('spell_monk_blackout_kick','spell_monk_rising_sun_kick','spell_monk_fists_of_fury_damage',
+'spell_monk_keg_smash','spell_monk_spinning_fire_blossom','spell_monk_spinning_crane_kick_damage','spell_monk_rushing_jade_wind_damage',
+'spell_monk_expel_harm','spell_monk_expel_harm_damage','spell_monk_chi_wave_heal','spell_monk_chi_wave_damage','spell_monk_chi_burst_heal',
+'spell_monk_chi_burst_damage','spell_monk_zen_sphere_damage','spell_monk_zen_sphere_detonate_damage','spell_monk_zen_sphere_detonate_heal',
+'spell_monk_zen_sphere_periodic');
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(100784, 'spell_monk_blackout_kick'),
+(107428, 'spell_monk_rising_sun_kick'),
+(117418, 'spell_monk_fists_of_fury_damage'),
+(121253, 'spell_monk_keg_smash'),
+(115073, 'spell_monk_spinning_fire_blossom'),
+(107270, 'spell_monk_spinning_crane_kick_damage'),
+(148187, 'spell_monk_rushing_jade_wind_damage'),
+(115072, 'spell_monk_expel_harm'),
+(147489, 'spell_monk_expel_harm'),
+(115129, 'spell_monk_expel_harm_damage'),
+(132463, 'spell_monk_chi_wave_heal'),
+(132467, 'spell_monk_chi_wave_damage'),
+(130654, 'spell_monk_chi_burst_heal'),
+(148135, 'spell_monk_chi_burst_damage'),
+(124098, 'spell_monk_zen_sphere_damage'),
+(125033, 'spell_monk_zen_sphere_detonate_damage'),
+(124101, 'spell_monk_zen_sphere_detonate_heal'),
+(124081, 'spell_monk_zen_sphere_periodic');
