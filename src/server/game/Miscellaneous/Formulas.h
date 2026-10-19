@@ -192,7 +192,9 @@ namespace Trinity
             {
                 float xpMod = 1.0f;
 
-                gain = BaseGain(player->GetLevel(), u->GetLevelForTarget(player), creature ? creature->GetCreatureDifficulty()->GetHealthScalingExpansion() : GetExpansionForLevel(u->GetLevelForTarget(player)));
+                // MoP: XP follows the mob's level, not its health curve (expansion 4 health would give Cata XP to low-level mobs)
+                // TODO(verify): retail 70449 sniffs give ~1.45x this for same-level island mobs, plus per-creature modifiers
+                gain = BaseGain(player->GetLevel(), u->GetLevelForTarget(player), GetExpansionForLevel(u->GetLevelForTarget(player)));
 
                 if (gain && creature)
                 {
