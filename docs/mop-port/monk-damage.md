@@ -51,7 +51,7 @@ and no script (hunter pet basic attacks, Kill Command, Prayer of Mending 33110, 
 Spirit Wolves heal, Lacerate, Explosive Shot, ...). Many are proc spells whose amount a trigger script must pass.
 Done: Prayer of Mending (33076/41635/351575, spell_priest.cpp) and Lifebloom bloom (33763/94447 -> 33778, spell_druid.cpp).
 List and method: scratch scan `SpellEffect` (Effect 2/10 or aura 3/8, BasePoints 0-1, all three coefficients 0)
-joined with `spell_script_names`. Not done yet.
+joined with `spell_script_names`; the rest is not done yet.
 
 ### Remaining placeholder spells (scan 2026-10-19, unscripted; id, effects, description start)
 ```
@@ -152,7 +152,6 @@ joined with `spell_script_names`. Not done yet.
 146361	eff0:DMG:bp1	-	$@spelldesc1464
 146585	eff0:DMG:bp1	-	$@spelldesc114916
 146586	eff0:HEAL:bp1	-	$@spelldesc114917
-147489	eff0:HEAL:bp1	-	Instantly heals a friendly target for ${7*$<low>} to ${7*$<h
 148022	eff0:DMG:bp1	-	$@spelldesc76613
 413861	eff0:DMG:bp0	-	Your critical Aimed, Steady and Chimera Shots cause the targ
 1214948	eff0:DMG:bp1	-	
