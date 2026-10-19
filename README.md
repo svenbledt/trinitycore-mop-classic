@@ -1,97 +1,67 @@
-# ![logo](https://community.trinitycore.org/public/style_images/1_trinitycore.png) TrinityCore (cata_classic)
+# TrinityCore MoP Classic
 
-[![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/TrinityCore/TrinityCore.svg)](https://isitmaintained.com/project/TrinityCore/TrinityCore "Average time to resolve an issue") [![Percentage of issues still open](https://isitmaintained.com/badge/open/TrinityCore/TrinityCore.svg)](https://isitmaintained.com/project/TrinityCore/TrinityCore "Percentage of issues still open")
+A **work-in-progress server core for World of Warcraft: Mists of Pandaria Classic (5.5.x)**, built as a port of [TrinityCore](https://github.com/TrinityCore/TrinityCore).
+
+> ### 💬 Join the community
+> **[discord.gg/uAtSHesZt9](https://discord.gg/uAtSHesZt9)**
+>
+> This is an open, community-driven project — contributors, testers and the curious are all welcome. Come say hi, grab a task, or just follow along.
 
 --------------
 
+## Built on TrinityCore
 
-* [Build Status](#build-status)
-* [Introduction](#introduction)
-* [Requirements](#requirements)
-* [Install](#install)
-* [Reporting issues](#reporting-issues)
-* [Submitting fixes](#submitting-fixes)
-* [Copyright](#copyright)
-* [Authors &amp; Contributors](#authors--contributors)
-* [Links](#links)
+This project **uses [TrinityCore](https://github.com/TrinityCore/TrinityCore) as its base.** It is a fork of TrinityCore's `cata_classic` branch (Cataclysm Classic 4.4.x), ported forward to talk to the **Mists of Pandaria Classic** client.
 
+All of the heavy lifting — the server architecture, build system, database layer, networking, DB2 stores, CASC extractors and scripting engine — comes from TrinityCore. Huge thanks to the TrinityCore team and its contributors; none of this would exist without their work. We track upstream `cata_classic` and pull in fixes over time.
 
+* Upstream project: <https://github.com/TrinityCore/TrinityCore>
+* Upstream website: <https://www.trinitycore.org>
 
-## Build Status
+## What this is
 
-master | 3.3.5 | cata_classic
-:------------: | :------------: | :------------:
-[![master Build Status](https://circleci.com/gh/TrinityCore/TrinityCore/tree/master.svg?style=shield)](https://circleci.com/gh/TrinityCore/TrinityCore/tree/master) | [![3.3.5 Build Status](https://circleci.com/gh/TrinityCore/TrinityCore/tree/3.3.5.svg?style=shield)](https://circleci.com/gh/TrinityCore/TrinityCore/tree/3.3.5) | [![cata_classic Build Status](https://circleci.com/gh/TrinityCore/TrinityCore/tree/cata_classic.svg?style=shield)](https://circleci.com/gh/TrinityCore/TrinityCore/tree/cata_classic)
-[![master Build status](https://ci.appveyor.com/api/projects/status/54d0u1fxe50ad80o/branch/master?svg=true)](https://ci.appveyor.com/project/DDuarte/trinitycore/branch/master) | [![Build status](https://ci.appveyor.com/api/projects/status/54d0u1fxe50ad80o/branch/3.3.5?svg=true)](https://ci.appveyor.com/project/DDuarte/trinitycore/branch/3.3.5) | [![Build status](https://ci.appveyor.com/api/projects/status/54d0u1fxe50ad80o/branch/cata_classic?svg=true)](https://ci.appveyor.com/project/DDuarte/trinitycore/branch/cata_classic)
-[![master Windows Build status](https://github.com/TrinityCore/TrinityCore/actions/workflows/win-x64-build.yml/badge.svg?branch=master&event=push)](https://github.com/TrinityCore/TrinityCore/actions?query=workflow%3A%22Windows%20x64%22+branch%3Amaster+event%3Apush) | [![3.3.5 Windows Build status](https://github.com/TrinityCore/TrinityCore/actions/workflows/win-x64-build.yml/badge.svg?branch=3.3.5&event=push)](https://github.com/TrinityCore/TrinityCore/actions?query=workflow%3A%22Windows%20x64%22+branch%3A3.3.5+event%3Apush) | [![cata_classic GCC Build status](https://github.com/TrinityCore/TrinityCore/actions/workflows/gcc-build.yml/badge.svg?branch=cata_classic&event=push)](https://github.com/TrinityCore/TrinityCore/actions?query=workflow%3AGCC+branch%3Acata_classic+event%3Apush)
-[![master Ubuntu Build status](https://github.com/TrinityCore/TrinityCore/actions/workflows/linux-build.yml/badge.svg?branch=master&event=push)](https://github.com/TrinityCore/TrinityCore/actions?query=workflow%3A%22Ubuntu%20x64%22+branch%3Amaster+event%3Apush) | [![3.3.5 Ubuntu Build status](https://github.com/TrinityCore/TrinityCore/actions/workflows/linux-build.yml/badge.svg?branch=3.3.5&event=push)](https://github.com/TrinityCore/TrinityCore/actions?query=workflow%3A%22Ubuntu%20x64%22+branch%3A3.3.5+event%3Apush) | [![cata_classic GCC Build status](https://github.com/TrinityCore/TrinityCore/actions/workflows/gcc-build.yml/badge.svg?branch=cata_classic&event=push)](https://github.com/TrinityCore/TrinityCore/actions?query=workflow%3AGCC+branch%3Acata_classic+event%3Apush)
-[![master macOS arm64 Build status](https://github.com/TrinityCore/TrinityCore/actions/workflows/macos-arm-build.yml/badge.svg?branch=master&event=push)](https://github.com/TrinityCore/TrinityCore/actions?query=workflow%3A%22macOS%20arm64%22+branch%3Amaster+event%3Apush) | [![3.3.5 macOS arm64 Build status](https://github.com/TrinityCore/TrinityCore/actions/workflows/macos-arm-build.yml/badge.svg?branch=3.3.5&event=push)](https://github.com/TrinityCore/TrinityCore/actions?query=workflow%3A%22macOS%20arm64%22+branch%3A3.3.5+event%3Apush) | [![cata_classic macOS arm64 Build status](https://github.com/TrinityCore/TrinityCore/actions/workflows/macos-arm-build.yml/badge.svg?branch=cata_classic&event=push)](https://github.com/TrinityCore/TrinityCore/actions?query=workflow%3A%22macOS%20arm64%22+branch%3Acata_classic+event%3Apush)
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/435/badge.svg)](https://scan.coverity.com/projects/435) | [![Coverity Scan Build Status](https://scan.coverity.com/projects/4656/badge.svg)](https://scan.coverity.com/projects/4656) |
+* **Goal:** a solid, maintainable MoP Classic (5.5.x) core that keeps receiving upstream TrinityCore fixes.
+* **First milestone:** a client logs in, creates or selects a character, and enters the world.
+* **Current focus:** world protocol, client data (DB2) for MoP, and a gameplay baseline (movement, chat, basic spells, the Monk class and the Wandering Isle starting experience).
 
-## Introduction
+This is early, actively-developed software. Expect rough edges and breaking changes while the port matures.
 
-TrinityCore is a *MMORPG* Framework based mostly in C++.
+## What this is *not*
 
-It is derived from *MaNGOS*, the *Massive Network Game Object Server*, and is
-based on the code of that project with extensive changes over time to optimize,
-improve and cleanup the codebase at the same time as improving the in-game
-mechanics and functionality.
+* It is **not** affiliated with or endorsed by Blizzard Entertainment.
+* It ships **no** Blizzard game data. You need your own copy of the MoP Classic client to extract maps and client data from.
+* It is **not** a drop-in replacement for upstream TrinityCore — it targets a different client build.
 
-It is completely open source; community involvement is highly encouraged.
+## Getting started
 
-If you wish to contribute ideas or code, please visit our site linked below or
-make pull requests to our [Github repository](https://github.com/TrinityCore/TrinityCore/pulls).
+The quickest path is the Docker dev setup in [`contrib/mop-dev/`](contrib/mop-dev/) (nothing to install but Docker Desktop):
 
-For further information on the TrinityCore project, please visit our project
-website at [TrinityCore.org](https://www.trinitycore.org).
+```sh
+cd contrib/mop-dev
+docker compose --profile build run --rm builder       # configure + build + install
+docker compose --profile extract run --rm extractor   # extract client data into the data volume
+docker compose up -d db bnetserver worldserver        # MySQL + servers
+```
 
-## Requirements
+Native build requirements (CMake ≥ 3.24, Boost, OpenSSL, MySQL client, zlib/bzip2/readline) follow upstream TrinityCore; see the [TrinityCore wiki](https://trinitycore.info/en/home) for platform details, and `contrib/mop-dev/README.md` for this project's specifics.
 
+## Contributing
 
-Software requirements are available in the [wiki](https://trinitycore.info/en/install/requirements) for
-Windows, Linux and macOS.
+Pull requests, bug reports and testing are all welcome — this is a community project and that's the whole point. The best place to coordinate, ask questions and claim work is the Discord:
 
+**👉 [discord.gg/uAtSHesZt9](https://discord.gg/uAtSHesZt9)**
 
-## Install
+When contributing code, please follow TrinityCore's existing conventions so changes stay mergeable with upstream.
 
-Detailed installation guides are available in the [wiki](https://trinitycore.info/en/home) for
-Windows, Linux and macOS.
+## Copyright / License
 
+License: **GPL 2.0** — see [COPYING](COPYING).
 
-## Reporting issues
-
-Issues can be reported via the [Github issue tracker](https://github.com/TrinityCore/TrinityCore/labels/Branch-master).
-
-Please take the time to review existing issues before submitting your own to
-prevent duplicates.
-
-In addition, thoroughly read through the [issue tracker guide](https://community.trinitycore.org/topic/37-the-trinitycore-issuetracker-and-you/) to ensure
-your report contains the required information. Incorrect or poorly formed
-reports are wasteful and are subject to deletion.
-
-
-## Submitting fixes
-
-C++ fixes are submitted as pull requests via Github. For more information on how to
-properly submit a pull request, read the [how-to: maintain a remote fork](https://community.trinitycore.org/topic/9002-howto-maintain-a-remote-fork-for-pull-requests-tortoisegit/).
-For SQL only fixes, open a ticket; if a bug report exists for the bug, post on an existing ticket.
-
-
-## Copyright
-
-License: GPL 2.0
-
-Read file [COPYING](COPYING).
-
-
-## Authors &amp; Contributors
-
-Read file [AUTHORS](AUTHORS).
-
+This project inherits TrinityCore's license and copyright. See [AUTHORS](AUTHORS) for TrinityCore's authors and contributors.
 
 ## Links
 
-* [Website](https://www.trinitycore.org)
-* [Wiki](https://www.trinitycore.info)
-* [Forums](https://talk.trinitycore.org/)
-* [Discord](https://discord.trinitycore.org/)
+* **Community Discord:** <https://discord.gg/uAtSHesZt9>
+* Upstream (TrinityCore): <https://github.com/TrinityCore/TrinityCore>
+* TrinityCore website: <https://www.trinitycore.org>
+* TrinityCore wiki: <https://www.trinitycore.info>
