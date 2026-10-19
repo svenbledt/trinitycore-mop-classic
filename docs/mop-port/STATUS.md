@@ -11,6 +11,8 @@ Last updated: 2026-10-18
 
 
 ## Backlog (noted, not started)
+- Monk class completion: plan in `monk-plan.md` (445 spells, 111 only covered by SkyFire; 9 work packages).
+  Other classes' placeholder-value spells: list in `monk-damage.md`.
 - Guild / guild bank / bank tabs / calendar / community finder: retail sniff `g1` (2026-10-18, 20.7k packets). Opcodes all at our values;
   only QUERY_GUILD_INFO is in sniffcheck so far. Unhandled in TC: CMSG_GUILD_QUERY_RECIPES and the CLUB_FINDER_* requests/responses;
   communities go through bnet ClubService (84 CMSG_BATTLENET_REQUEST). User: "just note it, not do anything for now".
