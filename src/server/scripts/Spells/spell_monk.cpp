@@ -22,6 +22,8 @@
  */
 
 #include "ScriptMgr.h"
+#include "Player.h"
+#include "Random.h"
 #include "Spell.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
@@ -37,7 +39,56 @@ namespace Scripts::Spells::Monk
         SPELL_MONK_PROVOKE_SINGLE_TARGET    = 116189,
         SPELL_MONK_PROVOKE_AOE              = 118635,
         SPELL_MONK_ROLL_BACKWARD            = 109131,
-        SPELL_MONK_ROLL_FORWARD             = 107427
+        SPELL_MONK_ROLL_FORWARD             = 107427,
+        SPELL_MONK_2H_STAFF_OVERRIDE        = 108561,
+        SPELL_MONK_2H_POLEARM_OVERRIDE      = 115697,
+        SPELL_MONK_BREWMASTER_TRAINING      = 120267, // $bm / $apc in the damage formula
+        SPELL_MONK_DUAL_WIELD_OFFHAND       = 124146  // $offlow uses the off-hand weapon
+    };
+
+    // Monk melee range from the 5.5.4 tooltip variables ($<low>/$<high>, e.g. Blackout Kick 100784, Expel Harm 115072)
+    static std::pair<float, float> GetMonkMeleeDamageRange(Unit const* caster)
+    {
+        bool twoHanded = caster->HasAura(SPELL_MONK_2H_STAFF_OVERRIDE) || caster->HasAura(SPELL_MONK_2H_POLEARM_OVERRIDE);
+        Player const* player = caster->ToPlayer();
+        bool brewmaster = player && player->HasSpell(SPELL_MONK_BREWMASTER_TRAINING);
+        float dwm = twoHanded ? 1.0f : 0.898882275f;
+        float bm = brewmaster ? 0.4f : 1.0f;
+        float apc = caster->GetTotalAttackPowerValue(BASE_ATTACK) / (brewmaster ? 11.0f : 14.0f);
+
+        auto speed = [caster](WeaponAttackType type) { return std::max(caster->GetBaseAttackTime(type), 1u) / 1000.0f; };
+        float mainSpeed = speed(BASE_ATTACK);
+        float mainMin = caster->GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE);
+        float mainMax = caster->GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE);
+
+        float offLow = 0.0f, offHigh = 0.0f;
+        if (!twoHanded)
+        {
+            bool useOffHand = player && player->HasSpell(SPELL_MONK_DUAL_WIELD_OFFHAND) && caster->haveOffhandWeapon();
+            WeaponAttackType type = useOffHand ? OFF_ATTACK : BASE_ATTACK;
+            offLow = caster->GetWeaponDamageRange(type, MINDAMAGE) / 2.0f / speed(type);
+            offHigh = caster->GetWeaponDamageRange(type, MAXDAMAGE) / 2.0f / speed(type);
+        }
+
+        float low = bm * dwm * (mainMin / mainSpeed + offLow) + apc - 1.0f;
+        float high = bm * dwm * (mainMax / mainSpeed + offHigh) + apc + 1.0f;
+        return { std::max(low, 0.0f), std::max(high, 0.0f) };
+    }
+
+    // 100784 - Blackout Kick
+    class spell_monk_blackout_kick : public SpellScript
+    {
+        // The DB2 effect carries only BasePoints 1; the damage is the tooltip's 7.12 x <low>..<high>
+        void CalculateDamage(SpellEffectInfo const& /*spellEffectInfo*/, Unit* /*victim*/, int32& damage, int32& /*flatMod*/, float& /*pctMod*/) const
+        {
+            auto [low, high] = GetMonkMeleeDamageRange(GetCaster());
+            damage = int32(7.12f * frand(low, high));
+        }
+
+        void Register() override
+        {
+            CalcDamage += SpellCalcDamageFn(spell_monk_blackout_kick::CalculateDamage);
+        }
     };
 
     enum MonkCreatures
@@ -128,8 +179,9 @@ namespace Scripts::Spells::Monk
         void HandleDummy(SpellEffIndex /*effIndex*/)
         {
             Unit* caster = GetCaster();
+            // Fully triggered: with only IGNORE_CAST_IN_PROGRESS the roll failed with NOT_READY (GCD Roll itself started)
             caster->CastSpell(caster, caster->HasUnitMovementFlag(MOVEMENTFLAG_BACKWARD) ? SPELL_MONK_ROLL_BACKWARD : SPELL_MONK_ROLL_FORWARD,
-                TRIGGERED_IGNORE_CAST_IN_PROGRESS);
+                TRIGGERED_FULL_MASK);
         }
 
         void Register() override
@@ -165,6 +217,7 @@ namespace Scripts::Spells::Monk
 void AddSC_monk_spell_scripts()
 {
     using namespace Scripts::Spells::Monk;
+    RegisterSpellScript(spell_monk_blackout_kick);
     RegisterSpellScript(spell_monk_jab);
     RegisterSpellScript(spell_monk_provoke);
     RegisterSpellScript(spell_monk_roll);
