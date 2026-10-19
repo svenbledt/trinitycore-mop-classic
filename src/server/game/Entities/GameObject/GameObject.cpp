@@ -398,9 +398,8 @@ public:
         if (oldToNewStateDelta < 0)
             oldToNewStateDelta += pauseTimesCount + 1;
 
-        // this additional check is neccessary because client doesn't check dynamic flags on progress update
-        // instead it multiplies progress from dynamicflags field by -1 and then compares that against 0
-        // when calculating path progress while we simply check the flag if (!_owner.HasDynamicFlag(GO_DYNFLAG_LO_INVERTED_MOVEMENT))
+        // needed because the client ignores dynamic flags on progress update: it negates the progress from the dynamic
+        // flags field and compares it with 0, where we check !_owner.HasDynamicFlag(GO_DYNFLAG_LO_INVERTED_MOVEMENT)
         bool isAtStartOfPath = _stateChangeProgress == 0;
 
         if (oldToNewStateDelta < newToOldStateDelta && !isAtStartOfPath)
@@ -3116,9 +3115,8 @@ void GameObject::Use(Unit* user, bool ignoreCastInProgress /*= false*/)
                     spellArgs.TriggerFlags = TRIGGERED_FULL_MASK;
                 }
 
-                // Cast casterTargetSpell at a random GO user
-                // on the current DB there is only one gameobject that uses this (Ritual of Doom)
-                // and its required target number is 1 (outter for loop will run once)
+                // Cast casterTargetSpell at a random GO user; only Ritual of Doom uses it in the current DB,
+                // with 1 required target, so the outer loop runs once
                 if (info->ritual.casterTargetSpell && info->ritual.casterTargetSpell != 1) // No idea why this field is a bool in some cases
                     for (uint32 i = 0; i < info->ritual.casterTargetSpellTargets; i++)
                         // m_unique_users can contain only player GUIDs
@@ -3267,12 +3265,8 @@ void GameObject::Use(Unit* user, bool ignoreCastInProgress /*= false*/)
 
                 player->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                 player->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
-                // BG flag dropped
-                // WS:
-                // 179785 - Silverwing Flag
-                // 179786 - Warsong Flag
-                // EotS:
-                // 184142 - Netherstorm Flag
+                // BG flag dropped: WS 179785 Silverwing Flag, 179786 Warsong Flag;
+                // EotS 184142 Netherstorm Flag
                 GameObjectTemplate const* info = GetGOInfo();
                 if (info->flagDrop.eventID)
                     GameEvents::Trigger(info->flagDrop.eventID, player, this);

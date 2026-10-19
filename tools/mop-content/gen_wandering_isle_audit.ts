@@ -242,12 +242,13 @@ const patrolGuids = new Set((SNIFF.patrols as { g: string }[]).map(p => p.g));
 
 // ---- 7. static creatures the sniff shows and no source spawns -------------------------------------------------------------
 {
-  // Temple of Five Dawns brazier bunnies (sniff m2 #203); SkyFire spawns one of each elsewhere, master none.
+  // Master Li Fei duel brazier bunnies (Blessing of the Red/Purple/Blue Flame area auras); retail creates them only in the
+  // duel phase 504 (sniff 18-43-54 #4334) and they go out of range at the duel credit. SkyFire spawns one of each elsewhere.
   const STATIC = [54900, 54901, 54902];
   const GUID = 9_520_000;
   const rows = STATIC.flatMap((e, i) => {
     const c = sniffed.find(x => x.e === e); if (!c) return [];
-    return [{ guid: String(GUID + i), id: String(e), map: String(MAP), zoneId: "5736", areaId: "0", spawnDifficulties: "0", phaseUseFlags: "0", PhaseId: "0", PhaseGroup: "0",
+    return [{ guid: String(GUID + i), id: String(e), map: String(MAP), zoneId: "5736", areaId: "0", spawnDifficulties: "0", phaseUseFlags: "0", PhaseId: "504", PhaseGroup: "0",
       terrainSwapMap: "-1", modelid: "0", equipment_id: "0", position_x: String(c.p[0]), position_y: String(c.p[1]), position_z: String(c.p[2]), orientation: String(c.o),
       spawntimesecs: "120", wander_distance: "0", currentwaypoint: "0", MovementType: "0", VerifiedBuild: "70449" } as Row];
   });

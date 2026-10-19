@@ -65,6 +65,9 @@ namespace Spells
     static constexpr uint32 FlyingShadowKickJump = 108943;
     static constexpr uint32 FeetOfFury = 108958;
     static constexpr uint32 FeetOfFuryDamage = 108957;
+
+    // The Passion of Shen-zin Su
+    static constexpr uint32 SummonHuo = 128700;
 }
 
 namespace Quests
@@ -84,6 +87,7 @@ namespace Creatures
 {
     static constexpr uint32 MasterLiFei = 54135;
     static constexpr uint32 MasterLiFeiCombat = 54734;
+    static constexpr uint32 HuoFollower = 54958;
 
     // Yak and Cart
     static constexpr uint32 CartSingingPools = 57710;
@@ -1391,6 +1395,27 @@ struct npc_li_fei : public ScriptedAI
     }
 };
 
+// 29423 - The Passion of Shen-zin Su
+// Retail (sniff 18-43-54) drops Summon Huo 128700 and Huo's Blessing of Huo 102630 at turn-in; TC only does so for RewardSpell -1
+class quest_the_passion_of_shen_zin_su : public QuestScript
+{
+public:
+    quest_the_passion_of_shen_zin_su() : QuestScript("quest_the_passion_of_shen_zin_su") { }
+
+    void OnQuestStatusChange(Player* player, Quest const* /*quest*/, QuestStatus /*oldStatus*/, QuestStatus newStatus) override
+    {
+        if (newStatus != QUEST_STATUS_REWARDED && newStatus != QUEST_STATUS_NONE)
+            return;
+
+        player->RemoveAurasDueToSpell(Spells::SummonHuo);
+
+        std::list<TempSummon*> huos;
+        player->GetAllMinionsByEntry(huos, Creatures::HuoFollower);
+        for (TempSummon* huo : huos)
+            huo->UnSummon();
+    }
+};
+
 // 102499 - Fire Crash
 class spell_fire_crash : public SpellScript
 {
@@ -2317,6 +2342,7 @@ void AddSC_zone_the_wandering_isle()
     new at_singing_pools_transform_base<Spells::CurseOfTheTurtle>("at_singing_pools_transform_turtle");
 
     RegisterCreatureAI(npc_li_fei);
+    new quest_the_passion_of_shen_zin_su();
     RegisterSpellScript(spell_fire_crash);
     RegisterCreatureAI(npc_li_fei_combat);
     RegisterSpellScript(spell_feet_of_fury);

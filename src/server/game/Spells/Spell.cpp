@@ -618,9 +618,8 @@ void Spell::InitExplicitTargets(SpellCastTargets const& targets)
 {
     m_targets = targets;
 
-    // this function tries to correct spell explicit targets for spell
-    // client doesn't send explicit targets correctly sometimes - we need to fix such spells serverside
-    // this also makes sure that we correctly send explicit targets to client (removes redundant data)
+    // corrects explicit targets: the client sometimes sends them wrong, and this strips redundant data
+    // so the targets sent back to the client are right
     uint32 neededTargets = m_spellInfo->GetExplicitTargetMask();
 
     if (WorldObject* target = m_targets.GetObjectTarget())
@@ -785,11 +784,8 @@ void Spell::SelectSpellTargets()
             processedEffectsMaskForSpell |= implicitTargetEffectMaskToSelect;
         }
 
-        // Select targets of effect based on effect type
-        // those are used when no valid target could be added for spell effect based on spell target type
-        // some spell effects use explicit target as a default target added to target map (like SPELL_EFFECT_LEARN_SPELL)
-        // some spell effects add target to target map only when target type specified (like SPELL_EFFECT_WEAPON)
-        // some spell effects don't add anything to target map (confirmed with sniffs) (like SPELL_EFFECT_DESTROY_ALL_TOTEMS)
+        // Fallback targets by effect type when the target type gave none: explicit target (LEARN_SPELL),
+        // only with a target type (WEAPON), or nothing at all (DESTROY_ALL_TOTEMS, confirmed with sniffs)
         SelectEffectTypeImplicitTargets(spellEffectInfo);
 
         if (m_targets.HasDst())
@@ -1685,9 +1681,7 @@ void Spell::SelectImplicitTargetDestTargets(SpellEffectInfo const& spellEffectIn
 
 void Spell::SelectImplicitDestDestTargets(SpellEffectInfo const& spellEffectInfo, SpellImplicitTargetInfo const& targetType, SpellTargetIndex targetIndex)
 {
-    // set destination to caster if no dest provided
-    // can only happen if previous destination target could not be set for some reason
-    // (not found nearby target, or channel target for example
+    // no dest (nearby/channel target not found): fall back to the caster
     // maybe we should abort the spell in such case?
     CheckDst();
 
@@ -1863,8 +1857,7 @@ float tangent(float x)
 {
     x = std::tan(x);
     //if (x < std::numeric_limits<float>::max() && x > -std::numeric_limits<float>::max()) return x;
-    //if (x >= std::numeric_limits<float>::max()) return std::numeric_limits<float>::max();
-    //if (x <= -std::numeric_limits<float>::max()) return -std::numeric_limits<float>::max();
+    //return x >= std::numeric_limits<float>::max() ? std::numeric_limits<float>::max() : -std::numeric_limits<float>::max();
     if (x < 100000.0f && x > -100000.0f) return x;
     if (x >= 100000.0f) return 100000.0f;
     if (x <= 100000.0f) return -100000.0f;
@@ -2033,8 +2026,7 @@ void Spell::SelectEffectTypeImplicitTargets(SpellEffectInfo const& spellEffectIn
                 // scripts may modify the target - recheck
                 if (target && target->GetTypeId() == TYPEID_PLAYER)
                 {
-                    // target is not stored in target map for those spells
-                    // since we're completely skipping AddUnitTarget logic, we need to check immunity manually
+                    // not in the target map and AddUnitTarget is skipped, so check immunity manually
                     // eg. aura 21546 makes target immune to summons
                     Player* player = target->ToPlayer();
                     if (player->IsImmunedToSpellEffect(m_spellInfo, spellEffectInfo, nullptr))
@@ -2329,10 +2321,8 @@ GameObject* Spell::SearchSpellFocus()
 
 void Spell::prepareDataForTriggerSystem()
 {
-    //==========================================================================================
-    // Now fill data for trigger system, need know:
-    // Create base triggers flags for Attacker and Victim (m_procAttacker, m_procVictim and m_hitMask)
-    //==========================================================================================
+    // Fill data for the trigger system: base trigger flags for attacker and victim
+    // (m_procAttacker, m_procVictim and m_hitMask)
 
     m_procVictim = m_procAttacker = PROC_FLAG_NONE;
     // Get data for type of attack and fill base info for trigger
@@ -3301,10 +3291,8 @@ void Spell::DoSpellEffectHit(Unit* unit, SpellEffectInfo const& spellEffectInfo,
 
 void Spell::DoTriggersOnSpellHit(Unit* unit)
 {
-    // handle SPELL_AURA_ADD_TARGET_TRIGGER auras
-    // this is executed after spell proc spells on target hit
-    // spells are triggered for each hit spell target
-    // info confirmed with retail sniffs of permafrost and shadow weaving
+    // SPELL_AURA_ADD_TARGET_TRIGGER: after proc spells, once per hit target
+    // (confirmed with retail sniffs of permafrost and shadow weaving)
     if (!m_hitTriggerSpells.empty())
     {
         int32 _duration = 0;
@@ -3487,10 +3475,8 @@ SpellCastResult Spell::prepare(SpellCastTargets const& targets, AuraEffect const
         result = SPELL_CAST_OK;
     if (result != SPELL_CAST_OK)
     {
-        // Periodic auras should be interrupted when aura triggers a spell which can't be cast
-        // for example bladestorm aura should be removed on disarm as of patch 3.3.5
-        // channeled periodic spells should be affected by this (arcane missiles, penance, etc)
-        // a possible alternative sollution for those would be validating aura target on unit state change
+        // Interrupt periodic/channeled auras whose triggered spell can't be cast (bladestorm on disarm, 3.3.5;
+        // arcane missiles, penance). Alternative: validate the aura target on unit state change
         if (triggeredByAura && triggeredByAura->IsPeriodic() && !triggeredByAura->GetBase()->IsPassive())
         {
             SendChannelUpdate(0);
@@ -3542,10 +3528,8 @@ SpellCastResult Spell::prepare(SpellCastTargets const& targets, AuraEffect const
         }
         else
         {
-            // Creatures (not controlled) give priority to spell casting over movement.
-            // We assume that the casting is always valid and the current movement
-            // is stopped immediately (because spells are updated before movement, so next Unit::Update would cancel the spell before stopping movement)
-            // and future attempts are stopped by by Unit::IsMovementPreventedByCasting in movement generators to prevent casting interruption.
+            // Uncontrolled creatures prefer casting over moving: stop movement now (spells update before movement),
+            // later moves are blocked by Unit::IsMovementPreventedByCasting in the movement generators
             m_caster->ToUnit()->StopMoving();
         }
     }
@@ -3570,10 +3554,8 @@ SpellCastResult Spell::prepare(SpellCastTargets const& targets, AuraEffect const
         cast(true);
     else
     {
-        // commented out !m_spellInfo->StartRecoveryTime, it forces instant spells with global cooldown to be processed in spell::update
-        // as a result a spell that passed CheckCast and should be processed instantly may suffer from this delayed process
-        // the easiest bug to observe is LoS check in AddUnitTarget, even if spell passed the CheckCast LoS check the situation can change in spell::update
-        // because target could be relocated in the meantime, making the spell fly to the air (no targets can be registered, so no effects processed, nothing in combat log)
+        // !m_spellInfo->StartRecoveryTime is left out: it deferred instant GCD spells to Spell::update, where a target
+        // that moved meanwhile failed the AddUnitTarget LoS check and the spell hit nothing
         bool willCastDirectly = !m_casttime && /*!m_spellInfo->StartRecoveryTime && */ GetCurrentContainer() == CURRENT_GENERIC_SPELL;
 
         if (Unit* unitCaster = m_caster->ToUnit())
@@ -3711,9 +3693,8 @@ void Spell::_cast(bool skipCheck)
         // should be done before the spell is actually executed
         sScriptMgr->OnPlayerSpellCast(playerCaster, this, skipCheck);
 
-        // As of 3.0.2 pets begin attacking their owner's target immediately
-        // Let any pets know we've attacked something. Check DmgClass for harmful spells only
-        // This prevents spells such as Hunter's Mark from triggering pet attack
+        // Since 3.0.2 pets attack their owner's target at once; DmgClass limits this to harmful spells
+        // so that spells like Hunter's Mark don't trigger a pet attack
         if (GetSpellInfo()->DmgClass != SPELL_DAMAGE_CLASS_NONE)
             if (Unit* target = m_targets.GetUnitTarget())
                 for (Unit* controlled : playerCaster->m_Controlled)
@@ -5440,10 +5421,8 @@ void Spell::TakeRunePower(bool didHit)
         }
     }
 
-    // Let's say we use a skill that requires a Frost rune. This is the order:
-    // - Frost rune
-    // - Death rune, originally a Frost rune
-    // - Death rune, any kind
+    // Order for a skill that requires a Frost rune: Frost rune, then a Death rune that was a Frost rune,
+    // then any Death rune
     for (uint32 i = 0; i < MAX_RUNES; ++i)
     {
         RuneType rune = player->GetCurrentRune(i);
@@ -5804,10 +5783,8 @@ SpellCastResult Spell::CheckCast(bool strict, int32* param1 /*= nullptr*/, int32
         }
     }
 
-    // Don't check explicit target for passive spells (workaround) (check should be skipped only for learn case)
-    // those spells may have incorrect target entries or not filled at all (for example 15332)
-    // such spells when learned are not targeting anyone using targeting system, they should apply directly to caster instead
-    // also, such casts shouldn't be sent to client
+    // Workaround: skip the explicit target check for passive spells (should be learn case only); their target entries
+    // can be wrong or empty (15332), they apply directly to the caster and aren't sent to the client
     if (!(m_spellInfo->IsPassive() && (!m_targets.GetUnitTarget() || m_targets.GetUnitTarget() == m_caster)))
     {
         // Check explicit target for m_originalCaster - todo: get rid of such workarounds
@@ -8792,9 +8769,8 @@ void Spell::PrepareTriggersExecutedOnHit()
     if (!unitCaster)
         return;
 
-    // handle SPELL_AURA_ADD_TARGET_TRIGGER auras:
-    // save auras which were present on spell caster on cast, to prevent triggered auras from affecting caster
-    // and to correctly calculate proc chance when combopoints are present
+    // SPELL_AURA_ADD_TARGET_TRIGGER: save the caster's auras at cast time so triggered auras don't affect the caster
+    // and the proc chance is right when combo points are present
     Unit::AuraEffectList const& targetTriggers = unitCaster->GetAuraEffectsByType(SPELL_AURA_ADD_TARGET_TRIGGER);
     for (AuraEffect const* aurEff : targetTriggers)
     {
@@ -8850,9 +8826,8 @@ void Spell::TriggerGlobalCooldown()
     constexpr Milliseconds MinGCD = 750ms;
     constexpr Milliseconds MaxGCD = 1500ms;
 
-    // Global cooldown can't leave range 1..1.5 secs
-    // There are some spells (mostly not cast directly by player) that have < 1 sec and > 1.5 sec global cooldowns
-    // but as tests show are not affected by any spell mods.
+    // Global cooldown stays within 1..1.5 s; some (mostly non-player) spells have GCDs outside it,
+    // and tests show those are not affected by spell mods
     if (gcd >= MinGCD && gcd <= MaxGCD)
     {
         // gcd modifier auras are applied only to own spells and only players have such mods
@@ -9176,17 +9151,8 @@ void SelectRandomInjuredTargets(std::list<WorldObject*>& targets, size_t maxTarg
     if (targets.size() <= maxTargets)
         return;
 
-    // Target priority states (bit indices)
-    // higher value means lower selection priority
-    // current list:
-    // * injured player group members
-    // * injured other players
-    // * injured pets of group members
-    // * injured other pets
-    // * full health player group members
-    // * full health other players
-    // * full health pets of group members
-    // * full health other pets
+    // Target priority bits, higher value = lower priority: injured before full health; within each,
+    // player group members, other players, pets of group members, other pets
     enum
     {
         NOT_GROUPED,
@@ -9222,9 +9188,8 @@ void SelectRandomInjuredTargets(std::list<WorldObject*>& targets, size_t maxTarg
     {
         if (foundTargets + countForPriority >= maxTargets)
         {
-            // shuffle only the lower priority extras
-            // example: our initial target list had 5 injured and 5 full health units and we want to select 7 targets
-            //          we always want to select 5 injured and 2 random full health ones
+            // shuffle only the lower priority extras: from 5 injured + 5 full health, picking 7 always takes
+            // the 5 injured and 2 random full health ones
             Containers::RandomShuffle(tempTargets.begin() + foundTargets, tempTargets.begin() + foundTargets + countForPriority);
             break;
         }
