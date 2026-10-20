@@ -1,12 +1,12 @@
 # MoP Classic port — status
 
-Last updated: 2026-10-18
+Last updated: 2026-10-20
 
 | | |
 |---|---|
 | Base | TrinityCore `cata_classic` @ `0614c9fd941` (4.4.2.60895) |
-| Target | MoP Classic **5.5.4.70449** (dump `d:\WoW\World of Warcraft\_classic_\WowClassic_orion.exe`; 70032 dump kept as `WowClassic_dump.exe`) |
-| Current phase | **2b done: a character enters the world on 5.5.4.70449 (2026-10-18)** |
+| Target | MoP Classic **5.5.4.70469** (dump `d:\WoW\World of Warcraft\_classic_\WowClassic_orion.exe`; 70032 dump kept as `WowClassic_dump.exe`) |
+| Current phase | **2b done: a character enters the world on 5.5.4.70469 (2026-10-20)** |
 | Next | Phase 3/4: DB2 layout hashes, gameplay baseline; keep checking new sniffs with `tools/mop-re/sniffcheck` |
 
 
@@ -59,6 +59,11 @@ applied without SQL errors. Rules, GUID ranges and gaps (creature/node loot miss
 - REA now runs **attached** to the user's IDA GUI database (no re-analysis); see `tools/mop-re/verify/AGENT.rea.md`.
 - Opcodes: only names MoP uses are verified; retail-only families (garrison, housing, delves...) stay `TODO(verify)` behind the send guard. Round 4: p00 (26 server-used names) and q00 (41 MoP-era names) → +9 anchors, nothing moved; the rest are order-only (handler globals never written).
 - Layouts: `tools/mop-re/pe/tc_layouts.py` compares every server Write()/Read() with the client; fixers L1-L4 fixed ~45 packets/structs from client code (`re-notes.md` "5.5.4.70449 layout pass"). L5 (auction, guild, PvP, LFG, calendar, tickets) in progress.
+
+## Re-baseline to 5.5.4.70469 (2026-10-20)
+- Opcodes and every packet layout unchanged: build diff plus a whole-binary census of the 3737 (de)serializers (`opcode-harvest.md` "70449 → 70469"). `Opcodes.h` banner only.
+- Auth rows `2026_10_20_00_auth.sql` with the recaptured key (`re-notes.md` "Auth key capture, 5.5.4.70469"); launcher singleton RVA added.
+- DB2 layout hashes: 822 checked, same 15 missing as on 70032 (no change). Update fields: not diffed directly (UPDATE_OBJECT ctor is split into chunks); client 70469 entered the world without errors (2026-10-20).
 
 ## Re-baseline to 5.5.4.70449 (2026-10-18)
 - Opcodes: every name keeps its 70032 value, proven by a build-to-build diff of all 2482 packets (`opcode-harvest.md` "70032 → 70449"). `Opcodes.h` banner only.
