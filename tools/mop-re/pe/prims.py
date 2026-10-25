@@ -1,4 +1,4 @@
-# CDataStore primitive addresses per client build; select with MOP_BUILD (default 70469).
+# CDataStore primitive addresses per client build; select with MOP_BUILD (default 70579).
 # 70449 was relocated from 70032 by unanimous call-site votes (pe/diff_builds.py, docs/mop-port/opcode-harvest.md).
 import os
 
@@ -33,6 +33,17 @@ BUILDS = {
         "noise": {0x142DC1D30, 0x142DA2430, 0x142DA2310, 0x142F7F670, 0x142F7FD10, 0x1401D0DC0},
         "sized": {0x142E0C660, 0x142E0C6B0},
     },
+    # 70579: -0x7B560 (CDataStore/GUID), -0x1BC0 (bit writers), unanimous votes; code shapes identical to 70032
+    "70579": {
+        "smsg": {0x142D90AF0: "B", 0x142D90B40: "H", 0x142D90B90: "I", 0x142D90BE0: "Q", 0x142D91100: "S",
+                 0x142D91150: "S", 0x142DE2630: "G"},
+        "cmsg": {0x142D915E0: "I", 0x142D914A0: "B", 0x142DE2660: "G", 0x140581BA0: "B", 0x142D91CA0: "S",
+                 0x142D917E0: "Q", 0x142D91680: "I", 0x142D91540: "H", 0x140581AE0: "B", 0x140581A20: "B",
+                 0x1405817E0: "B", 0x140581720: "B", 0x1405818A0: "B", 0x140581960: "B"},
+        # TODO(verify): 0x1401CF200 placed by its region's delta; no packet calls it
+        "noise": {0x142D467D0, 0x142D26ED0, 0x142D26DB0, 0x142F04110, 0x142F047B0, 0x1401CF200},
+        "sized": {0x142D91100, 0x142D91150},
+    },
 }
 
-P = BUILDS[os.environ.get("MOP_BUILD", "70469")]
+P = BUILDS[os.environ.get("MOP_BUILD", "70579")]

@@ -273,6 +273,13 @@ DungeonScoreMapSummary diff left as is.
   `0x3D43DB8` (33/33 code references agree); CertStore accessor matches byte for byte, so `+0x748/+0x28/+0x30` hold.
   Launcher `burralis-launcher` `923be6a` adds the singleton.
 
+## Auth key capture, 5.5.4.70579 (2026-10-25)
+- **build_auth_key (70579) = `109C69C0E73A5C0A3DC3BE22C94EE541`** (`snap149.bin` +0xE9590, 30811 windows). Same recipe;
+  the stack capture must run before the realm is selected (a capture started after the client closed finds nothing).
+- 70579 addresses, relocated from 70032 by masked signatures: digest function RVA `0x2DF5B10` (unique match), NetClient
+  singleton RVA `0x3CC6DC8` (127/127 sampled references agree); the `+0x748` access sites match byte for byte.
+  Launcher `burralis-launcher` `704e235` adds the singleton.
+
 ## Pandaren faction choice (2026-10-18)
 Opcodes and layouts proven from the 70032 client (verifier results `s02`, `s12`, `r01`; same values on 70449) and matching WPP `V5_5_0_61735`:
 
